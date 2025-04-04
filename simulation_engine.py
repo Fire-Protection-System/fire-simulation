@@ -57,8 +57,6 @@ def get_topic_for_sensor(sensor_type: str) -> str:
     }
     return topic_mapping.get(sensor_type, "Unknown topic")
 
-
-
 def run_simulation(configuration):
     store = MessageStore()
     read_threads = []
@@ -98,7 +96,6 @@ def run_simulation(configuration):
     wind = Wind()
 
     all_sectors: List[Sector] = [item for sublist in map.sectors for item in sublist]
-
     sectors_on_fire: List[Sector] = []
     sectors_on_fire.append(map.start_new_fire())
 
@@ -118,8 +115,6 @@ def run_simulation(configuration):
                         neighbour[0].start_fire()
                         new_sectors_on_fire.append(neighbour[0])
 
-                
-
         sectors_on_fire = list(filter(lambda sector: sector.fire_state is FireState.ACTIVE, sectors_on_fire))
         sectors_on_fire.extend(new_sectors_on_fire)        
 
@@ -134,5 +129,4 @@ def run_simulation(configuration):
                     store.add_message_to_sent(queue, json)
         
         agents_manager.update_agents_states()
-
         time.sleep(10)
