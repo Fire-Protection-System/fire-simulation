@@ -129,4 +129,4 @@ def run_simulation(configuration):
                     store.add_message_to_sent(queue, json)
         
         agents_manager.update_agents_states()
-        time.sleep(10)
+        time.sleep(1)

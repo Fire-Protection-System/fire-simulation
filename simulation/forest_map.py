@@ -1,9 +1,10 @@
 import json
 import random
+
 from datetime import datetime
 from typing import TypeAlias
 from typing import Tuple
-
+from typing import List, Tuple, Optional
 
 from simulation.sectors.sector import Sector
 from simulation.location import Location
@@ -99,10 +100,10 @@ class ForestMap:
                 co2_concentration=val["initialState"]["co2Concentration"],
                 pm2_5_concentration=val["initialState"]["pm2_5Concentration"],
             )
-            sectors[val["row"]][val["column"]] = Sector(
+            sectors[val["row"] - 1][val["column"] - 1] = Sector(
                 sector_id=val["sectorId"],
-                row=val["row"],
-                column=val["column"],
+                row=val["row"] - 1,
+                column=val["column"] - 1,
                 sector_type=SectorType[val["sectorType"]],
                 initial_state=initial_state,
             )
@@ -295,28 +296,31 @@ class ForestMap:
         return None
 
     def find_sector(self, location: Location):
-        # print(location.latitude)
-        # print("===========================================================")
-        # print(f"Korner 0 : {self._location[0]}")
-        # print(f"Korner 1 : {self._location[1]}")
-        # print(f"Korner 2 : {self._location[2]}")
-        # print(f"Korner 3 : {self._location[3]}")
-        # print("===========================================================")
-        lat_interpolation = (
-                (location.latitude - self._location[1].latitude)
-                / abs(self._location[1].latitude - self._location[0].latitude)
-        )
-        lon_interpolation = (
-                (location.longitude - self._location[0].longitude)
-                / abs(self._location[2].longitude - self._location[1].longitude)
-        )
+        lat0 = self._location[0].latitude
+        lat1 = self._location[1].latitude
+        lon0 = self._location[0].longitude
+        lon1 = self._location[2].longitude  # use [2] assuming rectangular layout
+
+        lat_diff = abs(lat1 - lat0)
+        lon_diff = abs(lon1 - lon0)
+
+        # Handle edge cases: avoid division by zero
+        if lat_diff == 0 or lon_diff == 0:
+            return 
+            #raise ValueError("Map corner coordinates are invalid (division by zero). Check map location configuration.")
+
+        lat_interpolation = (location.latitude - lat1) / lat_diff
+        lon_interpolation = (location.longitude - lon0) / lon_diff
 
         height_index = int(self.rows * lat_interpolation)
         width_index = int(self.columns * lon_interpolation)
-        height_index = min(7, height_index)
-        width_index = min(11, width_index)
+
+        # Clamp indices to map boundaries
+        height_index = max(0, min(self.rows - 1, height_index))
+        width_index = max(0, min(self.columns - 1, width_index))
 
         return self._sectors[height_index][width_index]
+
 
     def get_adjacent_sectors(self, sector: Sector) -> list[Tuple[Sector, GeographicDirection]]:
         row = sector.row
@@ -342,3 +346,29 @@ class ForestMap:
                 adjacent_sectors.append((self.sectors[new_row][new_column], direction))
 
         return adjacent_sectors
+
+    def update_sectors(self, new_sectors: List[Sector]):
+        id_map = {s.sector_id: s for s in new_sectors}
+        for row in self.sectors:
+            for i, s in enumerate(row):
+                row[i] = id_map[s.sector_id]
+
+    def clone(self) -> 'ForestMap':
+        cloned_sectors = [
+            [sector.clone() for sector in row]
+            for row in self._sectors
+        ]
+
+        cloned_brigades = [brigade.clone() for brigade in self._fire_brigades]
+        cloned_patrols = [patrol.clone() for patrol in self._forester_patrols]
+
+        return ForestMap(
+            forest_id=self._forest_id,
+            forest_name=self._forest_name,
+            rows=self._rows,
+            columns=self._columns,
+            location=tuple(Location(loc.latitude, loc.longitude) for loc in self._location),
+            sectors=cloned_sectors,
+            foresterPatrols=cloned_patrols,
+            fireBrigades=cloned_brigades
+        )

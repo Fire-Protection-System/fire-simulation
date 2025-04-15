@@ -5,6 +5,7 @@ from typing import List
 import random
 import json as jssonLib
 from datetime import timedelta
+import copy
 
 from simulation.sensors.sensor import Sensor
 from simulation.sectors.sector_state import SectorState
@@ -24,7 +25,7 @@ from simulation.cameras.camera import Camera
 from simulation.location import Location
 
 logger = logging.getLogger(__name__)
-
+logger.disabled = True
 
 class Sector:
     def __init__(
@@ -120,6 +121,7 @@ class Sector:
         fire_add = (self._fire_level/10) * coef_generator.calculate_alpha(self._sector_type) * const.FIRE_LEVEL_MULTIPLIER
         fire_sub = self._extinguish_level
         new_fire_level =  min(self._fire_level + fire_add - fire_sub, 100)
+
         if new_fire_level <= 0:
             self._fire_state = FireState.INACTIVE
             self._fire_level = 0
@@ -193,10 +195,6 @@ class Sector:
         logger.info(f"Sector {self.sector_id} - Wind Speed: {self._state.wind_speed}")
 
 
-        
-
-        
-
     def update_sector(self):
         self.update_extinguish_level()
         self.update_fire_level()
@@ -245,6 +243,30 @@ class Sector:
             jsons_by_type[sensor.sensor_type.name].append(json)
         
         return jsons_by_type
+
+    def clone(self) -> "Sector":
+        cloned_state = self._state.copy() if hasattr(self._state, "copy") else copy.deepcopy(self._state)
+
+        cloned_sector = Sector(
+            sector_id=self._sector_id,
+            row=self._row,
+            column=self._column,
+            sector_type=self._sector_type,
+            initial_state=cloned_state
+        )
+
+        cloned_sector._extinguish_level = self._extinguish_level
+        cloned_sector._fire_level = self._fire_level
+        cloned_sector._burn_level = self._burn_level
+        cloned_sector._number_of_fire_brigades = self._number_of_fire_brigades
+        cloned_sector._number_of_forester_patrols = self._number_of_forester_patrols
+        cloned_sector._fire_state = self._fire_state
+        cloned_sector._sensors = []  
+
+        if hasattr(self, "_initial_temperature"):
+            cloned_sector._initial_temperature = self._initial_temperature
+
+        return cloned_sector
 
     
 
