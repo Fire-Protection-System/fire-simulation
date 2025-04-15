@@ -3,9 +3,13 @@ import logging
 import json
 from simulation.rabbitmq.message_store import MessageStore
 import time
+import os
 
 logger = logging.getLogger(__name__)
     
+RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST', 'rabbitmq-service')
+RABBITMQ_PORT = int(os.environ.get('RABBITMQ_PORT', 5672))
+
 def produce_message(exchange, channel, routing_key, message):
     try:
         if channel is None:
@@ -19,17 +23,22 @@ def produce_message(exchange, channel, routing_key, message):
         logger.error(f"Error sending message: {e}")
 
 def start_producing_messages(exchange, routing_key, store: MessageStore, username, password):
-    CONNECTION_CREDENTIALS = pika.PlainCredentials(username, password)
-    
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', credentials=CONNECTION_CREDENTIALS))
-    channel = connection.channel()
-    
-    while(1):
-        message = store.get_message_to_sent(routing_key)
-        if(message):
-            #logger.info("Message to sent found.")
-            produce_message(exchange, channel, routing_key, message)
-        else:
-            #logger.info("No messages to sent")
-            pass
-        time.sleep(0.5)
+    credentials = pika.PlainCredentials(username, password)
+    try:
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host=RABBITMQ_HOST,
+                port=RABBITMQ_PORT,
+                credentials=credentials
+            )
+        )
+        channel = connection.channel()
+        
+        while True:
+            message = store.get_message_to_sent(routing_key)
+            if message:
+                produce_message(exchange, channel, routing_key, message)
+            time.sleep(0.5)
+    except Exception as e:
+        print(f"Connection error: {e}")
+        # Add more robust error handling or logging here
