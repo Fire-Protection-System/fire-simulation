@@ -4,11 +4,6 @@ from itertools import product, permutations
 from typing import List, Tuple, Optional, Set, Dict, FrozenSet, Any, NamedTuple
 import numpy as np
 from collections import defaultdict, namedtuple
-import collections
-
-import heapq
-import collections
-import numpy as np
 
 from recomendation.node import Node
 from simulation.sectors.sector import Sector
@@ -19,13 +14,13 @@ from simulation.forest_map import ForestMap
 from simulation.sectors.geographic_direction import GeographicDirection
 from simulation.agent_state import AGENT_STATE
 from simulation.agent import Agent
-from simulation.fire_brigades.fire_brigade import FireBrigade
-from simulation.forester_patrols.forester_patrol import ForesterPatrol
 
-# lightweight Position Object
+
+# Define lightweight objects for positions
 class Position(NamedTuple):
     latitude: float
     longitude: float
+
 
 class FireSimulationNode(Node):
     __slots__ = ('sectors', 'sector_states', 'agents', 'agent_states', 'time_step', 
@@ -42,7 +37,7 @@ class FireSimulationNode(Node):
         max_brigades: int = 2,
         forest_map: Optional[ForestMap] = None,
         wind: Optional[Wind] = None,
-
+        # New optimization parameters - pre-computed values
         sector_states=None,
         agent_states=None,
         _sector_lookup=None,
@@ -50,30 +45,23 @@ class FireSimulationNode(Node):
     ):
         self.sectors = sectors
         
-        """Caching every state/object possible to optimize computations."""
+        # Cache sector states as frozen data structure for hashing/comparison
         if sector_states is None:
             self.sector_states = frozenset((s.sector_id, s.fire_state, s.fire_level, s.burn_level, 
                                           s._number_of_fire_brigades) for s in sectors)
         else:
             self.sector_states = sector_states
-                    
+            
+        self.agents = agents
+        
+        # Cache agent states as tuple for hashing/comparison
         if agent_states is None:
             self.agent_states = tuple((a.state, a.location.latitude, a.location.longitude,
                                      getattr(a.destination, 'latitude', None),
                                      getattr(a.destination, 'longitude', None)) for a in agents)
         else:
             self.agent_states = agent_states
-        
-        if _sector_lookup is None:
-            self._sector_lookup = {s.sector_id: s for s in sectors}
-        else:
-            self._sector_lookup = _sector_lookup
             
-        if _active_sector_ids is None:
-            self._active_sector_ids = frozenset(s.sector_id for s in sectors if s.fire_state == FireState.ACTIVE)
-        else:
-            self._active_sector_ids = _active_sector_ids
-        
         self.time_step = time_step
         self.max_steps = max_steps
         self.action = tuple(action) if action else None
@@ -81,8 +69,19 @@ class FireSimulationNode(Node):
         self.map = forest_map
         self.wind = wind or Wind()
         self._children_cache = None
-        self.agents = agents
         
+        # Create fast lookup dictionaries for sectors
+        if _sector_lookup is None:
+            self._sector_lookup = {s.sector_id: s for s in sectors}
+        else:
+            self._sector_lookup = _sector_lookup
+            
+        # Cache active sector IDs for faster filtering
+        if _active_sector_ids is None:
+            self._active_sector_ids = frozenset(s.sector_id for s in sectors if s.fire_state == FireState.ACTIVE)
+        else:
+            self._active_sector_ids = _active_sector_ids
+    
     def __hash__(self):
         return hash((self.time_step, self.sector_states, self.agent_states))
 
@@ -99,123 +98,123 @@ class FireSimulationNode(Node):
         return np.sqrt(lat_diff**2 + lon_diff**2)
 
     def find_children(self):
-        """Find Best Children using optimized heuristics and cached values"""
+        """
+        Find Best Children using optimized heuristics and cached values
+        """
         if self._children_cache is not None:
             return self._children_cache
 
+        # Use cached active sectors
         if not self._active_sector_ids:
             self._children_cache = set()
             return self._children_cache
 
+        # Get active sectors using the lookup
         active_sectors = [self._sector_lookup[sid] for sid in self._active_sector_ids]
         num_agents = len(self.agents)
         children = set()
 
-        # Precompute fire threat and brigade requirements
+        # Pre-compute threat levels once
         sector_threat = {
             s.sector_id: s.fire_level * (1 + s.burn_level)
             for s in active_sectors
         }
-        required_brigades = {
-            s.sector_id: s.required_fire_brigades()
-            for s in active_sectors
-        }
-
-        # Agent and sector locations
-        agent_locations = {
-            i: (self.agents[i].location.latitude, self.agents[i].location.longitude)
-            for i in range(num_agents)
-        }
-        sector_locations = {
-            s.sector_id: self.map.get_sector_location(s)
-            for s in active_sectors
-        }
-
-        # Compute all distances once
-        agent_to_sector_distances = {
-            (i, sid): np.hypot(agent_locations[i][0] - sector_locations[sid].latitude,
-                            agent_locations[i][1] - sector_locations[sid].longitude)
-            for i in range(num_agents)
-            for sid in sector_threat
-        }
-
-        # Select top K most threatening sectors
+        
+        # Sort once and reuse
+        sorted_sectors = sorted(active_sectors, key=lambda s: sector_threat[s.sector_id], reverse=True)
+        
+        # Pre-calculate all distances once
+        locations = {i: (self.agents[i].location.latitude, self.agents[i].location.longitude) 
+                   for i in range(num_agents)}
+        sector_locations = {s.sector_id: self.map.get_sector_location(s) for s in active_sectors}
+        
+        # Use numpy for faster distance calculations
+        agent_to_sector_distances = {}
+        for i in range(num_agents):
+            agent_lat, agent_lon = locations[i]
+            for s in active_sectors:
+                sid = s.sector_id
+                s_loc = sector_locations[sid]
+                lat_diff = agent_lat - s_loc.latitude
+                lon_diff = agent_lon - s_loc.longitude
+                agent_to_sector_distances[(i, sid)] = np.sqrt(lat_diff**2 + lon_diff**2)
+        
+        # Calculate top sectors to consider (optimization to limit comparisons)
         top_k = max(1, min(len(active_sectors), num_agents * 2, int(len(self.sectors) * 0.1)))
-        top_sectors = heapq.nlargest(top_k, active_sectors, key=lambda s: sector_threat[s.sector_id])
-
-        # Score agents for assigning to top threat sectors
+        top_sectors = sorted_sectors[:top_k]
+        
+        # Agent scoring using vectorized operations where possible
         agent_scores = []
         for i in range(num_agents):
+            # Vectorized calculation of scores
             score = sum(
                 sector_threat[s.sector_id] / max(0.1, agent_to_sector_distances[(i, s.sector_id)])
                 for s in top_sectors
             )
             agent_scores.append((i, score))
-        agent_scores.sort(key=lambda x: x[1], reverse=True)
 
+        # Sort agents by score
+        agent_scores.sort(key=lambda x: x[1], reverse=True)
+        
+        # Best threat-based assignment
         assigned_sectors = set()
         threat_actions = []
-        sector_brigade_counts = collections.defaultdict(int)
 
         for i, _ in agent_scores:
+            # Find best unassigned sector for this agent
             best_options = [
-                (sid, sector_threat[sid] / (1 + agent_to_sector_distances[(i, sid)] * 0.5))
-                for sid in sector_threat
-                if sid not in assigned_sectors
+                (s.sector_id, sector_threat[s.sector_id] / (1 + agent_to_sector_distances[(i, s.sector_id)] * 0.5))
+                for s in sorted_sectors if s.sector_id not in assigned_sectors
             ]
+            
             if best_options:
-                best_sid, _ = max(best_options, key=lambda x: x[1])
-                if sector_brigade_counts[best_sid] < required_brigades[best_sid]:
-                    threat_actions.append((i, best_sid))
-                    assigned_sectors.add(best_sid)
-                    sector_brigade_counts[best_sid] += 1
+                best_sid = max(best_options, key=lambda x: x[1])[0]
+                threat_actions.append((i, best_sid))
+                assigned_sectors.add(best_sid)
 
         if threat_actions:
             children.add(self._apply_step(threat_actions))
 
-        # Try coordinated actions for top sectors
+        # Generate focused assignment for top burning sectors
         if num_agents > 1:
-            for s in top_sectors[:min(3, len(top_sectors))]:
-                sid = s.sector_id
-                required = required_brigades[sid]
-                if required == 0:
-                    continue
-
+            for s in sorted_sectors[:min(3, len(sorted_sectors))]:
+                sector_id = s.sector_id
                 closest_agents = sorted(
-                    [(i, agent_to_sector_distances[(i, sid)]) for i in range(num_agents)],
+                    [(i, agent_to_sector_distances[(i, sector_id)]) for i in range(num_agents)],
                     key=lambda x: x[1]
-                )[:min(required, num_agents)]
+                )[:min(2, num_agents)]
+                actions = [(i, sector_id) for i, _ in closest_agents]
+                children.add(self._apply_step(actions))
 
-                actions = [(i, sid) for i, _ in closest_agents]
-                if actions:
-                    children.add(self._apply_step(actions))
-
-        # Generate random but reasonable assignments
+        # Generate some intelligent random assignments
         seen_assignments = set()
         max_random = min(10, 30 - len(children))
-        sector_ids = list(sector_threat.keys())
+        
+        # Create probability distribution for sector selection
+        sector_ids = [s.sector_id for s in active_sectors]
         agent_sector_probs = {}
-
+        
         for i in range(num_agents):
             probs = np.array([
                 sector_threat[sid] / (1 + agent_to_sector_distances[(i, sid)])
                 for sid in sector_ids
             ])
-            if probs.sum() > 0:
-                probs = probs / probs.sum()
+            if len(probs) > 0:
+                # Normalize probabilities
+                probs = probs / np.sum(probs)
                 agent_sector_probs[i] = (sector_ids, probs)
-
+        
+        # Generate smart random assignments using the precomputed probabilities
         for _ in range(max_random):
             actions = []
-            temp_brigade_counts = collections.defaultdict(int)
+            
             for i in range(num_agents):
                 if i in agent_sector_probs:
                     sids, probs = agent_sector_probs[i]
-                    chosen = np.random.choice(sids, p=probs)
-                    if temp_brigade_counts[chosen] < required_brigades[chosen]:
+                    if len(sids) > 0:
+                        chosen = np.random.choice(sids, p=probs)
                         actions.append((i, chosen))
-                        temp_brigade_counts[chosen] += 1
-
+            
             actions_sorted = tuple(sorted(actions))
             if actions and actions_sorted not in seen_assignments:
                 seen_assignments.add(actions_sorted)
@@ -223,8 +222,6 @@ class FireSimulationNode(Node):
 
         self._children_cache = children
         return children
-
-
 
     def find_random_child(self):
         """Find a random child using cached active sectors"""
@@ -246,30 +243,37 @@ class FireSimulationNode(Node):
         return self._apply_step(actions)
 
     def _apply_step(self, actions: List[Tuple[int, int]]):
-        """Apply actions and create new state with optimized object creation"""
+        """
+        Apply actions and create new state with optimized object creation
+        """
         # Create shallow copies of sectors that will be modified
         sectors_to_modify = set()
         for _, sector_id in actions:
             sectors_to_modify.add(sector_id)
             
-        # Create a map of original sectors
+        # Create a map of original sectors to cloned sectors
         new_sectors_map = {}
         new_sectors = []
-
-        for s in self.sectors:
-            # Clone all sectors
-            cloned = s.clone()
-            new_sectors_map[s.sector_id] = cloned
-            new_sectors.append(cloned)
         
-        # Clone forest map only if needed
+        for s in self.sectors:
+            if s.sector_id in sectors_to_modify:
+                cloned = s.clone()
+                new_sectors_map[s.sector_id] = cloned
+                new_sectors.append(cloned)
+            else:
+                # For unchanged sectors, don't clone unless necessary
+                new_sectors.append(s)
+                new_sectors_map[s.sector_id] = s
+        
+        # Clone the forest map only if needed
         new_map = self.map.clone()
         new_map.update_sectors(new_sectors)
         
-        # Use of agents 
+        # Use lightweight copies of agents when possible
         new_agents = []
         for i, agent in enumerate(self.agents):
-            agent_actions = [a for a in actions if a[0] == i] 
+            # Clone agent only if it's involved in an action
+            agent_actions = [a for a in actions if a[0] == i]  # Use index instead of id
             if agent_actions:
                 new_agent = agent.clone()
                 new_agents.append(new_agent)
@@ -280,6 +284,7 @@ class FireSimulationNode(Node):
         for agent_idx, sector_id in actions:
             agent = new_agents[agent_idx]
             dest_sector = new_map.get_sector(sector_id)
+            # Use Position object for faster calculations
             dest_position = new_map.get_sector_location(dest_sector)
             agent.set_state_travelling(dest_position)
         
@@ -287,35 +292,20 @@ class FireSimulationNode(Node):
         for agent in new_agents:
             if agent.state == AGENT_STATE.TRAVELLING:
                 if self._update_position(agent):
-                    agent._location = agent.destination
-                
-                    if agent.destination == agent.base_location:
-                        agent.set_state_available()
-                    else:
-                        sec = new_map.find_sector(agent.location)
-                        sec._number_of_fire_brigades += 1
-                        agent.set_state_executing()
+                    agent.set_state_executing()
 
         # Track updated sectors
         updated_sector_ids = set()
         for agent in new_agents:
             if agent.state == AGENT_STATE.EXECUTING:
                 sec = new_map.find_sector(agent.location)
-
                 if sec.sector_id not in updated_sector_ids:
                     if sec is not new_sectors_map[sec.sector_id]:
+                        # Only clone if we haven't already
                         sec = sec.clone()
                         new_sectors_map[sec.sector_id] = sec
                     updated_sector_ids.add(sec.sector_id)
-
-                if isinstance(agent, FireBrigade):
-                    sec.update_extinguish_level()
-                    
-                    if hasattr(sec, "fire_intensity") and sec.extinguish_level >= sec.fire_intensity:
-                        agent.set_state_available()
-                
-                elif hasattr(agent, "is_task_finished") and agent.is_task_finished(sec):
-                    agent.set_state_available()
+                sec._number_of_fire_brigades += 1
 
         # Update sectors and track fire state changes
         new_active_sector_ids = set()
@@ -324,8 +314,10 @@ class FireSimulationNode(Node):
             if sector.fire_state == FireState.ACTIVE:
                 new_active_sector_ids.add(sector.sector_id)
         
+        # Spread fire with optimized calculations
         self._spread_fire(new_sectors, new_map, copy.copy(self.wind), new_active_sector_ids)
-
+        
+        # Create new node with pre-computed values
         new_sector_states = frozenset((s.sector_id, s.fire_state, s.fire_level, s.burn_level, 
                                       s._number_of_fire_brigades) for s in new_sectors)
                                       
@@ -345,46 +337,20 @@ class FireSimulationNode(Node):
             max_brigades=self.max_brigades,
             forest_map=new_map,
             wind=copy.copy(self.wind),
-            
-            # precomputing
+            # Pass pre-computed values
             sector_states=new_sector_states,
             agent_states=new_agent_states,
             _sector_lookup=new_sector_lookup,
             _active_sector_ids=new_active_sector_ids
         )
 
-    def calculate_reward(self, state):
-        """Calculate reward strategy (optional)"""
-
-        LOST_SECTOR_PENALTY = 20
-        EXTINGUISHED_FIRES_REWARD = 20
-        SPREAD_PREVENTION_REWARD = 20
-        
-        # Lost sectors reward calculation
-        lost_penalty = -LOST_SECTOR_PENALTY * sum(1 for s in state.sectors if s.fire_state == FireState.LOST)
-        
-        # Penalize active fires based on their level
-        fire_penalty = -sum(s.fire_level for s in state.sectors if s.fire_state == FireState.ACTIVE)
-        
-        # Extinguished fires reward
-        extinguished_reward = EXTINGUISHED_FIRES_REWARD * sum(1 for s in state.sectors 
-                                    if s.fire_state == FireState.INACTIVE and s.burn_level > 0)
-
-        # Preventing spread to neighboring sectors reward
-        spread_prevention = SPREAD_PREVENTION_REWARD * sum(1 for s in state.sectors 
-                                if s.fire_state == FireState.INACTIVE and
-                                any(n.fire_state == FireState.ACTIVE 
-                                    for n, _ in state.map.get_adjacent_sectors(s)))
-        
-        return lost_penalty + fire_penalty + extinguished_reward + spread_prevention
-
     def is_terminal(self):
         """Optimized terminal state check using cached active sectors"""
         return self.time_step >= self.max_steps or not self._active_sector_ids
 
     def reward(self):
-        """Calculate reward"""
-        return self.calculate_reward(self)
+        """Calculate reward (unchanged)"""
+        return -sum(s.burn_level for s in self.sectors)
 
     def _update_position(self, agent: Agent) -> bool:
         """Update agent position with optimized movement calculation"""
@@ -406,24 +372,24 @@ class FireSimulationNode(Node):
 
     def _spread_fire(self, sectors: List[Sector], forest_map: ForestMap, wind: Wind, active_sector_ids=None):
         """Optimized fire spread simulation using cached data structures"""
-
-        # Use cached sectors if possible
+        # Use passed active_sector_ids if available, otherwise compute
         if active_sector_ids is None:
             active_sectors = [s for s in sectors if s.fire_state == FireState.ACTIVE]
         else:
             active_sectors = [s for s in sectors if s.sector_id in active_sector_ids]
         
-        # Lookup for storing sectors to activate
+        # Collect sectors to activate in one pass
         sectors_to_activate = []
+        
+        # Pre-compute a lookup for sectors
         sector_lookup = {s.sector_id: s for s in sectors}
         
-        # Pre-compute all adjacency sectors
+        # Pre-compute adjacent sectors mapping
         adjacency_map = {}
         for sector in active_sectors:
             adjacency_map[sector.sector_id] = forest_map.get_adjacent_sectors(sector)
         
-        # Process each currently burning sector
-        # Calculate probability with simulation function
+        # Calculate spread probabilities in batch
         for sector in active_sectors:
             for neighbor, direction in adjacency_map[sector.sector_id]:
                 if neighbor.fire_state == FireState.INACTIVE:
@@ -431,32 +397,37 @@ class FireSimulationNode(Node):
                     if random.random() < prob:
                         sectors_to_activate.append(neighbor)
         
-        # Apply fires to chosen sectors
+        # Activate sectors
         for sector in sectors_to_activate:
             sector.start_fire()
             
+        # Update wind once
         wind.update_wind()
 
     def simulate_steps_without_action(self, steps: int) -> List[Sector]:
         """Simulate future steps without agent actions - optimized version"""
 
+        # Store only active sectors
         active_sectors = {s.sector_id for s in self.sectors if s.fire_state == FireState.ACTIVE}
         
         clones_map = {}
         clones = []
         
+        # Start with only cloning active sectors and their neighbors
         sectors_to_clone = set(active_sectors)
         for s in self.sectors:
             if s.fire_state == FireState.ACTIVE:
                 for neighbor, _ in self.map.get_adjacent_sectors(s):
                     sectors_to_clone.add(neighbor.sector_id)
         
+        # Create clones for sectors that might change
         for s in self.sectors:
             if s.sector_id in sectors_to_clone:
                 clone = s.clone()
                 clones_map[s.sector_id] = clone
                 clones.append(clone)
             else:
+                # For sectors unlikely to change, use a reference
                 clones_map[s.sector_id] = s
                 clones.append(s)
         
@@ -467,40 +438,51 @@ class FireSimulationNode(Node):
         active_sector_ids = frozenset(s.sector_id for s in clones if s.fire_state == FireState.ACTIVE)
 
         for _ in range(steps):
+            # Track which sectors need updating
             sectors_to_update = set()
             
+            # Update active sectors
             for s_id in active_sector_ids:
                 s = clones_map[s_id]
+                # Ensure we have a clone, not a reference
                 if s is self._sector_lookup.get(s_id):
                     s = s.clone()
                     clones_map[s_id] = s
+                    # Update the clone in the list
                     idx = clones.index(self._sector_lookup[s_id])
                     clones[idx] = s
                 s.update_sector()
                 
+                # Add neighbors to potential update list
                 for neighbor, _ in fmap.get_adjacent_sectors(s):
                     sectors_to_update.add(neighbor.sector_id)
                 
+            # Spread fire
             self._spread_fire(clones, fmap, w, active_sector_ids)
             
+            # Update active sectors for next iteration
             active_sector_ids = frozenset(s.sector_id for s in clones if s.fire_state == FireState.ACTIVE)
 
         return clones
 
     def simulate_steps_with_action(self, steps: int, actions: List[Tuple[int, int]]) -> Tuple[List[Sector], List[Agent]]:
         """Simulate future steps with specified agent actions - optimized version"""
+        # Only clone sectors that will be affected
         affected_sectors = set()
         for _, sector_id in actions:
             affected_sectors.add(sector_id)
         
+        # Add active sectors
         active_sectors = {s.sector_id for s in self.sectors if s.fire_state == FireState.ACTIVE}
         affected_sectors.update(active_sectors)
         
+        # Add neighbors of active sectors that might be affected
         for s in self.sectors:
             if s.fire_state == FireState.ACTIVE:
                 for neighbor, _ in self.map.get_adjacent_sectors(s):
                     affected_sectors.add(neighbor.sector_id)
         
+        # Create clones for affected sectors only
         clones_map = {}
         clones = []
         for s in self.sectors:
@@ -516,38 +498,35 @@ class FireSimulationNode(Node):
         fmap.update_sectors(clones)
         w = copy.copy(self.wind)
         
-        ags = [i for i in self.agents]
-        # for i, agent in enumerate(self.agents):
-        #     if any(a[0] == i for a in actions):
-        #         ags.append(agent.clone())
-        #     else:
-        #         ags.append(agent)
+        # Only clone agents involved in actions (using index for identification)
+        ags = []
+        for i, agent in enumerate(self.agents):
+            # Check if this agent index appears in actions
+            if any(a[0] == i for a in actions):
+                ags.append(agent.clone())
+            else:
+                ags.append(agent)
         
+        # Set destinations
         for idx, sec_id in actions:
             ag = ags[idx]
             dest = fmap.get_sector_location(fmap.get_sector(sec_id))
             ag.set_state_travelling(dest)
         
+        # Track active sectors
         active_sector_ids = frozenset(s.sector_id for s in clones if s.fire_state == FireState.ACTIVE)
         
         for _ in range(steps):
+            # Update agent positions
             updated_sectors = set()
             for ag in ags:
-                if ag.state == AGENT_STATE.TRAVELLING:
-                    if self._update_position(ag):
-                        ag._location = ag.destination
-                        
-                        if ag.destination == ag.base_location:
-                            ag.set_state_available()
-                        else:
-                            ag.set_state_executing()
-                            if isinstance(ag, FireBrigade):
-                                sec = fmap.find_sector(ag.location)
-                                sec._number_of_fire_brigades += 1
+                if ag.state == AGENT_STATE.TRAVELLING and self._update_position(ag):
+                    ag.set_state_executing()
                     
                 if ag.state == AGENT_STATE.EXECUTING:
                     sector = fmap.find_sector(ag.location)
                     if sector and sector.sector_id not in updated_sectors:
+                        # Ensure we have a clone
                         if sector is self._sector_lookup.get(sector.sector_id):
                             sector = sector.clone()
                             try:
@@ -555,15 +534,19 @@ class FireSimulationNode(Node):
                                 clones[idx] = sector
                                 clones_map[sector.sector_id] = sector
                             except ValueError:
+                                # Handle case where sector isn't in clones list
                                 clones.append(sector)
                                 clones_map[sector.sector_id] = sector
                         updated_sectors.add(sector.sector_id)
             
+            # Create list of sectors to update: active sectors and sectors affected by agents
             sectors_to_update = active_sector_ids.union(updated_sectors)
             
+            # Update sectors
             for s_id in sectors_to_update:
                 if s_id in clones_map:
                     s = clones_map[s_id]
+                    # Ensure we have a clone
                     if s is self._sector_lookup.get(s_id):
                         s = s.clone()
                         try:
@@ -574,7 +557,10 @@ class FireSimulationNode(Node):
                         clones_map[s_id] = s
                     s.update_sector()
             
+            # Spread fire
             self._spread_fire(clones, fmap, w, active_sector_ids)
+            
+            # Update active sectors for next iteration
             active_sector_ids = frozenset(s.sector_id for s in clones if s.fire_state == FireState.ACTIVE)
         
         return clones, ags

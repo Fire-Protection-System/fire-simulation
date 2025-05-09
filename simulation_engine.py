@@ -1,6 +1,7 @@
 import logging
 import random
 from typing import List, Tuple
+from queue import Queue
 
 from threading import Thread
 import time
@@ -21,6 +22,8 @@ from simulation.rabbitmq import producer, consumer, connection_manager
 from simulation.rabbitmq.message_store import MessageStore
 from simulation.sensors.sensor_type import SensorType
 
+from recomendation.mcts_test import predict
+
 logger = logging.getLogger(__name__)
 
 EXCHANGE_NAME = "fire_updates"
@@ -36,7 +39,8 @@ WRITE_QUEUE_TOPICS = [
     "Litter moisture topic",
     "CO2 topic",
     "PM2.5 topic",
-    "Fire brigades state topic"
+    "Fire brigades state topic",
+    "Recommended action topic"
 ]
 
 READ_QUEUE_TOPICS = [
@@ -61,6 +65,34 @@ def run_simulation(configuration):
     store = MessageStore()
     read_threads = []
     write_threads = []
+
+    # MCTS predictions results
+    prediction_queue = Queue()
+    prediction_running = True
+
+    def prediction_worker():
+        while prediction_running:
+            try:
+                forest_map_clone = map.clone()
+                recommended_actions = predict(forest_map_clone)
+
+                if recommended_actions:
+                    action_queue = "Recommended action topic"
+                    action_message = {
+                        "timestamp": time.time(),
+                        "recommendedActions": [
+                            { "unitId": unit_id, "sectorId": sector_id }
+                            for unit_id, sector_id in recommended_actions
+                        ],
+                        "priority": "high"
+                    }
+                    store.add_message_to_sent(action_queue, action_message)
+                    logger.info(f"MCTS recommended actions: {recommended_actions}")
+
+            except Exception as e:
+                logger.error(f"Error in MCTS prediction: {str(e)}")
+                
+            time.sleep(5) 
     
     #===================Get connection and channel===================
 
@@ -88,9 +120,14 @@ def run_simulation(configuration):
 
     map = ForestMap.from_conf(configuration)
     agents_manager = AgentManager(map, store)
-
     orderProcessingThread = Thread(target=agents_manager.start_processing_orders)
     orderProcessingThread.start()
+
+    # Start the prediction thread
+    prediction_thread = Thread(target=prediction_worker)
+    prediction_thread.daemon = True
+    prediction_thread.start()
+    logger.info("MCTS prediction thread started")
 
     #===================SIMULATION===================
     wind = Wind()
@@ -127,6 +164,7 @@ def run_simulation(configuration):
                 queue = get_topic_for_sensor(sensor_type)
                 for json in jsons:
                     store.add_message_to_sent(queue, json)
+        
         
         agents_manager.update_agents_states()
         time.sleep(1)

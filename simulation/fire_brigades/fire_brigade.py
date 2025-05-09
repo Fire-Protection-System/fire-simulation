@@ -23,6 +23,7 @@ class FireBrigade(Agent):
 
         self._initial_location = initial_location
         self._base_location = base_location
+        self._timestamp = timestamp
 
     @property
     def fire_brigade_id(self) -> str:
@@ -49,10 +50,9 @@ class FireBrigade(Agent):
         logging.debug(f'Fire brigade {self._fire_brigade_id} is in state: {self._state}.')
 
     def clone(self) -> 'FireBrigade':
-        # Ensure that the clone method references the correct location attributes
         return FireBrigade(
             fire_brigade_id=self._fire_brigade_id,
-            timestamp=self._timestamp,  # Ensure _timestamp is being correctly set
+            timestamp=self._timestamp, 
             initial_state=self._state,
             base_location=Location(self._base_location.latitude, self._base_location.longitude),
             initial_location=Location(self._initial_location.latitude, self._initial_location.longitude)  # Assuming _initial_location exists

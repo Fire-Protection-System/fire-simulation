@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 import random
 
-GRID_SIZE = 4
+GRID_SIZE = 3
 
 LON_START = 19.934967812541295
 LAT_START = 50.034952974941994

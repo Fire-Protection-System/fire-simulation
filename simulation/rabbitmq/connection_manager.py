@@ -19,7 +19,8 @@ QUEUE_NAMES = [
     "CO2 queue",
     "PM2.5 queue",
     "Fire brigades action queue",
-    "Fire brigades state queue"
+    "Fire brigades state queue",
+    "Recommended action queue"
 ]
 
 TOPIC_NAMES = [
@@ -33,7 +34,8 @@ TOPIC_NAMES = [
     "CO2 topic",
     "PM2.5 topic",
     "Fire brigades action topic",
-    "Fire brigades state topic"
+    "Fire brigades state topic",
+    "Recommended action topic"
 ]
 
 def create_queues(exchange_name, username, password):

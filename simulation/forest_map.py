@@ -282,12 +282,27 @@ class ForestMap:
         return max_burn_sector
     
     def get_sector_location(self, sector: Sector) -> Location:
+        """
+        Compute the geographic center of a given sector based on the four map corners.
+        Assumes self._location is (upper-left, upper-right, lower-right, lower-left).
+        """
 
-        return Location(
-            longitude=self._location[0].longitude + sector.column * (self._location[1].longitude - self._location[0].longitude) / self._width,
-            latitude=self._location[0].latitude + sector.row * (self._location[2].latitude - self._location[1].latitude) / self._height
-        )
-    
+        ul = self._location[0] 
+        ur = self._location[1] 
+        lr = self._location[2]
+        ll = self._location[3]
+
+        total_lon_span = ur.longitude - ul.longitude
+        total_lat_span = ul.latitude - ll.latitude  
+
+        sector_width = total_lon_span / self._columns
+        sector_height = total_lat_span / self._rows
+
+        center_lon = ul.longitude + (sector.column + 0.5) * sector_width
+        center_lat = ul.latitude - (sector.row + 0.5) * sector_height
+
+        return Location(longitude=center_lon, latitude=center_lat)
+
     def get_sector(self, sector_id: int) -> Sector:
         for row in self._sectors:
             for sector in row:
@@ -296,26 +311,28 @@ class ForestMap:
         return None
 
     def find_sector(self, location: Location):
-        lat0 = self._location[0].latitude
-        lat1 = self._location[1].latitude
-        lon0 = self._location[0].longitude
-        lon1 = self._location[2].longitude  # use [2] assuming rectangular layout
+        bottom_left = self._location[0]
+        bottom_right = self._location[1]
+        top_right = self._location[2]
+        top_left = self._location[3]
 
-        lat_diff = abs(lat1 - lat0)
-        lon_diff = abs(lon1 - lon0)
+        min_lat = bottom_left.latitude
+        max_lat = top_left.latitude
+        min_lon = bottom_left.longitude
+        max_lon = bottom_right.longitude
 
-        # Handle edge cases: avoid division by zero
+        lat_diff = max_lat - min_lat
+        lon_diff = max_lon - min_lon
+
         if lat_diff == 0 or lon_diff == 0:
-            return 
-            #raise ValueError("Map corner coordinates are invalid (division by zero). Check map location configuration.")
+            return None  # Avoid division by zero
 
-        lat_interpolation = (location.latitude - lat1) / lat_diff
-        lon_interpolation = (location.longitude - lon0) / lon_diff
+        lat_interpolation = (location.latitude - min_lat) / lat_diff
+        lon_interpolation = (location.longitude - min_lon) / lon_diff
 
-        height_index = int(self.rows * lat_interpolation)
-        width_index = int(self.columns * lon_interpolation)
+        height_index = int((1 - lat_interpolation) * self.rows)  # flip latitude (north = lower index)
+        width_index = int(lon_interpolation * self.columns)
 
-        # Clamp indices to map boundaries
         height_index = max(0, min(self.rows - 1, height_index))
         width_index = max(0, min(self.columns - 1, width_index))
 
