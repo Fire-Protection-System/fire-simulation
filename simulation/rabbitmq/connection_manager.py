@@ -67,3 +67,29 @@ def create_queues(exchange_name, username, password):
     except Exception as e:
         logger.error(f"Error connecting to RabbitMQ: {e}")
         return None, None
+
+
+def remove_queues(exchange_name, username, password):
+    try:
+        credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
+
+        connection = pika.BlockingConnection(pika.ConnectionParameters(
+            host=RABBITMQ_HOST,
+            port=RABBITMQ_PORT,
+            credentials=credentials
+        ))
+        channel = connection.channel()
+
+        # Deleting Exchange
+        channel.exchange_delete(exchange=exchange_name)
+
+        # Deleting Queues
+        for queue_name in QUEUE_NAMES:
+            channel.queue_delete(queue=queue_name)
+            logger.info(f"Queue deleted: {queue_name}")
+
+        return True
+
+    except Exception as e:
+        logger.error(f"Error connecting to RabbitMQ: {e}")
+        return False
