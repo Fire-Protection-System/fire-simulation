@@ -18,5 +18,11 @@ def run():
     return 'Simulation is running'
 
 
+@app.route('/stop_simulation', methods=['POST'])
+def stop():
+    simulation_engine.stop_simulation()
+
+    return 'Simulation stopped'
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

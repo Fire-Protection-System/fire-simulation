@@ -22,7 +22,7 @@ def produce_message(exchange, channel, routing_key, message):
     except Exception as e:
         logger.error(f"Error sending message: {e}")
 
-def start_producing_messages(exchange, routing_key, store: MessageStore, username, password):
+def start_producing_messages(exchange, routing_key, store: MessageStore, username, password, stop_event):
     credentials = pika.PlainCredentials(username, password)
     try:
         connection = pika.BlockingConnection(
@@ -34,7 +34,7 @@ def start_producing_messages(exchange, routing_key, store: MessageStore, usernam
         )
         channel = connection.channel()
         
-        while True:
+        while not stop_event.is_set():
             message = store.get_message_to_sent(routing_key)
             if message:
                 produce_message(exchange, channel, routing_key, message)
