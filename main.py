@@ -12,6 +12,7 @@ def run():
     data = request.get_json()
     print("Received data:", data)
 
+    simulation_engine.stop_event.clear()
     thread = threading.Thread(target=background_task, args=(data,))
     thread.start()
         

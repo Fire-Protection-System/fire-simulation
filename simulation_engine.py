@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 from simulation.forest_map import ForestMap
+from threading import Thread, Event
 from simulation.sectors.sector import Sector
 from simulation.sectors.fire_state import FireState
 from simulation.fire_spread.coef_generator import calculate_beta
@@ -66,7 +67,6 @@ def run_simulation(configuration):
     store = MessageStore()
     read_threads = []
     write_threads = []
-    stop_event = Event()
     
     #===================Get connection and channel===================
 
@@ -140,7 +140,6 @@ def run_simulation(configuration):
 
     # ===================Stop Threads with producing and consuming===================
 
-    stop_event.set()
     for thread in write_threads:
         thread.join()
 
