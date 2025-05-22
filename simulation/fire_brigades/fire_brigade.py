@@ -41,6 +41,10 @@ class FireBrigade(Agent):
     @property
     def getId(self):
         return self.fire_brigade_id
+    
+    @property
+    def initial_state(self) -> AGENT_STATE:
+        return self._state
 
     def next(self):
         pass
