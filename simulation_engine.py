@@ -1,6 +1,7 @@
 import logging
 import random
 from typing import List, Tuple
+from queue import Queue
 
 import threading
 import time
@@ -21,6 +22,9 @@ from simulation.agent_manager.agent_manager import AgentManager
 from simulation.rabbitmq import producer, consumer, connection_manager
 from simulation.rabbitmq.message_store import MessageStore
 from simulation.sensors.sensor_type import SensorType
+from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
+
+from recomendation.mcts_test import predict
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +41,8 @@ WRITE_QUEUE_TOPICS = [
     "Litter moisture topic",
     "CO2 topic",
     "PM2.5 topic",
-    "Fire brigades state topic"
+    "Fire brigades state topic",
+    "Recommended action topic"
 ]
 
 READ_QUEUE_TOPICS = [
@@ -67,7 +72,35 @@ def run_simulation(configuration):
     store = MessageStore()
     read_threads = []
     write_threads = []
-    
+
+    # MCTS predictions results
+    prediction_queue = Queue()
+
+    def prediction_worker():
+        while not stop_event.is_set():
+            try:
+                forest_map_clone = map.clone()
+                recommended_actions = predict(forest_map_clone)
+                available_agents = [a.fire_brigade_id for a in forest_map_clone.fireBrigades if a.state == FIREBRIGADE_STATE.AVAILABLE]
+
+                if recommended_actions:
+                    action_queue = "Recommended action topic"
+                    action_message = {
+                        "timestamp": time.time(),
+                        "recommendedActions": [
+                            { "unitId": int(unit_id), "sectorId": int(sector_id) }
+                            for unit_id, sector_id in recommended_actions if unit_id in available_agents
+                        ],
+                        "priority": "high"
+                    }
+                    store.add_message_to_sent(action_queue, action_message)
+                    logger.info(f"MCTS recommended actions: {recommended_actions}")
+
+            except Exception as e:
+                logger.error(f"Error in MCTS prediction: {str(e)}")
+
+            time.sleep(5)
+
     #===================Get connection and channel===================
 
     while(1):
@@ -97,6 +130,12 @@ def run_simulation(configuration):
 
     orderProcessingThread = Thread(target=agents_manager.start_processing_orders)
     orderProcessingThread.start()
+
+    # Start the prediction thread
+    prediction_thread = Thread(target=prediction_worker)
+    prediction_thread.daemon = True
+    prediction_thread.start()
+    logger.info("MCTS prediction thread started")
 
     #===================SIMULATION===================
     wind = Wind()
@@ -135,13 +174,14 @@ def run_simulation(configuration):
                     store.add_message_to_sent(queue, json)
         
         agents_manager.update_agents_states()
-        time.sleep(10)
+        time.sleep(5)
 
 
     # ===================Stop Threads with producing and consuming===================
 
     for thread in write_threads:
         thread.join()
+    prediction_thread.join()
 
     #===================Remove queues===================
 

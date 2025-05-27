@@ -14,7 +14,6 @@ from simulation.agent_manager.action_type import *
 logger = logging.getLogger(__name__)
 
 class AgentManager:
-
     def __init__(self, map : ForestMap, storage : MessageStore):
         self._map = map
         self._storage = storage
