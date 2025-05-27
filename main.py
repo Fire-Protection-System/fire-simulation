@@ -12,11 +12,18 @@ def run():
     data = request.get_json()
     print("Received data:", data)
 
+    simulation_engine.stop_event.clear()
     thread = threading.Thread(target=background_task, args=(data,))
     thread.start()
         
     return 'Simulation is running'
 
+
+@app.route('/stop_simulation', methods=['POST'])
+def stop():
+    simulation_engine.stop_simulation()
+
+    return 'Simulation stopped'
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
