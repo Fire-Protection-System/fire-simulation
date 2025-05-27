@@ -75,10 +75,9 @@ def run_simulation(configuration):
 
     # MCTS predictions results
     prediction_queue = Queue()
-    prediction_running = True
 
     def prediction_worker():
-        while prediction_running:
+        while not stop_event.is_set():
             try:
                 forest_map_clone = map.clone()
                 recommended_actions = predict(forest_map_clone)
@@ -181,6 +180,7 @@ def run_simulation(configuration):
 
     for thread in write_threads:
         thread.join()
+    prediction_thread.join()
 
     #===================Remove queues===================
 
