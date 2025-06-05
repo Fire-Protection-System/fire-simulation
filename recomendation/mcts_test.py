@@ -18,12 +18,11 @@ from recomendation.fire_simulation_node import FireSimulationNode
 
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = "./configs/forest_4x4_conf_20250415_173345.json"
+CONFIG_PATH = "./configs/my-file.json"
 
-NUMBER_OF_SIMULATED_FIRES = 2
-NUMBER_OF_MAX_SEARCH_STEPS = 3
-MAX_SIMULATION_TIME = 2
-
+NUMBER_OF_SIMULATED_FIRES = 0
+NUMBER_OF_MAX_SEARCH_STEPS = 4
+MAX_SIMULATION_TIME = 3
 
 import traceback
 
