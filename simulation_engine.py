@@ -27,6 +27,7 @@ from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
 from recomendation.mcts_test import predict
 
 logger = logging.getLogger(__name__)
+logging.disable(logging.CRITICAL) 
 
 EXCHANGE_NAME = "fire_updates"
 USERNAME = "guest"
@@ -42,7 +43,8 @@ WRITE_QUEUE_TOPICS = [
     "CO2 topic",
     "PM2.5 topic",
     "Fire brigades state topic",
-    "Recommended action topic"
+    "Recommended action topic", 
+    "Sector state topic"
 ]
 
 READ_QUEUE_TOPICS = [
@@ -73,7 +75,6 @@ def run_simulation(configuration):
     read_threads = []
     write_threads = []
 
-    # MCTS predictions results
     prediction_queue = Queue()
 
     def prediction_worker():
@@ -81,7 +82,7 @@ def run_simulation(configuration):
             try:
                 forest_map_clone = map.clone()
                 recommended_actions = predict(forest_map_clone)
-                available_agents = [a.fire_brigade_id for a in forest_map_clone.fireBrigades if a.state == FIREBRIGADE_STATE.AVAILABLE]
+                available_agents = [a.fire_brigade_id for a in forest_map_clone.fireBrigades]
 
                 if recommended_actions:
                     action_queue = "Recommended action topic"
@@ -144,7 +145,6 @@ def run_simulation(configuration):
     sectors_on_fire.append(map.start_new_fire())
 
     while not stop_event.is_set():
-
         for sector in sectors_on_fire:
             sector.update_sector()
 
@@ -171,6 +171,11 @@ def run_simulation(configuration):
                 queue = get_topic_for_sensor(sensor_type)
                 for json in jsons:
                     store.add_message_to_sent(queue, json)
+
+            # send sector state for debuging 
+            action_queue = "Sector state topic"
+            logger.info(sector.make_sector_json())
+            store.add_message_to_sent(action_queue, sector.make_sector_json())
         
         
         agents_manager.update_agents_states()

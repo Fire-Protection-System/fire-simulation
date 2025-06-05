@@ -21,8 +21,9 @@ logger = logging.getLogger(__name__)
 CONFIG_PATH = "./configs/forest_4x4_conf_20250415_173345.json"
 
 NUMBER_OF_SIMULATED_FIRES = 2
-NUMBER_OF_MAX_SEARCH_STEPS = 5
+NUMBER_OF_MAX_SEARCH_STEPS = 3
 MAX_SIMULATION_TIME = 2
+
 
 import traceback
 
@@ -50,7 +51,7 @@ def predict(forest_map: ForestMap) -> List[Tuple[int, int]]:
         Returns list of (agent_id, sector_id) tuples
         """
         sectors = [s for row in forest_map.sectors for s in row]
-        agents = [a.clone() for a in forest_map.fireBrigades if a.state == FIREBRIGADE_STATE.AVAILABLE]
+        agents = [a.clone() for a in forest_map.fireBrigades]
         
         active_fires = sum(1 for s in sectors if s.fire_state == FireState.ACTIVE)
         logger.info(f"MCTS starting with {active_fires} active fires and {len(agents)} fire brigades")
@@ -65,7 +66,7 @@ def predict(forest_map: ForestMap) -> List[Tuple[int, int]]:
         )
         
         logger.info(f"Starting MCTS search with time limit {MAX_SIMULATION_TIME} seconds...")
-        best_actions = mcts_search(root, time_limit=MAX_SIMULATION_TIME, return_score=False)
+        best_actions, best_score = mcts_search(root, time_limit=MAX_SIMULATION_TIME, return_score=True)
         logger.info(f"Found optimal actions: {best_actions}")
         
         if best_actions:
@@ -114,6 +115,11 @@ def run_mcts_test():
     print("\nMCTS recommends dispatching:")
     for agent_idx, sector_id in action:
         print(f"  • Agent #{agent_idx} → Sector {sector_id}")
+
+    with_action_sectors = root.simulate_steps_with_action(NUMBER_OF_MAX_SEARCH_STEPS, action)
+    print_sector_states(with_action_sectors, "After recomendations")
+
+    print("")
     
 if __name__ == "__main__":
     run_mcts_test()

@@ -26,7 +26,7 @@ from simulation.cameras.camera import Camera
 from simulation.location import Location
 
 logger = logging.getLogger(__name__)
-logger.disabled = False
+logger.disabled = True
 
 class Sector:
     __slots__ = (
@@ -48,7 +48,7 @@ class Sector:
         initial_state: SectorState,
         fire_state=None,
         extinguish_level=0,
-        fire_level=0,
+        fire_level=.0,
         burn_level=0,
         num_brigades=0,
         num_patrols=0,
@@ -158,7 +158,7 @@ class Sector:
         
         if prev_level != self._extinguish_level:
             self._is_modified = True
-            # logger.info(f"New extinguish level in sector {self._sector_id} is {self._extinguish_level}")
+            logger.info(f"New extinguish level in sector {self._sector_id} is {self._extinguish_level}")
 
     def update_fire_level(self):
         """Update fire level with optimized calculations"""
@@ -174,11 +174,11 @@ class Sector:
             self._fire_state = FireState.INACTIVE
             self._fire_level = 0
             self._is_modified = True
-            # logger.info(f"Sector {self._sector_id} is extinguished")
+            logger.info(f"Sector {self._sector_id} is extinguished")
         elif new_fire_level != prev_level:
             self._fire_level = new_fire_level
             self._is_modified = True
-            # logger.info(f"New fire level in sector {self._sector_id} is {self._fire_level}")
+            logger.info(f"New fire level in sector {self._sector_id} is {self._fire_level}")
 
     def required_fire_brigades(self):
         if self.fire_state != FireState.ACTIVE:
@@ -307,6 +307,15 @@ class Sector:
             jsons_by_type[sensor.sensor_type.name].append(json)
         
         return jsons_by_type
+
+    def make_sector_json(self):
+        return {
+            "sectorId":         int(self.sector_id), 
+            # "fireState":      0,
+            "fireLevel":        float(self.fire_level),
+            "burnLevel":        float(self.burn_level), 
+            "extinguishLevel":  float(self.extinguish_level)
+        }
 
     def clone(self):
         # Create a new instance with the same core attributes

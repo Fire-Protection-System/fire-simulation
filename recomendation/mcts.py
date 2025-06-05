@@ -7,7 +7,6 @@ https://gist.github.com/qpwo/c538c6f73727e254fdc7fab81024f6e1
 from collections import defaultdict
 import math
 
-
 class MCTS:
     "Monte Carlo tree searcher. First rollout the tree then choose a move."
 

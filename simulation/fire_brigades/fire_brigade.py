@@ -36,7 +36,7 @@ class FireBrigade(Agent):
         sector._number_of_fire_brigades += 1
 
     def decrement_agents_in_sector(self, sector):
-        sector._number_of_fire_brigades += 1
+        sector._number_of_fire_brigades -= 1
 
     @property
     def getId(self):
