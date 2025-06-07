@@ -27,7 +27,6 @@ from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
 from recomendation.mcts_test import predict
 
 logger = logging.getLogger(__name__)
-logging.disable(logging.CRITICAL) 
 
 EXCHANGE_NAME = "fire_updates"
 USERNAME = "guest"

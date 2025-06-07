@@ -461,10 +461,7 @@ class FireSimulationNode(Node):
                 if isinstance(agent, FireBrigade):
                     sec.update_extinguish_level()
                     
-                    if hasattr(sec, "fire_intensity") and sec.extinguish_level >= sec.fire_intensity:
-                        agent.set_state_available()
-                
-                elif hasattr(agent, "is_task_finished") and agent.is_task_finished(sec):
+                if hasattr(agent, "is_task_finished") and agent.is_task_finished(sec):
                     agent.set_state_available()
 
         new_active_sector_ids = set()
@@ -606,8 +603,7 @@ class FireSimulationNode(Node):
 
     def simulate_steps_with_action(self, steps: int, actions: List[Tuple[int, int]]) -> Tuple[List[Sector], List[Agent]]:
         active_sectors = {s.sector_id for s in self.sectors if s.fire_state == FireState.ACTIVE}
-        sectors_to_modify = {sector_id for _, sector_id in actions}
-
+        
         new_sectors = [s.clone() for s in self.sectors]
         new_sectors_map = {s.sector_id: s for s in new_sectors}
 
@@ -620,7 +616,7 @@ class FireSimulationNode(Node):
                 new_agents.append(agent.clone())
             else:
                 new_agents.append(agent)
-
+                
         for agent_idx, sector_id in actions:
             agent = new_agents[agent_idx]
             dest_sector = new_map.get_sector(sector_id)
@@ -648,13 +644,12 @@ class FireSimulationNode(Node):
                         if sec is not new_sectors_map[sec.sector_id]:
                             sec = sec.clone()
                             new_sectors_map[sec.sector_id] = sec
+                            new_map.update_sectors([sec]) 
                         updated_sector_ids.add(sec.sector_id)
 
-                    if isinstance(agent, FireBrigade):
-                        sec.update_extinguish_level()
-                        if hasattr(sec, "fire_intensity") and sec.extinguish_level >= sec.fire_intensity:
-                            agent.set_state_available()
-                    elif hasattr(agent, "is_task_finished") and agent.is_task_finished(sec):
+                    sec.update_extinguish_level()
+
+                    if agent.is_task_finished(sec):
                         agent.set_state_available()
 
             new_active_sector_ids = set()
@@ -665,7 +660,8 @@ class FireSimulationNode(Node):
 
             self._spread_fire(new_sectors, new_map, copy.copy(self.wind), new_active_sector_ids)
 
+        print()
         for a in new_agents:
-            print(f"Agent state: {a.state.name}")
+            print(f"Agent {a.fire_brigade_id} state: {a.state.name}")
     
         return new_sectors

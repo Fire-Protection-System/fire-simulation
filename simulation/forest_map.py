@@ -22,8 +22,9 @@ from simulation.forester_patrols.forester_patrol import ForesterPatrol
 from simulation.fire_brigades.fire_brigade import FireBrigade
 from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
 from simulation.forester_patrols.forest_patrols_state import FORESTERPATROL_STATE
+from simulation.sectors.fire_state import FireState
 
-ForestMapCornerLocations: TypeAlias = tuple[Location, Location, Location, Location]  # cw start upper left
+ForestMapCornerLocations: TypeAlias = tuple[Location, Location, Location, Location] 
 
 
 class ForestMap:
@@ -106,6 +107,8 @@ class ForestMap:
                 column=val["column"] - 1,
                 sector_type=SectorType[val["sectorType"]],
                 initial_state=initial_state,
+                fire_level=val["initialState"]["fireLevel"],
+                fire_state= FireState.ACTIVE if (val["initialState"]["fireLevel"] > 0) else FireState.INACTIVE
             )
         return sectors
     
@@ -264,9 +267,6 @@ class ForestMap:
     def start_new_fire(self) -> Sector:
         row = random.choice(self.sectors)
         sector = random.choice(row)
-
-        #sector = self.sectors[6][6]
-
         sector.start_fire()
 
         return sector        
@@ -284,13 +284,13 @@ class ForestMap:
     def get_sector_location(self, sector: Sector) -> Location:
         """
         Compute the geographic center of a given sector based on the four map corners.
-        Assumes self._location is (upper-left, upper-right, lower-right, lower-left).
+        Assumes self._location is (lower-left, lower-right, upper-right, upper-left).
         """
 
-        ul = self._location[0] 
-        ur = self._location[1] 
-        lr = self._location[2]
-        ll = self._location[3]
+        ul = self._location[3]
+        ur = self._location[2]
+        lr = self._location[1]
+        ll = self._location[0]
 
         total_lon_span = ur.longitude - ul.longitude
         total_lat_span = ul.latitude - ll.latitude  
@@ -325,7 +325,7 @@ class ForestMap:
         lon_diff = max_lon - min_lon
 
         if lat_diff == 0 or lon_diff == 0:
-            return None  # Avoid division by zero
+            return None  
 
         lat_interpolation = (location.latitude - min_lat) / lat_diff
         lon_interpolation = (location.longitude - min_lon) / lon_diff

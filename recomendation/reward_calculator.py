@@ -6,9 +6,9 @@ from simulation.sectors.fire_state import FireState
 
 @dataclass
 class RewardConfig:
-    LOST_SECTOR_PENALTY = 20
+    LOST_SECTOR_PENALTY = 50
     EXTINGUISHED_FIRES_REWARD = 20
-    SPREAD_PREVENTION_REWARD = 20
+    SPREAD_PREVENTION_REWARD = 100
 
 class RewardCalculator:
     def __init__(self, config: RewardConfig = None):

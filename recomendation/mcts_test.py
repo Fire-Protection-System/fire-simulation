@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 CONFIG_PATH = "./configs/my-file.json"
 
 NUMBER_OF_SIMULATED_FIRES = 0
-NUMBER_OF_MAX_SEARCH_STEPS = 4
-MAX_SIMULATION_TIME = 3
+NUMBER_OF_MAX_SEARCH_STEPS = 5
+MAX_SIMULATION_TIME = 5
 
 import traceback
 
