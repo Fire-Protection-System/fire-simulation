@@ -4,15 +4,14 @@ from datetime import datetime
 from enum import Enum
 import random
 
-GRID_SIZE = 3
+import argparse
+
+DEFAULT_GRID_SIZE = 5
 
 LON_START = 19.934967812541295
 LAT_START = 50.034952974941994
 LON_END = 19.979856325506027
 LAT_END = 50.07185882753423
-
-lon_step = (LON_END - LON_START) / GRID_SIZE
-lat_step = (LAT_END - LAT_START) / GRID_SIZE
 
 
 class SensorType(Enum):
@@ -23,7 +22,7 @@ class SensorType(Enum):
     PM2_5 = 5
     CO2 = 6
 
-def main():
+def main(grid_size):
     sensors = []
     sectors = []
     fireBrigades = []
@@ -31,9 +30,12 @@ def main():
     sensor_id = 0
     brigade_id = 0
 
-    for i in range(GRID_SIZE):
-        for j in range(GRID_SIZE):
-            sector_id = j * GRID_SIZE + i
+    lon_step = (LON_END - LON_START) / grid_size
+    lat_step = (LAT_END - LAT_START) / grid_size
+
+    for i in range(grid_size):
+        for j in range(grid_size):
+            sector_id = j * grid_size + i
             lon_min = LON_START + j * lon_step
             lon_max = lon_min + lon_step
             lat_min = LAT_START + i * lat_step
@@ -61,7 +63,8 @@ def main():
                     "airHumidity": 0,
                     "plantLitterMoisture": 0,
                     "co2Concentration": 0,
-                    "pm2_5Concentration": 0
+                    "pm2_5Concentration": 0, 
+                    "fireLevel": 0
                 }, 
                 "contours": contours
             })
@@ -100,13 +103,13 @@ def main():
 
             brigade_id += 1
 
-    forest_name = f"forest_{GRID_SIZE}x{GRID_SIZE}"
+    forest_name = f"forest_{grid_size}x{grid_size}"
 
     configuration = {
         "forestId": -1,
         "forestName": forest_name,
-        "rows": GRID_SIZE,
-        "columns": GRID_SIZE,
+        "rows": grid_size,
+        "columns": grid_size,
         "location": [
             {"longitude": LON_START, "latitude": LAT_START},  
             {"longitude": LON_END, "latitude": LAT_START},    
@@ -128,4 +131,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description="Generate forest configuration.")
+    parser.add_argument('--grid-size', type=int, default=5, help='Grid size of the forest (default: 5)')
+    args = parser.parse_args()
+
+    main(args.grid_size)

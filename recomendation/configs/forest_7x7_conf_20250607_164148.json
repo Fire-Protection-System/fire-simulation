@@ -1,0 +1,4981 @@
+{
+    "forestId": -1,
+    "forestName": "forest_7x7",
+    "rows": 7,
+    "columns": 7,
+    "location": [
+        {
+            "longitude": 19.934967812541295,
+            "latitude": 50.034952974941994
+        },
+        {
+            "longitude": 19.979856325506027,
+            "latitude": 50.034952974941994
+        },
+        {
+            "longitude": 19.979856325506027,
+            "latitude": 50.07185882753423
+        },
+        {
+            "longitude": 19.934967812541295,
+            "latitude": 50.07185882753423
+        }
+    ],
+    "sectors": [
+        {
+            "sectorId": 1,
+            "row": 1,
+            "column": 1,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.934967812541295,
+                    50.034952974941994
+                ],
+                [
+                    19.934967812541295,
+                    50.04022523959803
+                ],
+                [
+                    19.941380457250542,
+                    50.04022523959803
+                ],
+                [
+                    19.941380457250542,
+                    50.034952974941994
+                ]
+            ]
+        },
+        {
+            "sectorId": 8,
+            "row": 1,
+            "column": 2,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.941380457250542,
+                    50.034952974941994
+                ],
+                [
+                    19.941380457250542,
+                    50.04022523959803
+                ],
+                [
+                    19.94779310195979,
+                    50.04022523959803
+                ],
+                [
+                    19.94779310195979,
+                    50.034952974941994
+                ]
+            ]
+        },
+        {
+            "sectorId": 15,
+            "row": 1,
+            "column": 3,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.94779310195979,
+                    50.034952974941994
+                ],
+                [
+                    19.94779310195979,
+                    50.04022523959803
+                ],
+                [
+                    19.954205746669036,
+                    50.04022523959803
+                ],
+                [
+                    19.954205746669036,
+                    50.034952974941994
+                ]
+            ]
+        },
+        {
+            "sectorId": 22,
+            "row": 1,
+            "column": 4,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.954205746669036,
+                    50.034952974941994
+                ],
+                [
+                    19.954205746669036,
+                    50.04022523959803
+                ],
+                [
+                    19.960618391378283,
+                    50.04022523959803
+                ],
+                [
+                    19.960618391378283,
+                    50.034952974941994
+                ]
+            ]
+        },
+        {
+            "sectorId": 29,
+            "row": 1,
+            "column": 5,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.960618391378286,
+                    50.034952974941994
+                ],
+                [
+                    19.960618391378286,
+                    50.04022523959803
+                ],
+                [
+                    19.967031036087533,
+                    50.04022523959803
+                ],
+                [
+                    19.967031036087533,
+                    50.034952974941994
+                ]
+            ]
+        },
+        {
+            "sectorId": 36,
+            "row": 1,
+            "column": 6,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.967031036087533,
+                    50.034952974941994
+                ],
+                [
+                    19.967031036087533,
+                    50.04022523959803
+                ],
+                [
+                    19.97344368079678,
+                    50.04022523959803
+                ],
+                [
+                    19.97344368079678,
+                    50.034952974941994
+                ]
+            ]
+        },
+        {
+            "sectorId": 43,
+            "row": 1,
+            "column": 7,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.97344368079678,
+                    50.034952974941994
+                ],
+                [
+                    19.97344368079678,
+                    50.04022523959803
+                ],
+                [
+                    19.979856325506027,
+                    50.04022523959803
+                ],
+                [
+                    19.979856325506027,
+                    50.034952974941994
+                ]
+            ]
+        },
+        {
+            "sectorId": 2,
+            "row": 2,
+            "column": 1,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.934967812541295,
+                    50.04022523959803
+                ],
+                [
+                    19.934967812541295,
+                    50.045497504254065
+                ],
+                [
+                    19.941380457250542,
+                    50.045497504254065
+                ],
+                [
+                    19.941380457250542,
+                    50.04022523959803
+                ]
+            ]
+        },
+        {
+            "sectorId": 9,
+            "row": 2,
+            "column": 2,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.941380457250542,
+                    50.04022523959803
+                ],
+                [
+                    19.941380457250542,
+                    50.045497504254065
+                ],
+                [
+                    19.94779310195979,
+                    50.045497504254065
+                ],
+                [
+                    19.94779310195979,
+                    50.04022523959803
+                ]
+            ]
+        },
+        {
+            "sectorId": 16,
+            "row": 2,
+            "column": 3,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.94779310195979,
+                    50.04022523959803
+                ],
+                [
+                    19.94779310195979,
+                    50.045497504254065
+                ],
+                [
+                    19.954205746669036,
+                    50.045497504254065
+                ],
+                [
+                    19.954205746669036,
+                    50.04022523959803
+                ]
+            ]
+        },
+        {
+            "sectorId": 23,
+            "row": 2,
+            "column": 4,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.954205746669036,
+                    50.04022523959803
+                ],
+                [
+                    19.954205746669036,
+                    50.045497504254065
+                ],
+                [
+                    19.960618391378283,
+                    50.045497504254065
+                ],
+                [
+                    19.960618391378283,
+                    50.04022523959803
+                ]
+            ]
+        },
+        {
+            "sectorId": 30,
+            "row": 2,
+            "column": 5,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.960618391378286,
+                    50.04022523959803
+                ],
+                [
+                    19.960618391378286,
+                    50.045497504254065
+                ],
+                [
+                    19.967031036087533,
+                    50.045497504254065
+                ],
+                [
+                    19.967031036087533,
+                    50.04022523959803
+                ]
+            ]
+        },
+        {
+            "sectorId": 37,
+            "row": 2,
+            "column": 6,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.967031036087533,
+                    50.04022523959803
+                ],
+                [
+                    19.967031036087533,
+                    50.045497504254065
+                ],
+                [
+                    19.97344368079678,
+                    50.045497504254065
+                ],
+                [
+                    19.97344368079678,
+                    50.04022523959803
+                ]
+            ]
+        },
+        {
+            "sectorId": 44,
+            "row": 2,
+            "column": 7,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.97344368079678,
+                    50.04022523959803
+                ],
+                [
+                    19.97344368079678,
+                    50.045497504254065
+                ],
+                [
+                    19.979856325506027,
+                    50.045497504254065
+                ],
+                [
+                    19.979856325506027,
+                    50.04022523959803
+                ]
+            ]
+        },
+        {
+            "sectorId": 3,
+            "row": 3,
+            "column": 1,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.934967812541295,
+                    50.04549750425406
+                ],
+                [
+                    19.934967812541295,
+                    50.050769768910094
+                ],
+                [
+                    19.941380457250542,
+                    50.050769768910094
+                ],
+                [
+                    19.941380457250542,
+                    50.04549750425406
+                ]
+            ]
+        },
+        {
+            "sectorId": 10,
+            "row": 3,
+            "column": 2,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.941380457250542,
+                    50.04549750425406
+                ],
+                [
+                    19.941380457250542,
+                    50.050769768910094
+                ],
+                [
+                    19.94779310195979,
+                    50.050769768910094
+                ],
+                [
+                    19.94779310195979,
+                    50.04549750425406
+                ]
+            ]
+        },
+        {
+            "sectorId": 17,
+            "row": 3,
+            "column": 3,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.94779310195979,
+                    50.04549750425406
+                ],
+                [
+                    19.94779310195979,
+                    50.050769768910094
+                ],
+                [
+                    19.954205746669036,
+                    50.050769768910094
+                ],
+                [
+                    19.954205746669036,
+                    50.04549750425406
+                ]
+            ]
+        },
+        {
+            "sectorId": 24,
+            "row": 3,
+            "column": 4,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.954205746669036,
+                    50.04549750425406
+                ],
+                [
+                    19.954205746669036,
+                    50.050769768910094
+                ],
+                [
+                    19.960618391378283,
+                    50.050769768910094
+                ],
+                [
+                    19.960618391378283,
+                    50.04549750425406
+                ]
+            ]
+        },
+        {
+            "sectorId": 31,
+            "row": 3,
+            "column": 5,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.960618391378286,
+                    50.04549750425406
+                ],
+                [
+                    19.960618391378286,
+                    50.050769768910094
+                ],
+                [
+                    19.967031036087533,
+                    50.050769768910094
+                ],
+                [
+                    19.967031036087533,
+                    50.04549750425406
+                ]
+            ]
+        },
+        {
+            "sectorId": 38,
+            "row": 3,
+            "column": 6,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.967031036087533,
+                    50.04549750425406
+                ],
+                [
+                    19.967031036087533,
+                    50.050769768910094
+                ],
+                [
+                    19.97344368079678,
+                    50.050769768910094
+                ],
+                [
+                    19.97344368079678,
+                    50.04549750425406
+                ]
+            ]
+        },
+        {
+            "sectorId": 45,
+            "row": 3,
+            "column": 7,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.97344368079678,
+                    50.04549750425406
+                ],
+                [
+                    19.97344368079678,
+                    50.050769768910094
+                ],
+                [
+                    19.979856325506027,
+                    50.050769768910094
+                ],
+                [
+                    19.979856325506027,
+                    50.04549750425406
+                ]
+            ]
+        },
+        {
+            "sectorId": 4,
+            "row": 4,
+            "column": 1,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.934967812541295,
+                    50.050769768910094
+                ],
+                [
+                    19.934967812541295,
+                    50.05604203356613
+                ],
+                [
+                    19.941380457250542,
+                    50.05604203356613
+                ],
+                [
+                    19.941380457250542,
+                    50.050769768910094
+                ]
+            ]
+        },
+        {
+            "sectorId": 11,
+            "row": 4,
+            "column": 2,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.941380457250542,
+                    50.050769768910094
+                ],
+                [
+                    19.941380457250542,
+                    50.05604203356613
+                ],
+                [
+                    19.94779310195979,
+                    50.05604203356613
+                ],
+                [
+                    19.94779310195979,
+                    50.050769768910094
+                ]
+            ]
+        },
+        {
+            "sectorId": 18,
+            "row": 4,
+            "column": 3,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.94779310195979,
+                    50.050769768910094
+                ],
+                [
+                    19.94779310195979,
+                    50.05604203356613
+                ],
+                [
+                    19.954205746669036,
+                    50.05604203356613
+                ],
+                [
+                    19.954205746669036,
+                    50.050769768910094
+                ]
+            ]
+        },
+        {
+            "sectorId": 25,
+            "row": 4,
+            "column": 4,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.954205746669036,
+                    50.050769768910094
+                ],
+                [
+                    19.954205746669036,
+                    50.05604203356613
+                ],
+                [
+                    19.960618391378283,
+                    50.05604203356613
+                ],
+                [
+                    19.960618391378283,
+                    50.050769768910094
+                ]
+            ]
+        },
+        {
+            "sectorId": 32,
+            "row": 4,
+            "column": 5,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.960618391378286,
+                    50.050769768910094
+                ],
+                [
+                    19.960618391378286,
+                    50.05604203356613
+                ],
+                [
+                    19.967031036087533,
+                    50.05604203356613
+                ],
+                [
+                    19.967031036087533,
+                    50.050769768910094
+                ]
+            ]
+        },
+        {
+            "sectorId": 39,
+            "row": 4,
+            "column": 6,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.967031036087533,
+                    50.050769768910094
+                ],
+                [
+                    19.967031036087533,
+                    50.05604203356613
+                ],
+                [
+                    19.97344368079678,
+                    50.05604203356613
+                ],
+                [
+                    19.97344368079678,
+                    50.050769768910094
+                ]
+            ]
+        },
+        {
+            "sectorId": 46,
+            "row": 4,
+            "column": 7,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.97344368079678,
+                    50.050769768910094
+                ],
+                [
+                    19.97344368079678,
+                    50.05604203356613
+                ],
+                [
+                    19.979856325506027,
+                    50.05604203356613
+                ],
+                [
+                    19.979856325506027,
+                    50.050769768910094
+                ]
+            ]
+        },
+        {
+            "sectorId": 5,
+            "row": 5,
+            "column": 1,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.934967812541295,
+                    50.05604203356613
+                ],
+                [
+                    19.934967812541295,
+                    50.061314298222165
+                ],
+                [
+                    19.941380457250542,
+                    50.061314298222165
+                ],
+                [
+                    19.941380457250542,
+                    50.05604203356613
+                ]
+            ]
+        },
+        {
+            "sectorId": 12,
+            "row": 5,
+            "column": 2,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.941380457250542,
+                    50.05604203356613
+                ],
+                [
+                    19.941380457250542,
+                    50.061314298222165
+                ],
+                [
+                    19.94779310195979,
+                    50.061314298222165
+                ],
+                [
+                    19.94779310195979,
+                    50.05604203356613
+                ]
+            ]
+        },
+        {
+            "sectorId": 19,
+            "row": 5,
+            "column": 3,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.94779310195979,
+                    50.05604203356613
+                ],
+                [
+                    19.94779310195979,
+                    50.061314298222165
+                ],
+                [
+                    19.954205746669036,
+                    50.061314298222165
+                ],
+                [
+                    19.954205746669036,
+                    50.05604203356613
+                ]
+            ]
+        },
+        {
+            "sectorId": 26,
+            "row": 5,
+            "column": 4,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.954205746669036,
+                    50.05604203356613
+                ],
+                [
+                    19.954205746669036,
+                    50.061314298222165
+                ],
+                [
+                    19.960618391378283,
+                    50.061314298222165
+                ],
+                [
+                    19.960618391378283,
+                    50.05604203356613
+                ]
+            ]
+        },
+        {
+            "sectorId": 33,
+            "row": 5,
+            "column": 5,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.960618391378286,
+                    50.05604203356613
+                ],
+                [
+                    19.960618391378286,
+                    50.061314298222165
+                ],
+                [
+                    19.967031036087533,
+                    50.061314298222165
+                ],
+                [
+                    19.967031036087533,
+                    50.05604203356613
+                ]
+            ]
+        },
+        {
+            "sectorId": 40,
+            "row": 5,
+            "column": 6,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.967031036087533,
+                    50.05604203356613
+                ],
+                [
+                    19.967031036087533,
+                    50.061314298222165
+                ],
+                [
+                    19.97344368079678,
+                    50.061314298222165
+                ],
+                [
+                    19.97344368079678,
+                    50.05604203356613
+                ]
+            ]
+        },
+        {
+            "sectorId": 47,
+            "row": 5,
+            "column": 7,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.97344368079678,
+                    50.05604203356613
+                ],
+                [
+                    19.97344368079678,
+                    50.061314298222165
+                ],
+                [
+                    19.979856325506027,
+                    50.061314298222165
+                ],
+                [
+                    19.979856325506027,
+                    50.05604203356613
+                ]
+            ]
+        },
+        {
+            "sectorId": 6,
+            "row": 6,
+            "column": 1,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.934967812541295,
+                    50.061314298222165
+                ],
+                [
+                    19.934967812541295,
+                    50.0665865628782
+                ],
+                [
+                    19.941380457250542,
+                    50.0665865628782
+                ],
+                [
+                    19.941380457250542,
+                    50.061314298222165
+                ]
+            ]
+        },
+        {
+            "sectorId": 13,
+            "row": 6,
+            "column": 2,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.941380457250542,
+                    50.061314298222165
+                ],
+                [
+                    19.941380457250542,
+                    50.0665865628782
+                ],
+                [
+                    19.94779310195979,
+                    50.0665865628782
+                ],
+                [
+                    19.94779310195979,
+                    50.061314298222165
+                ]
+            ]
+        },
+        {
+            "sectorId": 20,
+            "row": 6,
+            "column": 3,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.94779310195979,
+                    50.061314298222165
+                ],
+                [
+                    19.94779310195979,
+                    50.0665865628782
+                ],
+                [
+                    19.954205746669036,
+                    50.0665865628782
+                ],
+                [
+                    19.954205746669036,
+                    50.061314298222165
+                ]
+            ]
+        },
+        {
+            "sectorId": 27,
+            "row": 6,
+            "column": 4,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.954205746669036,
+                    50.061314298222165
+                ],
+                [
+                    19.954205746669036,
+                    50.0665865628782
+                ],
+                [
+                    19.960618391378283,
+                    50.0665865628782
+                ],
+                [
+                    19.960618391378283,
+                    50.061314298222165
+                ]
+            ]
+        },
+        {
+            "sectorId": 34,
+            "row": 6,
+            "column": 5,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.960618391378286,
+                    50.061314298222165
+                ],
+                [
+                    19.960618391378286,
+                    50.0665865628782
+                ],
+                [
+                    19.967031036087533,
+                    50.0665865628782
+                ],
+                [
+                    19.967031036087533,
+                    50.061314298222165
+                ]
+            ]
+        },
+        {
+            "sectorId": 41,
+            "row": 6,
+            "column": 6,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.967031036087533,
+                    50.061314298222165
+                ],
+                [
+                    19.967031036087533,
+                    50.0665865628782
+                ],
+                [
+                    19.97344368079678,
+                    50.0665865628782
+                ],
+                [
+                    19.97344368079678,
+                    50.061314298222165
+                ]
+            ]
+        },
+        {
+            "sectorId": 48,
+            "row": 6,
+            "column": 7,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.97344368079678,
+                    50.061314298222165
+                ],
+                [
+                    19.97344368079678,
+                    50.0665865628782
+                ],
+                [
+                    19.979856325506027,
+                    50.0665865628782
+                ],
+                [
+                    19.979856325506027,
+                    50.061314298222165
+                ]
+            ]
+        },
+        {
+            "sectorId": 7,
+            "row": 7,
+            "column": 1,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.934967812541295,
+                    50.06658656287819
+                ],
+                [
+                    19.934967812541295,
+                    50.07185882753423
+                ],
+                [
+                    19.941380457250542,
+                    50.07185882753423
+                ],
+                [
+                    19.941380457250542,
+                    50.06658656287819
+                ]
+            ]
+        },
+        {
+            "sectorId": 14,
+            "row": 7,
+            "column": 2,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.941380457250542,
+                    50.06658656287819
+                ],
+                [
+                    19.941380457250542,
+                    50.07185882753423
+                ],
+                [
+                    19.94779310195979,
+                    50.07185882753423
+                ],
+                [
+                    19.94779310195979,
+                    50.06658656287819
+                ]
+            ]
+        },
+        {
+            "sectorId": 21,
+            "row": 7,
+            "column": 3,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.94779310195979,
+                    50.06658656287819
+                ],
+                [
+                    19.94779310195979,
+                    50.07185882753423
+                ],
+                [
+                    19.954205746669036,
+                    50.07185882753423
+                ],
+                [
+                    19.954205746669036,
+                    50.06658656287819
+                ]
+            ]
+        },
+        {
+            "sectorId": 28,
+            "row": 7,
+            "column": 4,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.954205746669036,
+                    50.06658656287819
+                ],
+                [
+                    19.954205746669036,
+                    50.07185882753423
+                ],
+                [
+                    19.960618391378283,
+                    50.07185882753423
+                ],
+                [
+                    19.960618391378283,
+                    50.06658656287819
+                ]
+            ]
+        },
+        {
+            "sectorId": 35,
+            "row": 7,
+            "column": 5,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.960618391378286,
+                    50.06658656287819
+                ],
+                [
+                    19.960618391378286,
+                    50.07185882753423
+                ],
+                [
+                    19.967031036087533,
+                    50.07185882753423
+                ],
+                [
+                    19.967031036087533,
+                    50.06658656287819
+                ]
+            ]
+        },
+        {
+            "sectorId": 42,
+            "row": 7,
+            "column": 6,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.967031036087533,
+                    50.06658656287819
+                ],
+                [
+                    19.967031036087533,
+                    50.07185882753423
+                ],
+                [
+                    19.97344368079678,
+                    50.07185882753423
+                ],
+                [
+                    19.97344368079678,
+                    50.06658656287819
+                ]
+            ]
+        },
+        {
+            "sectorId": 49,
+            "row": 7,
+            "column": 7,
+            "sectorType": "DECIDUOUS",
+            "initialState": {
+                "temperature": 20,
+                "windSpeed": 0,
+                "windDirection": "NE",
+                "airHumidity": 0,
+                "plantLitterMoisture": 0,
+                "co2Concentration": 0,
+                "pm2_5Concentration": 0,
+                "fireLevel": 0
+            },
+            "contours": [
+                [
+                    19.97344368079678,
+                    50.06658656287819
+                ],
+                [
+                    19.97344368079678,
+                    50.07185882753423
+                ],
+                [
+                    19.979856325506027,
+                    50.07185882753423
+                ],
+                [
+                    19.979856325506027,
+                    50.06658656287819
+                ]
+            ]
+        }
+    ],
+    "sensors": [
+        {
+            "sensorId": 0,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.936735501082357,
+                "latitude": 50.03580549967949
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 1,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.940335722989023,
+                "latitude": 50.036977440306146
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 2,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.93721109529042,
+                "latitude": 50.03863398441905
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 3,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.937016994153197,
+                "latitude": 50.03985629521681
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 4,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.940920094689755,
+                "latitude": 50.03959028092933
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 5,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.936112046959945,
+                "latitude": 50.03783799370956
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 6,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.947206364570455,
+                "latitude": 50.04008199237602
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 7,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.94317558941849,
+                "latitude": 50.03882163946871
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 8,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.942694122874823,
+                "latitude": 50.03626727353928
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 9,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.944039611882776,
+                "latitude": 50.03953742480751
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 10,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.944312608223928,
+                "latitude": 50.03605284163641
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 11,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.942796983620536,
+                "latitude": 50.036491758341995
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 12,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.953208894697003,
+                "latitude": 50.040162225092686
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 13,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.95143048261328,
+                "latitude": 50.038526042669496
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 14,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.949463900311482,
+                "latitude": 50.03811360489504
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 15,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.94963433697378,
+                "latitude": 50.03547617596894
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 16,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.95303621502097,
+                "latitude": 50.03614254889104
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 17,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.953547198544396,
+                "latitude": 50.03758141656457
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 18,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.956822180967315,
+                "latitude": 50.038461409981785
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 19,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.95696601171543,
+                "latitude": 50.03546066909403
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 20,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.95967981163914,
+                "latitude": 50.035938373486566
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 21,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.954999796730903,
+                "latitude": 50.038875710070606
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 22,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.959408495097307,
+                "latitude": 50.038757215111204
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 23,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.956099489598227,
+                "latitude": 50.03828944971466
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 24,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.96642310872451,
+                "latitude": 50.03800142016574
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 25,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.963736487829248,
+                "latitude": 50.037967194450346
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 26,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.967024623898965,
+                "latitude": 50.038574793574554
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 27,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.965426688615732,
+                "latitude": 50.03811407932777
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 28,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.964997274236353,
+                "latitude": 50.03585118088644
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 29,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.96259249075747,
+                "latitude": 50.03775666451425
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 30,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.9707668641004,
+                "latitude": 50.03791148317834
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 31,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.973014698764324,
+                "latitude": 50.036987117574775
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 32,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.967768953957556,
+                "latitude": 50.035363882437345
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 33,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.97079004353179,
+                "latitude": 50.03726272687458
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 34,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.96957144592625,
+                "latitude": 50.03836197591274
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 35,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.96966727391675,
+                "latitude": 50.03761289937743
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 36,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.976500110515648,
+                "latitude": 50.03660867198618
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 37,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.975977793071447,
+                "latitude": 50.035907909917846
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 38,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.97708554987647,
+                "latitude": 50.038616385701204
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 39,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.973741109795018,
+                "latitude": 50.037338328686864
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 40,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.979148447870234,
+                "latitude": 50.03872100784852
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 41,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.979555050398066,
+                "latitude": 50.039782816451364
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 42,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.93901498356609,
+                "latitude": 50.043916718203455
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 43,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.941171642386628,
+                "latitude": 50.04143704859031
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 44,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.938489629714557,
+                "latitude": 50.04494644800843
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 45,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.941117209673173,
+                "latitude": 50.045350355267665
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 46,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.935574618630582,
+                "latitude": 50.042486674834265
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 47,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.935362368106357,
+                "latitude": 50.045217405473835
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 48,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.943644921306685,
+                "latitude": 50.04407131473797
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 49,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.945281531104598,
+                "latitude": 50.043962765843226
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 50,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.94252595219853,
+                "latitude": 50.04371707114701
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 51,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.942745066352597,
+                "latitude": 50.04530397094808
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 52,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.947461308032544,
+                "latitude": 50.042708602964375
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 53,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.94672194103743,
+                "latitude": 50.04465621500025
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 54,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.948398923603033,
+                "latitude": 50.04421041473659
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 55,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.95076830874854,
+                "latitude": 50.04234924470729
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 56,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.947953734741493,
+                "latitude": 50.04286086627182
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 57,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.953523546615198,
+                "latitude": 50.04452354813084
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 58,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.954096812811674,
+                "latitude": 50.044514161533215
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 59,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.952845010688367,
+                "latitude": 50.04095468910314
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 60,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.95453329996093,
+                "latitude": 50.041140395706776
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 61,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.95646575392933,
+                "latitude": 50.04478129207013
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 62,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.95913708533906,
+                "latitude": 50.041818758839696
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 63,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.955314792503184,
+                "latitude": 50.04149046566393
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 64,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.95963778160367,
+                "latitude": 50.04450291416593
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 65,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.954395823616473,
+                "latitude": 50.04249696377843
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 66,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.965705856670294,
+                "latitude": 50.04094946466658
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 67,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.966480775501317,
+                "latitude": 50.04309707732361
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 68,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.96321704929941,
+                "latitude": 50.043887586151136
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 69,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.9644157832078,
+                "latitude": 50.04481864044863
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 70,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.966375324034058,
+                "latitude": 50.04035861174981
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 71,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.96286315080207,
+                "latitude": 50.04159291074044
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 72,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.968184412599836,
+                "latitude": 50.044375213733176
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 73,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.97199561060862,
+                "latitude": 50.04123197227531
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 74,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.973128251827156,
+                "latitude": 50.04217939998626
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 75,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.967427863329366,
+                "latitude": 50.04023352336415
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 76,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.97247249666466,
+                "latitude": 50.043442988081786
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 77,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.971139081258386,
+                "latitude": 50.04341990688416
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 78,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.978129842921902,
+                "latitude": 50.04245407254295
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 79,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.973959289684498,
+                "latitude": 50.04253707093796
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 80,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.97698402295051,
+                "latitude": 50.04137396184267
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 81,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.977970602211737,
+                "latitude": 50.04533526581393
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 82,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.978451900979323,
+                "latitude": 50.040669127598704
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 83,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.97738389556833,
+                "latitude": 50.04436637223317
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 84,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.94118578031923,
+                "latitude": 50.048927410735175
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 85,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.93682984857303,
+                "latitude": 50.04801177009033
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 86,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.937452110535574,
+                "latitude": 50.04860100172501
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 87,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.94059605433654,
+                "latitude": 50.046618038668434
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 88,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.941208741719322,
+                "latitude": 50.04790119982137
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 89,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.9388599856961,
+                "latitude": 50.0471431953209
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 90,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.946586206221077,
+                "latitude": 50.045849188154484
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 91,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.942868307907684,
+                "latitude": 50.04811211538646
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 92,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.947046390722427,
+                "latitude": 50.04669456366553
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 93,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.94195859799326,
+                "latitude": 50.04842231082078
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 94,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.944317620169528,
+                "latitude": 50.048707813188784
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 95,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.946316027249765,
+                "latitude": 50.04840460279274
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 96,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.949896182933877,
+                "latitude": 50.047775252325536
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 97,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.949195238974198,
+                "latitude": 50.049421397020886
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 98,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.950872074540847,
+                "latitude": 50.047690379354286
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 99,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.950105091291167,
+                "latitude": 50.046643104125906
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 100,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.951448466821258,
+                "latitude": 50.04575097603737
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 101,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.951207772474497,
+                "latitude": 50.04907873252843
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 102,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.959182635856493,
+                "latitude": 50.04575862795714
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 103,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.956033034003806,
+                "latitude": 50.045982227367155
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 104,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.95448416512723,
+                "latitude": 50.0477751292722
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 105,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.95829203730632,
+                "latitude": 50.050464924317595
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 106,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.9588381500208,
+                "latitude": 50.04609134889296
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 107,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.955150052116476,
+                "latitude": 50.04830251844843
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 108,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.963419419155063,
+                "latitude": 50.048721634278714
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 109,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.9654348364693,
+                "latitude": 50.04974189195661
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 110,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.964248884431964,
+                "latitude": 50.04962235567632
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 111,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.964011028989624,
+                "latitude": 50.04681722947577
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 112,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.961208255489492,
+                "latitude": 50.048224036700034
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 113,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.965420725816,
+                "latitude": 50.046524557648574
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 114,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.968002674734628,
+                "latitude": 50.04866373037032
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 115,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.970329778527844,
+                "latitude": 50.04687305480429
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 116,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.97250192157188,
+                "latitude": 50.050377169915464
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 117,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.97054399977118,
+                "latitude": 50.0465332444858
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 118,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.971557428957887,
+                "latitude": 50.05064809893725
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 119,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.96759145568851,
+                "latitude": 50.048291340059706
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 120,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.977292894620657,
+                "latitude": 50.047161902955125
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 121,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.97579102749037,
+                "latitude": 50.050637358922025
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 122,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.97960843426471,
+                "latitude": 50.047604845627134
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 123,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.978192116326074,
+                "latitude": 50.049279396031366
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 124,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.97545547635539,
+                "latitude": 50.05036338277849
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 125,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.97393083209706,
+                "latitude": 50.04852786418335
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 126,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.935354317799565,
+                "latitude": 50.054355708957225
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 127,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.93633555898647,
+                "latitude": 50.05396455450867
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 128,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.937492745439787,
+                "latitude": 50.05282342255172
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 129,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.94099219888296,
+                "latitude": 50.05193129631437
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 130,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.93944078455644,
+                "latitude": 50.053109438474905
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 131,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.93705279967336,
+                "latitude": 50.054386157958874
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 132,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.94374356311176,
+                "latitude": 50.05316199445092
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 133,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.94589070670214,
+                "latitude": 50.05161353694377
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 134,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.94748518685798,
+                "latitude": 50.05440912515882
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 135,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.944961927464707,
+                "latitude": 50.05588079131486
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 136,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.94769109747739,
+                "latitude": 50.05293500462901
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 137,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.943070287332016,
+                "latitude": 50.052019241599965
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 138,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.947866723379718,
+                "latitude": 50.0545040578371
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 139,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.951282330567214,
+                "latitude": 50.0550423192752
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 140,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.94932217708933,
+                "latitude": 50.05392157669343
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 141,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.954179387848402,
+                "latitude": 50.05477787877929
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 142,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.94966972366544,
+                "latitude": 50.05286634859378
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 143,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.947982659478576,
+                "latitude": 50.05234950809716
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 144,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.958744033141162,
+                "latitude": 50.05457834143906
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 145,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.955796750223183,
+                "latitude": 50.05309594026628
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 146,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.95640212211778,
+                "latitude": 50.05474259211962
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 147,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.958988500184415,
+                "latitude": 50.054152493685294
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 148,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.95437696836945,
+                "latitude": 50.05248720738941
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 149,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.955239799504977,
+                "latitude": 50.055493325610044
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 150,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.9668496836682,
+                "latitude": 50.05164197332799
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 151,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.96073378673419,
+                "latitude": 50.054333285046496
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 152,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.964071432124754,
+                "latitude": 50.05292777762411
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 153,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.961647303822595,
+                "latitude": 50.05447627577122
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 154,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.964704178375275,
+                "latitude": 50.05276941658786
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 155,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.963083180705276,
+                "latitude": 50.05253270857731
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 156,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.96923836142148,
+                "latitude": 50.054182535959946
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 157,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.96859515810945,
+                "latitude": 50.05568851405117
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 158,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.972634878154338,
+                "latitude": 50.05222988779407
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 159,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.970897516614627,
+                "latitude": 50.053727542786255
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 160,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.968517791659664,
+                "latitude": 50.0535020868429
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 161,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.969500305992273,
+                "latitude": 50.05359121951156
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 162,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.979124863115135,
+                "latitude": 50.05402409750968
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 163,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.977799526115586,
+                "latitude": 50.0554016503737
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 164,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.975638085119208,
+                "latitude": 50.053530273995975
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 165,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.973757108304785,
+                "latitude": 50.05262610357754
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 166,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.97753434657311,
+                "latitude": 50.05592750067904
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 167,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.975202671432417,
+                "latitude": 50.0538874848997
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 168,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.940965624001652,
+                "latitude": 50.060441442450596
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 169,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.936889518214056,
+                "latitude": 50.060127783755725
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 170,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.93567064160862,
+                "latitude": 50.059805371619056
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 171,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.940218209801863,
+                "latitude": 50.05904679631513
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 172,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.93535950333755,
+                "latitude": 50.06102999314045
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 173,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.940913113443962,
+                "latitude": 50.060571884599675
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 174,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.944642046121142,
+                "latitude": 50.05721561522377
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 175,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.941965918549304,
+                "latitude": 50.058401609480455
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 176,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.9456864478696,
+                "latitude": 50.06096289106898
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 177,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.94718232178132,
+                "latitude": 50.06097577740363
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 178,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.947565446302857,
+                "latitude": 50.056935396208935
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 179,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.942343048622124,
+                "latitude": 50.06130432623053
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 180,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.95296574638537,
+                "latitude": 50.06102423208942
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 181,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.952309628870857,
+                "latitude": 50.058747034161215
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 182,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.948572088771492,
+                "latitude": 50.05738093788617
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 183,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.952606211942562,
+                "latitude": 50.05948690455665
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 184,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.94915896753316,
+                "latitude": 50.05622073123118
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 185,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.953838239786453,
+                "latitude": 50.05753991041842
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 186,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.95554973099424,
+                "latitude": 50.05998380620872
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 187,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.95798939341215,
+                "latitude": 50.05722600225406
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 188,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.95550100065683,
+                "latitude": 50.061023458474956
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 189,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.96058195449385,
+                "latitude": 50.05838882267855
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 190,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.960397451571858,
+                "latitude": 50.06040923298316
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 191,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.956910685831552,
+                "latitude": 50.0587511351485
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 192,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.963281805415356,
+                "latitude": 50.06038282709789
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 193,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.965038629579904,
+                "latitude": 50.057636977926684
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 194,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.961519231026003,
+                "latitude": 50.05756588852365
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 195,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.966216009533117,
+                "latitude": 50.05791002113726
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 196,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.965933161187408,
+                "latitude": 50.05636830830147
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 197,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.96532686988397,
+                "latitude": 50.06091767401906
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 198,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.967646284882925,
+                "latitude": 50.0583651769108
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 199,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.970599141190746,
+                "latitude": 50.06057441048842
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 200,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.972664758857913,
+                "latitude": 50.060358207345175
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 201,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.97145606348525,
+                "latitude": 50.05862254379949
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 202,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.9714575620008,
+                "latitude": 50.05676125475359
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 203,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.970705054557026,
+                "latitude": 50.057471256060765
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 204,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.977801981698228,
+                "latitude": 50.05836989167533
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 205,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.973781624058528,
+                "latitude": 50.05780445934129
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 206,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.97887539630462,
+                "latitude": 50.0572340338327
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 207,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.97415812025835,
+                "latitude": 50.05617405788704
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 208,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.976685637139244,
+                "latitude": 50.06076416282773
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 209,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.97491641502165,
+                "latitude": 50.05993034631417
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 210,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.93533257001118,
+                "latitude": 50.062512439590854
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 211,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.94046289573521,
+                "latitude": 50.06176938515624
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 212,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.937244482223534,
+                "latitude": 50.06155522317381
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 213,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.935418945123708,
+                "latitude": 50.06369457858122
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 214,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.935968084024605,
+                "latitude": 50.066272281032404
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 215,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.939120950317108,
+                "latitude": 50.0638005325158
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 216,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.94413258945952,
+                "latitude": 50.06548266028416
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 217,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.943537933799146,
+                "latitude": 50.064266003353666
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 218,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.947551695945048,
+                "latitude": 50.06565930404609
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 219,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.94757941412452,
+                "latitude": 50.06653047145973
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 220,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.947318672221098,
+                "latitude": 50.06205044657781
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 221,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.94441340108853,
+                "latitude": 50.06197558767564
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 222,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.951492529077925,
+                "latitude": 50.06436408021313
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 223,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.949473471128815,
+                "latitude": 50.062207617101954
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 224,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.95266928418428,
+                "latitude": 50.06235474514197
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 225,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.949100050792552,
+                "latitude": 50.066080202886376
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 226,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.95234620263209,
+                "latitude": 50.06645992727138
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 227,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.952951458215864,
+                "latitude": 50.06455843079312
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 228,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.95791676419691,
+                "latitude": 50.062785582315506
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 229,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.96047223023639,
+                "latitude": 50.062812163821455
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 230,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.955662062121654,
+                "latitude": 50.062152126862564
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 231,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.9546134840894,
+                "latitude": 50.0648708877569
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 232,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.959789344133753,
+                "latitude": 50.06646640906717
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 233,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.955304342053726,
+                "latitude": 50.06293454294972
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 234,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.962110159440886,
+                "latitude": 50.06265240278053
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 235,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.962417028810737,
+                "latitude": 50.06165579975871
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 236,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.96387513971993,
+                "latitude": 50.066252646549586
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 237,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.96603894991545,
+                "latitude": 50.06469944565295
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 238,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.964327708618526,
+                "latitude": 50.06568452894999
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 239,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.965263100906505,
+                "latitude": 50.06458942051101
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 240,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.97235869306982,
+                "latitude": 50.06226641863765
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 241,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.972774701895265,
+                "latitude": 50.065368536911386
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 242,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.973166578826987,
+                "latitude": 50.063661820765695
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 243,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.971035208318792,
+                "latitude": 50.06590537923625
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 244,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.973049135487425,
+                "latitude": 50.06586495265331
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 245,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.971125694706572,
+                "latitude": 50.06538460705501
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 246,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.97535677122866,
+                "latitude": 50.061554655852255
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 247,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.97448191205511,
+                "latitude": 50.06341726219246
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 248,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.97512365781718,
+                "latitude": 50.063188913924876
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 249,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.979358036595254,
+                "latitude": 50.06463438208328
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 250,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.974643119099547,
+                "latitude": 50.06149168144048
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 251,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.979346134796156,
+                "latitude": 50.064359454853374
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 252,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.941025570682324,
+                "latitude": 50.07074609528226
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 253,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.937756623664466,
+                "latitude": 50.07051658587007
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 254,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.937596860962934,
+                "latitude": 50.06762159599439
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 255,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.94133594828284,
+                "latitude": 50.071810660591595
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 256,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.938674010349878,
+                "latitude": 50.07182743990046
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 257,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.93871919247847,
+                "latitude": 50.0689656119703
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 258,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.94294289370115,
+                "latitude": 50.068705984937054
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 259,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.945656585263286,
+                "latitude": 50.06861434326739
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 260,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.944136218261747,
+                "latitude": 50.071319499442055
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 261,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.947252477847737,
+                "latitude": 50.067721019226425
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 262,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.945070652958158,
+                "latitude": 50.066853994318485
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 263,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.943541810190226,
+                "latitude": 50.06906391650921
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 264,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.953247469738763,
+                "latitude": 50.07033066631171
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 265,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.951797139480107,
+                "latitude": 50.06884766487354
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 266,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.948461086511294,
+                "latitude": 50.066729950037846
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 267,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.953326640019235,
+                "latitude": 50.06954068468128
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 268,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.951999708001996,
+                "latitude": 50.071465498341624
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 269,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.94907449130288,
+                "latitude": 50.06806309740176
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 270,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.95931613463419,
+                "latitude": 50.07090427393054
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 271,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.95709215436186,
+                "latitude": 50.069863117129785
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 272,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.960399777289954,
+                "latitude": 50.07052964554181
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 273,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.957311456456157,
+                "latitude": 50.07039002196416
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 274,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.958118145727063,
+                "latitude": 50.07104655674995
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 275,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.956591665772915,
+                "latitude": 50.06705326452084
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 276,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.960725953975647,
+                "latitude": 50.068193327840575
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 277,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.96492613681261,
+                "latitude": 50.067819862384475
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 278,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.9623869200126,
+                "latitude": 50.06916312792489
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 279,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.965886562986242,
+                "latitude": 50.06884637110681
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 280,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.96592878130296,
+                "latitude": 50.07153995549469
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 281,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.962903311511205,
+                "latitude": 50.06982730196062
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 282,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.97283108536361,
+                "latitude": 50.06914203891772
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 283,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.96742930005507,
+                "latitude": 50.068081447683426
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 284,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.96787248235543,
+                "latitude": 50.06841903083464
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 285,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.967420372471537,
+                "latitude": 50.0684248731153
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 286,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.9713413892262,
+                "latitude": 50.0693484341445
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 287,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.971248027060835,
+                "latitude": 50.068623297353675
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 288,
+            "sensorType": "TEMPERATURE_AND_AIR_HUMIDITY",
+            "location": {
+                "longitude": 19.97659546439952,
+                "latitude": 50.06950743588714
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 289,
+            "sensorType": "WIND_SPEED",
+            "location": {
+                "longitude": 19.976902227675613,
+                "latitude": 50.06886774636832
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 290,
+            "sensorType": "WIND_DIRECTION",
+            "location": {
+                "longitude": 19.97707216347216,
+                "latitude": 50.06996308076424
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 291,
+            "sensorType": "LITTER_MOISTURE",
+            "location": {
+                "longitude": 19.97386006202412,
+                "latitude": 50.069176780245684
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 292,
+            "sensorType": "PM2_5",
+            "location": {
+                "longitude": 19.979280776255532,
+                "latitude": 50.06715266268157
+            },
+            "timestamp": "1749307308310"
+        },
+        {
+            "sensorId": 293,
+            "sensorType": "CO2",
+            "location": {
+                "longitude": 19.97884834920944,
+                "latitude": 50.071645916029034
+            },
+            "timestamp": "1749307308310"
+        }
+    ],
+    "cameras": [],
+    "fireBrigades": [
+        {
+            "fireBrigadeId": 0,
+            "timestamp": "2025-06-07T16:41:48.310236",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.03758910727001
+            },
+            "currentLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.03758910727001
+            }
+        },
+        {
+            "fireBrigadeId": 1,
+            "timestamp": "2025-06-07T16:41:48.310250",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.03758910727001
+            },
+            "currentLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.03758910727001
+            }
+        },
+        {
+            "fireBrigadeId": 2,
+            "timestamp": "2025-06-07T16:41:48.310261",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.03758910727001
+            },
+            "currentLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.03758910727001
+            }
+        },
+        {
+            "fireBrigadeId": 3,
+            "timestamp": "2025-06-07T16:41:48.310270",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.03758910727001
+            },
+            "currentLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.03758910727001
+            }
+        },
+        {
+            "fireBrigadeId": 4,
+            "timestamp": "2025-06-07T16:41:48.310281",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.03758910727001
+            },
+            "currentLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.03758910727001
+            }
+        },
+        {
+            "fireBrigadeId": 5,
+            "timestamp": "2025-06-07T16:41:48.310290",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.03758910727001
+            },
+            "currentLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.03758910727001
+            }
+        },
+        {
+            "fireBrigadeId": 6,
+            "timestamp": "2025-06-07T16:41:48.310299",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.03758910727001
+            },
+            "currentLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.03758910727001
+            }
+        },
+        {
+            "fireBrigadeId": 7,
+            "timestamp": "2025-06-07T16:41:48.310308",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.04286137192605
+            },
+            "currentLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.04286137192605
+            }
+        },
+        {
+            "fireBrigadeId": 8,
+            "timestamp": "2025-06-07T16:41:48.310318",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.04286137192605
+            },
+            "currentLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.04286137192605
+            }
+        },
+        {
+            "fireBrigadeId": 9,
+            "timestamp": "2025-06-07T16:41:48.310327",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.04286137192605
+            },
+            "currentLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.04286137192605
+            }
+        },
+        {
+            "fireBrigadeId": 10,
+            "timestamp": "2025-06-07T16:41:48.310336",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.04286137192605
+            },
+            "currentLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.04286137192605
+            }
+        },
+        {
+            "fireBrigadeId": 11,
+            "timestamp": "2025-06-07T16:41:48.310346",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.04286137192605
+            },
+            "currentLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.04286137192605
+            }
+        },
+        {
+            "fireBrigadeId": 12,
+            "timestamp": "2025-06-07T16:41:48.310355",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.04286137192605
+            },
+            "currentLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.04286137192605
+            }
+        },
+        {
+            "fireBrigadeId": 13,
+            "timestamp": "2025-06-07T16:41:48.310364",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.04286137192605
+            },
+            "currentLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.04286137192605
+            }
+        },
+        {
+            "fireBrigadeId": 14,
+            "timestamp": "2025-06-07T16:41:48.310372",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.04813363658208
+            },
+            "currentLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.04813363658208
+            }
+        },
+        {
+            "fireBrigadeId": 15,
+            "timestamp": "2025-06-07T16:41:48.310381",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.04813363658208
+            },
+            "currentLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.04813363658208
+            }
+        },
+        {
+            "fireBrigadeId": 16,
+            "timestamp": "2025-06-07T16:41:48.310389",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.04813363658208
+            },
+            "currentLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.04813363658208
+            }
+        },
+        {
+            "fireBrigadeId": 17,
+            "timestamp": "2025-06-07T16:41:48.310398",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.04813363658208
+            },
+            "currentLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.04813363658208
+            }
+        },
+        {
+            "fireBrigadeId": 18,
+            "timestamp": "2025-06-07T16:41:48.310407",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.04813363658208
+            },
+            "currentLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.04813363658208
+            }
+        },
+        {
+            "fireBrigadeId": 19,
+            "timestamp": "2025-06-07T16:41:48.310415",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.04813363658208
+            },
+            "currentLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.04813363658208
+            }
+        },
+        {
+            "fireBrigadeId": 20,
+            "timestamp": "2025-06-07T16:41:48.310424",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.04813363658208
+            },
+            "currentLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.04813363658208
+            }
+        },
+        {
+            "fireBrigadeId": 21,
+            "timestamp": "2025-06-07T16:41:48.310433",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.05340590123811
+            },
+            "currentLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.05340590123811
+            }
+        },
+        {
+            "fireBrigadeId": 22,
+            "timestamp": "2025-06-07T16:41:48.310441",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.05340590123811
+            },
+            "currentLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.05340590123811
+            }
+        },
+        {
+            "fireBrigadeId": 23,
+            "timestamp": "2025-06-07T16:41:48.310449",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.05340590123811
+            },
+            "currentLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.05340590123811
+            }
+        },
+        {
+            "fireBrigadeId": 24,
+            "timestamp": "2025-06-07T16:41:48.310526",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.05340590123811
+            },
+            "currentLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.05340590123811
+            }
+        },
+        {
+            "fireBrigadeId": 25,
+            "timestamp": "2025-06-07T16:41:48.310539",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.05340590123811
+            },
+            "currentLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.05340590123811
+            }
+        },
+        {
+            "fireBrigadeId": 26,
+            "timestamp": "2025-06-07T16:41:48.310563",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.05340590123811
+            },
+            "currentLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.05340590123811
+            }
+        },
+        {
+            "fireBrigadeId": 27,
+            "timestamp": "2025-06-07T16:41:48.310572",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.05340590123811
+            },
+            "currentLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.05340590123811
+            }
+        },
+        {
+            "fireBrigadeId": 28,
+            "timestamp": "2025-06-07T16:41:48.310582",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.05867816589415
+            },
+            "currentLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.05867816589415
+            }
+        },
+        {
+            "fireBrigadeId": 29,
+            "timestamp": "2025-06-07T16:41:48.310591",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.05867816589415
+            },
+            "currentLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.05867816589415
+            }
+        },
+        {
+            "fireBrigadeId": 30,
+            "timestamp": "2025-06-07T16:41:48.310599",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.05867816589415
+            },
+            "currentLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.05867816589415
+            }
+        },
+        {
+            "fireBrigadeId": 31,
+            "timestamp": "2025-06-07T16:41:48.310607",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.05867816589415
+            },
+            "currentLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.05867816589415
+            }
+        },
+        {
+            "fireBrigadeId": 32,
+            "timestamp": "2025-06-07T16:41:48.310616",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.05867816589415
+            },
+            "currentLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.05867816589415
+            }
+        },
+        {
+            "fireBrigadeId": 33,
+            "timestamp": "2025-06-07T16:41:48.310630",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.05867816589415
+            },
+            "currentLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.05867816589415
+            }
+        },
+        {
+            "fireBrigadeId": 34,
+            "timestamp": "2025-06-07T16:41:48.310638",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.05867816589415
+            },
+            "currentLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.05867816589415
+            }
+        },
+        {
+            "fireBrigadeId": 35,
+            "timestamp": "2025-06-07T16:41:48.310647",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.06395043055018
+            },
+            "currentLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.06395043055018
+            }
+        },
+        {
+            "fireBrigadeId": 36,
+            "timestamp": "2025-06-07T16:41:48.310655",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.06395043055018
+            },
+            "currentLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.06395043055018
+            }
+        },
+        {
+            "fireBrigadeId": 37,
+            "timestamp": "2025-06-07T16:41:48.310664",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.06395043055018
+            },
+            "currentLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.06395043055018
+            }
+        },
+        {
+            "fireBrigadeId": 38,
+            "timestamp": "2025-06-07T16:41:48.310673",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.06395043055018
+            },
+            "currentLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.06395043055018
+            }
+        },
+        {
+            "fireBrigadeId": 39,
+            "timestamp": "2025-06-07T16:41:48.310681",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.06395043055018
+            },
+            "currentLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.06395043055018
+            }
+        },
+        {
+            "fireBrigadeId": 40,
+            "timestamp": "2025-06-07T16:41:48.310690",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.06395043055018
+            },
+            "currentLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.06395043055018
+            }
+        },
+        {
+            "fireBrigadeId": 41,
+            "timestamp": "2025-06-07T16:41:48.310699",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.06395043055018
+            },
+            "currentLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.06395043055018
+            }
+        },
+        {
+            "fireBrigadeId": 42,
+            "timestamp": "2025-06-07T16:41:48.310708",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.06922269520621
+            },
+            "currentLocation": {
+                "longitude": 19.938174134895917,
+                "latitude": 50.06922269520621
+            }
+        },
+        {
+            "fireBrigadeId": 43,
+            "timestamp": "2025-06-07T16:41:48.310716",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.06922269520621
+            },
+            "currentLocation": {
+                "longitude": 19.944586779605167,
+                "latitude": 50.06922269520621
+            }
+        },
+        {
+            "fireBrigadeId": 44,
+            "timestamp": "2025-06-07T16:41:48.310725",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.06922269520621
+            },
+            "currentLocation": {
+                "longitude": 19.95099942431441,
+                "latitude": 50.06922269520621
+            }
+        },
+        {
+            "fireBrigadeId": 45,
+            "timestamp": "2025-06-07T16:41:48.310734",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.06922269520621
+            },
+            "currentLocation": {
+                "longitude": 19.95741206902366,
+                "latitude": 50.06922269520621
+            }
+        },
+        {
+            "fireBrigadeId": 46,
+            "timestamp": "2025-06-07T16:41:48.310743",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.06922269520621
+            },
+            "currentLocation": {
+                "longitude": 19.96382471373291,
+                "latitude": 50.06922269520621
+            }
+        },
+        {
+            "fireBrigadeId": 47,
+            "timestamp": "2025-06-07T16:41:48.310751",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.06922269520621
+            },
+            "currentLocation": {
+                "longitude": 19.970237358442155,
+                "latitude": 50.06922269520621
+            }
+        },
+        {
+            "fireBrigadeId": 48,
+            "timestamp": "2025-06-07T16:41:48.310759",
+            "state": "AVAILABLE",
+            "baseLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.06922269520621
+            },
+            "currentLocation": {
+                "longitude": 19.976650003151406,
+                "latitude": 50.06922269520621
+            }
+        }
+    ],
+    "foresterPatrols": []
+}
