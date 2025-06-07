@@ -146,6 +146,7 @@ class Sector:
 
     def start_fire(self):
         """Start fire with optimized random generation"""
+        random.seed(42)
         self._fire_level = random.randint(5, 20)
         self._fire_state = FireState.ACTIVE
         self._is_modified = True
@@ -210,6 +211,7 @@ class Sector:
         # Stałe współczynniki regulujące wpływ fire_level na różne parametry
         fire_influence = 0.5  # Wpływ poziomu pożaru na temperaturę
         cooling_factor = 0.02  # Naturalny spadek temperatury
+        random.seed(42)
         random_variation_temp = random.uniform(-0.5, 0.5)  # Zmniejszone losowe zmiany dla stabilności
 
         # Ograniczenie wartości fire_level do przedziału [0, 100] dla bezpieczeństwa

@@ -86,9 +86,7 @@ class ForestMap:
 
     @staticmethod
     def _parse_sectors(conf):        
-        print(conf)
         json_conf = json.dumps(conf, indent=4)
-        print(json_conf)
 
         sectors = [[None for _ in range(conf["columns"])] for _ in range(conf["rows"])]
         for val in conf["sectors"]:

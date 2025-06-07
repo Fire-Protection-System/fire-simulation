@@ -4,15 +4,12 @@ from enum import Enum
 
 from simulation.sectors.fire_state import FireState
 
-@dataclass
-class RewardConfig:
-    LOST_SECTOR_PENALTY = 50
-    EXTINGUISHED_FIRES_REWARD = 20
-    SPREAD_PREVENTION_REWARD = 100
+from reward_strategies import *
+
 
 class RewardCalculator:
-    def __init__(self, config: RewardConfig = None):
-        self.config = config or RewardConfig()
+    def __init__(self, config: str = ""):
+        self.config = get_config_by_name(str)
     
     def calculate_reward(self, state) -> float:
         """
@@ -21,12 +18,15 @@ class RewardCalculator:
         penalties = self._calculate_penalties(state)
         rewards = self._calculate_rewards(state)
         total_reward = penalties + rewards
+
+        # print(self.get_reward_breakdown(state))
         
         return total_reward
     
     def _calculate_penalties(self, state) -> float:
         lost_sectors_penalty = self._calculate_lost_sectors_penalty(state)
         active_fire_penalty = self._calculate_active_fire_penalty(state)
+        burned_sectors_panalty = self._calculate_burned_sector_penalties(state)
         
         return lost_sectors_penalty + active_fire_penalty
     
@@ -35,6 +35,12 @@ class RewardCalculator:
         spread_prevention_reward = self._calculate_spread_prevention_reward(state)
         
         return extinguished_fires_reward + spread_prevention_reward
+
+    def _calculate_burned_sector_penalties(self, state) -> float: 
+        burn_sector_penalty = sum(i.burn_level for i in state.sectors)
+
+        penalty = -burn_sector_penalty * self.config.BURNED_SECTOR_PENALTY
+        return penalty
     
     def _calculate_lost_sectors_penalty(self, state) -> float:
         lost_sectors_count = sum(
@@ -99,5 +105,6 @@ class RewardCalculator:
             'active_fire_penalty': self._calculate_active_fire_penalty(state),
             'extinguished_fires_reward': self._calculate_extinguished_fires_reward(state),
             'spread_prevention_reward': self._calculate_spread_prevention_reward(state),
+            'burned_sectors_penalties': self._calculate_burned_sector_penalties(state),
             'total_reward': penalties + rewards
         }

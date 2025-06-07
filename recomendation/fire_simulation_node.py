@@ -41,8 +41,8 @@ class CalculationContext:
     agent_scores: List[Tuple[int, float]]
 
 class OptimizationConfig:
-    MIN_DISTANCE_THRESHOLD = 0.1
-    DISTANCE_PENALTY_FACTOR = 0.5
+    MIN_DISTANCE_THRESHOLD = 1
+    DISTANCE_PENALTY_FACTOR = 1
     MAX_RANDOM_ATTEMPTS = 10
     MAX_TOTAL_CHILDREN = 30
     AGENT_SECTOR_MULTIPLIER = 2
@@ -68,9 +68,11 @@ class FireSimulationNode(Node):
         sector_states=None,
         agent_states=None,
         _sector_lookup=None,
-        _active_sector_ids=None
+        _active_sector_ids=None,
+        reward_strategy = ""
     ):
         self.sectors = sectors
+        self.reward_strategy = reward_strategy
         
         """Caching every state/object possible to optimize computations."""
         if sector_states is None:
@@ -491,7 +493,6 @@ class FireSimulationNode(Node):
             max_brigades=self.max_brigades,
             forest_map=new_map,
             wind=copy.copy(self.wind),
-            
             sector_states=new_sector_states,
             agent_states=new_agent_states,
             _sector_lookup=new_sector_lookup,
@@ -499,7 +500,7 @@ class FireSimulationNode(Node):
         )
 
     def calculate_reward(self, state):
-        calculator = RewardCalculator()
+        calculator = RewardCalculator(self.reward_strategy)
         return calculator.calculate_reward(state)
 
     def is_terminal(self):
@@ -660,8 +661,8 @@ class FireSimulationNode(Node):
 
             self._spread_fire(new_sectors, new_map, copy.copy(self.wind), new_active_sector_ids)
 
-        print()
-        for a in new_agents:
-            print(f"Agent {a.fire_brigade_id} state: {a.state.name}")
+        # print()
+        # for a in new_agents:
+        #     print(f"Agent {a.fire_brigade_id} state: {a.state.name}")
     
         return new_sectors
