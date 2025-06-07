@@ -72,7 +72,6 @@ def create_queues(exchange_name, username, password):
         logger.error(f"Error connecting to RabbitMQ: {e}")
         return None, None
 
-
 def remove_queues(exchange_name, username, password):
     try:
         credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
