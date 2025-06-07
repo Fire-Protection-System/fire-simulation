@@ -28,7 +28,7 @@ class Wind:
 
         self._direction = GeographicDirection(new_direction_value)
 
-        logger.info(f"New wind: {self._speed} {self._direction}")
+        # logger.info(f"New wind: {self._speed} {self._direction}")
 
     @property 
     def get_speed(self) -> float:

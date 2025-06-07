@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class SensorType(Enum):
     TEMPERATURE_AND_AIR_HUMIDITY = 1
     WIND_SPEED = 2

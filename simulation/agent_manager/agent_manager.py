@@ -14,7 +14,6 @@ from simulation.agent_manager.action_type import *
 logger = logging.getLogger(__name__)
 
 class AgentManager:
-
     def __init__(self, map : ForestMap, storage : MessageStore):
         self._map = map
         self._storage = storage
@@ -35,8 +34,10 @@ class AgentManager:
         }
 
         logger.warning("AgentManager class has been created.")
+
         for brigade in self.brigades.values():
             logger.warning(f"Brigade {brigade.fire_brigade_id} has been added!")
+
         for patrol in self.patrols.values():
             logger.warning(f"Patrol {patrol.forester_patrol_id} has been added!")
 
@@ -96,7 +97,6 @@ class AgentManager:
         at_destination = (
             abs(agent.destination.latitude - agent.location.latitude) <= 0.001 and
             abs(agent.destination.longitude - agent.location.longitude) <= 0.001
-            # logger.warning(f"Agent {agent.getId} reached location {agent.location.latitude}, {agent.location.longtitude}.")
         )
         if at_destination:
             logger.warning(f"Agent {agent.getId} reached destination {agent.destination}.")
