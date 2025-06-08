@@ -17,8 +17,7 @@ from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
 
 from recomendation.mcts_search import mcts_search
 from recomendation.fire_simulation_node import FireSimulationNode
-
-from reward_strategies import *
+from recomendation.reward_strategies import *
 
 logger = logging.getLogger(__name__)
 logger.disabled = True

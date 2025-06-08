@@ -4,7 +4,7 @@ from enum import Enum
 
 from simulation.sectors.fire_state import FireState
 
-from reward_strategies import *
+from recomendation.reward_strategies import *
 
 
 class RewardCalculator:

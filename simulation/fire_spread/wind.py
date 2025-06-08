@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 class Wind:
 
     def __init__(self):
-        random.seed(42)
         self._speed = random.uniform(0, 32)
         self._direction = random.choice(list(GeographicDirection))
         logger.info(f"Initial wind: {self._speed} {self._direction}")
