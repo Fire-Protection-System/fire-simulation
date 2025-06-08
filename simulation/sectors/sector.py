@@ -5,6 +5,8 @@ from typing import List
 import random
 import json as jssonLib
 from datetime import timedelta
+import copy
+import math
 
 from simulation.sensors.sensor import Sensor
 from simulation.sectors.sector_state import SectorState
@@ -24,16 +26,37 @@ from simulation.cameras.camera import Camera
 from simulation.location import Location
 
 logger = logging.getLogger(__name__)
-
+logger.disabled = True
 
 class Sector:
+    __slots__ = (
+        'lock', '_sector_id', '_row', '_column', '_sector_type', '_state',
+        '_extinguish_level', '_fire_level', '_burn_level',
+        '_number_of_fire_brigades', '_number_of_forester_patrols',
+        '_fire_state', '_sensors', '_initial_temperature',
+        '_adjacent_sectors',  
+        '_is_modified',  
+        '_coef_alpha'
+    )
+
     def __init__(
         self,
         sector_id: int,
         row: int,
         column: int,
         sector_type: SectorType,
-        initial_state: SectorState
+        initial_state: SectorState,
+        fire_state=None,
+        extinguish_level=0,
+        fire_level=.0,
+        burn_level=0,
+        num_brigades=0,
+        num_patrols=0,
+        sensors=None,
+        initial_temperature=None,
+        adjacent_sectors=None,
+        is_modified=False,
+        coef_alpha=None
     ):
         self.lock = Lock()
         self._sector_id = sector_id
@@ -41,13 +64,22 @@ class Sector:
         self._column = column
         self._sector_type = sector_type
         self._state = initial_state
-        self._extinguish_level = 0 #scale 0-100 - power of ex
-        self._fire_level = 0 #scale 0-100 - size of fire
-        self._burn_level = 0 #scale 0-100 - burned area
-        self._number_of_fire_brigades = 0
-        self._number_of_forester_patrols = 0
-        self._sensors: List[Sensor] = []
-        self._fire_state = FireState.INACTIVE
+        self._extinguish_level = extinguish_level
+        self._fire_level = fire_level
+        self._burn_level = burn_level
+        self._number_of_fire_brigades = num_brigades
+        self._number_of_forester_patrols = num_patrols
+        self._sensors = sensors or []
+        self._fire_state = fire_state or FireState.INACTIVE
+        self._adjacent_sectors = adjacent_sectors  
+        self._is_modified = is_modified  
+        
+        if initial_temperature is not None:
+            self._initial_temperature = initial_temperature
+        elif hasattr(initial_state, 'temperature'):
+            self._initial_temperature = initial_state.temperature
+            
+        self._coef_alpha = coef_alpha or coef_generator.calculate_alpha(self._sector_type)
 
     @property
     def sector_id(self) -> int:
@@ -84,14 +116,17 @@ class Sector:
     @fire_level.setter
     def fire_level(self, fire):
         self._fire_level = fire
+        self._is_modified = True
 
     @burn_level.setter
     def burn_level(self, burn):
         self._burn_level = burn
+        self._is_modified = True
 
     @extinguish_level.setter
     def extinguish_level(self, extinguish):
         self._extinguish_level = extinguish
+        self._is_modified = True
 
     @property
     def sensors(self):
@@ -103,42 +138,73 @@ class Sector:
 
     def add_sensor(self, sensor):
         self._sensors.append(sensor)
+        self._is_modified = True
 
     def remove_sensor(self, sensor):
         self._sensors.remove(sensor)
+        self._is_modified = True
 
     def start_fire(self):
+        """Start fire with optimized random generation"""
         self._fire_level = random.randint(5, 20)
         self._fire_state = FireState.ACTIVE
+        self._is_modified = True
         logger.info(f"Fire started in sector {self.sector_id} column:{self.column}, row:{self.row}.")
 
     def update_extinguish_level(self):
+        """Update extinguish level with fast calculation"""
+        prev_level = self._extinguish_level
         self._extinguish_level = self._number_of_fire_brigades * const.FIRE_FIGHTERS_MULTIPLIER
-        logger.info(f"New extinguish level in sector {self._sector_id} is {self._extinguish_level}")
+        
+        if prev_level != self._extinguish_level:
+            self._is_modified = True
+            logger.info(f"New extinguish level in sector {self._sector_id} is {self._extinguish_level}")
 
     def update_fire_level(self):
-        fire_add = (self._fire_level/10) * coef_generator.calculate_alpha(self._sector_type) * const.FIRE_LEVEL_MULTIPLIER
+        """Update fire level with optimized calculations"""
+        if self._fire_state != FireState.ACTIVE:
+            return
+            
+        prev_level = self._fire_level
+        fire_add = (self._fire_level/10) * self._coef_alpha * const.FIRE_LEVEL_MULTIPLIER
         fire_sub = self._extinguish_level
-        new_fire_level =  min(self._fire_level + fire_add - fire_sub, 100)
+        new_fire_level = min(self._fire_level + fire_add - fire_sub, 100)
+
         if new_fire_level <= 0:
             self._fire_state = FireState.INACTIVE
             self._fire_level = 0
+            self._is_modified = True
             logger.info(f"Sector {self._sector_id} is extinguished")
-        else:
+        elif new_fire_level != prev_level:
             self._fire_level = new_fire_level
-        logger.info(f"New fire level in sector {self._sector_id} is {self._fire_level}")
-        
+            self._is_modified = True
+            logger.info(f"New fire level in sector {self._sector_id} is {self._fire_level}")
+
+    def required_fire_brigades(self):
+        if self.fire_state != FireState.ACTIVE:
+            return 0
+        return math.ceil(self._fire_level / 3)
 
     def update_burn_level(self):
-        new_burn_level = min(self._burn_level + 0.00005 * self._fire_level**3, 100)
-        if (new_burn_level >= 100):
+        """Update burn level with optimized calculations"""
+        if self._fire_state != FireState.ACTIVE:
+            return
+            
+        prev_level = self._burn_level
+        
+        fire_cubed = self._fire_level * self._fire_level * self._fire_level
+        new_burn_level = min(self._burn_level + 0.00005 * fire_cubed, 100)
+        
+        if new_burn_level >= 100:
             self._fire_state = FireState.LOST
             self._fire_level = 0
             self._extinguish_level = 0
-            logger.info(f"Sector {self._sector_id} is lost!")
-        self._burn_level = new_burn_level
-        logger.info(f"New burn level in sector {self._sector_id} is {self._burn_level}")
-
+            self._is_modified = True
+            # logger.info(f"Sector {self._sector_id} is lost!")
+        elif new_burn_level != prev_level:
+            self._burn_level = new_burn_level
+            self._is_modified = True
+            logger.info(f"New burn level in sector {self._sector_id} is {self._burn_level}")
 
     def update_sector_state(self):
         # Stałe współczynniki regulujące wpływ fire_level na różne parametry
@@ -160,42 +226,38 @@ class Sector:
         # Uwzględnienie naturalnego chłodzenia i losowych fluktuacji
         self._state.temperature += temperature_change - (self._state.temperature * cooling_factor) + random_variation_temp
         self._state.temperature = max(10, min(self._state.temperature, self._initial_temperature + 80))  # Ograniczenie zakresu
-        logger.info(f"Sector {self.sector_id} - Temperature: {self._state.temperature}")
+        # logger.info(f"Sector {self.sector_id} - Temperature: {self._state.temperature}")
 
         # Wilgotność powietrza – maleje wraz z pożarem, ale nie spada poniżej 5%
         humidity_change = self._fire_level * 0.4 + random.uniform(-2, 2)
         self._state.air_humidity -= humidity_change
         self._state.air_humidity = max(5, min(self._state.air_humidity, 100))
-        logger.info(f"Sector {self.sector_id} - Air Humidity: {self._state.air_humidity}")
+        # logger.info(f"Sector {self.sector_id} - Air Humidity: {self._state.air_humidity}")
 
         # Stężenie CO2 – wzrost z ograniczonym wpływem losowości, kontrola wzrostu
         co2_change = (self._fire_level ** 1.1) - (self._state.co2_concentration * 0.01) + random.uniform(-5, 5)
         self._state.co2_concentration += co2_change
         self._state.co2_concentration = max(300, self._state.co2_concentration)  # Naturalny poziom CO2 minimum
-        logger.info(f"Sector {self.sector_id} - CO2 Concentration: {self._state.co2_concentration}")
+        # logger.info(f"Sector {self.sector_id} - CO2 Concentration: {self._state.co2_concentration}")
 
         # Wilgotność ściółki – gwałtowny spadek, ograniczenie przed całkowitym wysuszeniem
         litter_moisture_change = self._fire_level * 0.5 + random.uniform(-1, 1)
         self._state.plant_litter_moisture -= litter_moisture_change
         self._state.plant_litter_moisture = max(2, min(self._state.plant_litter_moisture, 100))
-        logger.info(f"Sector {self.sector_id} - Plant Litter Moisture: {self._state.plant_litter_moisture}")
+        # logger.info(f"Sector {self.sector_id} - Plant Litter Moisture: {self._state.plant_litter_moisture}")
 
         # Stężenie PM2.5 – eksponencjalny wzrost ograniczony kontrolą
         pm_increase = (self._fire_level ** 1.3 / 25) - (self._state.pm2_5_concentration * 0.02) + random.uniform(-0.3, 0.3)
         self._state.pm2_5_concentration += pm_increase
         self._state.pm2_5_concentration = max(5, self._state.pm2_5_concentration)  # Minimalny poziom PM2.5
-        logger.info(f"Sector {self.sector_id} - PM2.5 Concentration: {self._state.pm2_5_concentration}")
+        # logger.info(f"Sector {self.sector_id} - PM2.5 Concentration: {self._state.pm2_5_concentration}")
 
         # Prędkość wiatru – kontrolowany wzrost i fluktuacja dla realizmu
         wind_increase = (self._fire_level * 0.025) - (self._state.wind_speed * 0.01) + random.uniform(-0.2, 0.2)
         self._state.wind_speed += wind_increase
         self._state.wind_speed = max(0, min(self._state.wind_speed, 50))  # Ograniczenie prędkości wiatru
-        logger.info(f"Sector {self.sector_id} - Wind Speed: {self._state.wind_speed}")
+        # logger.info(f"Sector {self.sector_id} - Wind Speed: {self._state.wind_speed}")
 
-
-        
-
-        
 
     def update_sector(self):
         self.update_extinguish_level()
@@ -210,7 +272,7 @@ class Sector:
                 sensor._pm2_5 = self._state.pm2_5_concentration + random.uniform(-0.1, 0.1)
             elif isinstance(sensor, TemperatureAndAirHumiditySensor):                
                 sensor._temperature = self._state.temperature + random.uniform(-0.5, 0.5)
-                logger.info(f"Temperature {sensor._temperature} in sensor_id {sensor._sensor_id} in sector {self.sector_id}")
+                # logger.info(f"Temperature {sensor._temperature} in sensor_id {sensor._sensor_id} in sector {self.sector_id}")
                 sensor._humidity = self._state.air_humidity + random.uniform(-0.5, 0.5)
             elif isinstance(sensor, LitterMoistureSensor):
                 sensor._litter_moisture = self._state.plant_litter_moisture + random.uniform(-0.5, 0.5)
@@ -246,5 +308,39 @@ class Sector:
         
         return jsons_by_type
 
-    
+    def make_sector_json(self):
+        return {
+            "sectorId":         int(self.sector_id), 
+            # "fireState":      0,
+            "fireLevel":        float(self.fire_level),
+            "burnLevel":        float(self.burn_level), 
+            "extinguishLevel":  float(self.extinguish_level)
+        }
 
+    def clone(self):
+        # Create a new instance with the same core attributes
+        cloned = Sector(
+            sector_id=self._sector_id,
+            row=self._row,
+            column=self._column,
+            sector_type=self._sector_type,
+            initial_state=copy.deepcopy(self._state),
+            fire_state=self._fire_state,
+            extinguish_level=self._extinguish_level,
+            fire_level=self._fire_level,
+            burn_level=self._burn_level,
+            num_brigades=self._number_of_fire_brigades,
+            num_patrols=self._number_of_forester_patrols,
+            sensors=copy.deepcopy(self._sensors),
+            initial_temperature=self._initial_temperature,
+            is_modified=self._is_modified,
+            coef_alpha=self._coef_alpha
+        )
+        
+        # The new instance will create its own lock
+        
+        # Copy cached adjacent sectors if they exist
+        # if hasattr(self, '_adjacent_sectors') and self._adjacent_sectors is not None:
+        #     cloned._adjacent_sectors = copy.copy(self._adjacent_sectors)
+            
+        return cloned

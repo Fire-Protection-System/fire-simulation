@@ -17,7 +17,6 @@ class MessageStore:
             self.received_messages[queue_name].append(message)
             logger.info(f"Received message: {message}")
 
-
     def add_message_to_sent(self, queue_name, message):
         """Dodaje wiadomość do określonej kolejki."""
         with self.lock:

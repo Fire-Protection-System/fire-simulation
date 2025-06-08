@@ -21,6 +21,10 @@ class ForesterPatrol(Agent):
         self._state = initial_state
         self._destination = initial_location
 
+        self._initial_location = initial_location
+        self._base_location = base_location
+        self._timestamp = timestamp
+
     @property
     def forester_patrol_id(self) -> str:
         return self._forester_patrol_id
@@ -47,3 +51,12 @@ class ForesterPatrol(Agent):
 
     def log(self) -> None:
         logging.debug(f'Forester patrol {self._forester_patrol_id} is in state: {self._state}.')
+
+    def clone(self) -> 'ForesterPatrol':
+        return ForesterPatrol(
+            forester_patrol_id=self._forester_patrol_id,
+            timestamp=self._timestamp,
+            initial_state=self._state,
+            base_location=Location(self._base_location.latitude, self._base_location.longitude),
+            initial_location=Location(self.initial_location.latitude, self.initial_location.longitude)
+        )

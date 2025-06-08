@@ -1,8 +1,9 @@
 import logging
 import random
 from typing import List, Tuple
+from queue import Queue
 
-from threading import Thread
+import threading
 import time
 import numpy as np
 import json
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 from simulation.forest_map import ForestMap
+from threading import Thread, Event
 from simulation.sectors.sector import Sector
 from simulation.sectors.fire_state import FireState
 from simulation.fire_spread.coef_generator import calculate_beta
@@ -20,6 +22,9 @@ from simulation.agent_manager.agent_manager import AgentManager
 from simulation.rabbitmq import producer, consumer, connection_manager
 from simulation.rabbitmq.message_store import MessageStore
 from simulation.sensors.sensor_type import SensorType
+from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
+
+from recomendation.mcts_test import predict
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +41,20 @@ WRITE_QUEUE_TOPICS = [
     "Litter moisture topic",
     "CO2 topic",
     "PM2.5 topic",
-    "Fire brigades state topic"
+    "Fire brigades state topic",
+    "Recommended action topic", 
+    "Sector state topic"
 ]
 
 READ_QUEUE_TOPICS = [
     "Forester patrol action queue",
     "Fire brigades action queue"
 ]
+
+stop_event = threading.Event()
+
+def stop_simulation():
+    stop_event.set()
 
 def get_topic_for_sensor(sensor_type: str) -> str:
     # Indeksy odpowiadające typom sensorów w SensorType
@@ -61,6 +73,33 @@ def run_simulation(configuration):
     store = MessageStore()
     read_threads = []
     write_threads = []
+
+    prediction_queue = Queue()
+
+    def prediction_worker():
+        while not stop_event.is_set():
+            try:
+                forest_map_clone = map.clone()
+                recommended_actions = predict(forest_map_clone)
+                available_agents = [a.fire_brigade_id for a in forest_map_clone.fireBrigades]
+
+                if recommended_actions:
+                    action_queue = "Recommended action topic"
+                    action_message = {
+                        "timestamp": time.time(),
+                        "recommendedActions": [
+                            { "unitId": int(unit_id), "sectorId": int(sector_id) }
+                            for unit_id, sector_id in recommended_actions if unit_id in available_agents
+                        ],
+                        "priority": "high"
+                    }
+                    store.add_message_to_sent(action_queue, action_message)
+                    logger.info(f"MCTS recommended actions: {recommended_actions}")
+
+            except Exception as e:
+                logger.error(f"Error in MCTS prediction: {str(e)}")
+                
+            time.sleep(5) 
     
     #===================Get connection and channel===================
 
@@ -75,7 +114,7 @@ def run_simulation(configuration):
     #===================Threads with producing and consuming===================
 
     for index, queue in enumerate(WRITE_QUEUE_TOPICS):
-        write_threads.append(Thread(target=producer.start_producing_messages, args=(EXCHANGE_NAME, queue, store, USERNAME, PASSWORD)))
+        write_threads.append(Thread(target=producer.start_producing_messages, args=(EXCHANGE_NAME, queue, store, USERNAME, PASSWORD, stop_event)))
         write_threads[index].start()
         logger.info(f"Producer for {queue} has started working.")
     
@@ -88,9 +127,14 @@ def run_simulation(configuration):
 
     map = ForestMap.from_conf(configuration)
     agents_manager = AgentManager(map, store)
-
     orderProcessingThread = Thread(target=agents_manager.start_processing_orders)
     orderProcessingThread.start()
+
+    # Start the prediction thread
+    prediction_thread = Thread(target=prediction_worker)
+    prediction_thread.daemon = True
+    prediction_thread.start()
+    logger.info("MCTS prediction thread started")
 
     #===================SIMULATION===================
     wind = Wind()
@@ -99,8 +143,7 @@ def run_simulation(configuration):
     sectors_on_fire: List[Sector] = []
     sectors_on_fire.append(map.start_new_fire())
 
-    while True:
-
+    while not stop_event.is_set():
         for sector in sectors_on_fire:
             sector.update_sector()
 
@@ -127,6 +170,28 @@ def run_simulation(configuration):
                 queue = get_topic_for_sensor(sensor_type)
                 for json in jsons:
                     store.add_message_to_sent(queue, json)
+
+            # send sector state for debuging 
+            action_queue = "Sector state topic"
+            logger.info(sector.make_sector_json())
+            store.add_message_to_sent(action_queue, sector.make_sector_json())
+        
         
         agents_manager.update_agents_states()
-        time.sleep(10)
+        time.sleep(5)
+
+    # ===================Stop Threads with producing and consuming===================
+
+    for thread in write_threads:
+        thread.join()
+    prediction_thread.join()
+
+    #===================Remove queues===================
+
+    while(1):
+        result = connection_manager.remove_queues(EXCHANGE_NAME, USERNAME, PASSWORD)
+        logger.info("Queues have been removed!")
+        if(result):
+            break
+        logger.error("Error while connecting to RabbitMQ. Trying to reconnect.")
+        time.sleep(5)
