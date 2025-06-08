@@ -25,15 +25,12 @@ logger.setLevel(logging.CRITICAL)
 
 CONFIG_PATH = "./configs/forest_4x4_conf_20250607_164147.json"
 
-NUMBER_OF_SIMULATED_FIRES = 4
-NUMBER_OF_MAX_SEARCH_STEPS = 5
-MAX_SIMULATION_TIME = 3
+NUMBER_OF_SIMULATED_FIRES = 2
+NUMBER_OF_MAX_SEARCH_STEPS = 3
+MAX_SIMULATION_TIME = 4
 
 NO_EPOCHS = 10
-NO_TESTS = 5
-
-random.seed(42)
-np.random.seed(42)
+NO_TESTS = 3
 
 import traceback
 
@@ -72,7 +69,7 @@ def predict(forest_map: ForestMap) -> List[Tuple[int, int]]:
             time_step=0,
             max_steps=NUMBER_OF_MAX_SEARCH_STEPS,
             forest_map=forest_map.clone(),
-            max_brigades=len(forest_map.fireBrigades)
+            # max_brigades=len(forest_map.fireBrigades)
         )
         
         logger.info(f"Starting MCTS search with time limit {MAX_SIMULATION_TIME} seconds...")
@@ -111,7 +108,7 @@ def run_mcts_test():
         time_step=0,
         max_steps=NUMBER_OF_MAX_SEARCH_STEPS,
         forest_map=forest_map.clone(),
-        max_brigades=len(agents)
+        # max_brigades=len(agents)
     )
 
     no_action_sectors = root.simulate_steps_without_action(root.max_steps)
@@ -133,106 +130,117 @@ def run_mcts_test():
     print("")
 
 
-def data_collector():    
+def data_collector():
     result_agg = {}
     
-    for test_id in range(1, NO_TESTS):
-        MAX_SIMULATION_TIME = test_id  
-        result_agg[test_id] = {}
+    for strategy_name, strategy_config in REWARD_CONFIGS.items():
+        print(f"Testing strategy: {strategy_name}")
+        result_agg[strategy_name] = {}
         
-        print(f"Running test {test_id + 1}/{NO_TESTS} (time limit: {MAX_SIMULATION_TIME})")
-        
-        for strategy_name, strategy_config in REWARD_CONFIGS.items():
-            print(f"  Testing strategy: {strategy_name}")
+        for test_id in range(4):
+            MAX_SIMULATION_TIME = test_id * 0.2 + 0.5
             
-            strategy_results = {
-                "avg_burned_sectors": 0,
-                "avg_fire_level": 0,
-                "strategy_name": strategy_name,
-                "time_limit": MAX_SIMULATION_TIME,
-                "epochs_completed": 0
-            }
+            print(f"  (time limit: {MAX_SIMULATION_TIME})")
             
-            for epoch in range(NO_EPOCHS):
-                try:
-                    forest_map = ForestMap.from_conf(load_forest_config(CONFIG_PATH))
-                    
-                    for _ in range(NUMBER_OF_SIMULATED_FIRES):
-                        forest_map.start_new_fire()
-                    
-                    sectors = [s.clone() for row in forest_map.sectors for s in row]
-                    agents = [s.clone() for s in forest_map.fireBrigades]
-                    
-                    root = FireSimulationNode(
-                        sectors=[s.clone() for s in sectors],
-                        agents=[a.clone() for a in agents],
-                        time_step=0,
-                        max_steps=NUMBER_OF_MAX_SEARCH_STEPS,
-                        forest_map=forest_map.clone(),
-                        max_brigades=len(agents),
-                        reward_strategy=strategy_config
-                    )
-                    
-                    no_action_sectors = root.simulate_steps_without_action(root.max_steps)
-                    
-                    action, best_score = mcts_search(
-                        root, 
-                        time_limit=MAX_SIMULATION_TIME, 
-                        return_score=True
-                    )
-                    
-                    epoch_burned_sectors = 0
-                    epoch_fire_level = 0
-                    simulation_runs = 100
-                    
-                    for run in range(simulation_runs):
-                        with_action_sectors = root.simulate_steps_with_action(
-                            NUMBER_OF_MAX_SEARCH_STEPS, 
-                            action
+            for xp in range(NO_TESTS):
+
+                strategy_results = {
+                    "avg_burned_sectors": 0,
+                    "avg_fire_level": 0,
+                    "avg_extinguished_fires": 0,
+                    "strategy_name": strategy_name,
+                    "time_limit": MAX_SIMULATION_TIME,
+                    "epochs_completed": 0
+                }
+                
+                epoch_burned_values = []
+                epoch_fire_values = []
+                epoch_extinguished_values = []
+            
+                for epoch in range(NO_EPOCHS):
+                    try:
+                        forest_map = ForestMap.from_conf(load_forest_config(CONFIG_PATH))
+                        
+                        for _ in range(NUMBER_OF_SIMULATED_FIRES):
+                            forest_map.start_new_fire()
+                        
+                        sectors = [s.clone() for row in forest_map.sectors for s in row]
+                        agents = [s.clone() for s in forest_map.fireBrigades]
+                        
+                        root = FireSimulationNode(
+                            sectors=[s.clone() for s in sectors],
+                            agents=[a.clone() for a in agents],
+                            time_step=0,
+                            max_steps=NUMBER_OF_MAX_SEARCH_STEPS,
+                            forest_map=forest_map.clone(),
+                            # max_brigades=len(agents),
+                            reward_strategy=strategy_name
                         )
                         
-                        epoch_burned_sectors += sum(sector.burn_level for sector in with_action_sectors)
-                        epoch_fire_level += sum(sector.fire_level for sector in with_action_sectors)
+                        no_action_sectors = root.simulate_steps_without_action(root.max_steps)
+                        
+                        action, best_score = mcts_search(
+                            root,
+                            time_limit=MAX_SIMULATION_TIME,
+                            return_score=True
+                        )
+                        
+                        epoch_burned_sectors = 0
+                        epoch_fire_level = 0
+                        epoch_extinguished_level = 0
+                        simulation_runs = 250
+                        
+                        for run in range(simulation_runs):
+                            with_action_sectors = root.simulate_steps_with_action(
+                                NUMBER_OF_MAX_SEARCH_STEPS,
+                                action
+                            )
+                            
+                            epoch_burned_sectors += sum(sector.burn_level for sector in with_action_sectors)
+                            epoch_fire_level += sum(sector.fire_level for sector in with_action_sectors)
+                            epoch_extinguished_level += sum(sector.extinguish_level for sector in with_action_sectors)
+                        
+                        epoch_burned_values.append(epoch_burned_sectors / simulation_runs)
+                        epoch_fire_values.append(epoch_fire_level / simulation_runs)
+                        epoch_extinguished_values.append(epoch_extinguished_level / simulation_runs)
+                        
+                    except Exception as e:
+                        print(f"    Error in epoch {epoch}: {e}")
+                        continue
+                
+                def calculate_trimmed_mean(values):
+                    if len(values) <= 2:
+                        return sum(values) / len(values) if values else 0
                     
-                    strategy_results["avg_burned_sectors"] += (epoch_burned_sectors / simulation_runs) / NO_EPOCHS
-                    strategy_results["avg_fire_level"] += (epoch_fire_level / simulation_runs) / NO_EPOCHS
-                    strategy_results["epochs_completed"] += 1
+                    sorted_values = sorted(values)
+                    trimmed_values = sorted_values[1:-1]  
                     
-                except Exception as e:
-                    print(f"    Error in epoch {epoch}: {e}")
-                    continue
-            
-            result_agg[test_id][strategy_name] = strategy_results
+                    return sum(trimmed_values) / len(trimmed_values)
+                
+                strategy_results["avg_burned_sectors"] = calculate_trimmed_mean(epoch_burned_values)
+                strategy_results["avg_fire_level"] = calculate_trimmed_mean(epoch_fire_values)
+                strategy_results["avg_extinguished_fires"] = calculate_trimmed_mean(epoch_extinguished_values)
+                
+                result_agg[strategy_name][test_id] = strategy_results
+
+                print(f"    test {xp}: avg burned sectors: {strategy_results['avg_burned_sectors']:.2f}")
+                print(f"    test {xp}: avg fire level: {strategy_results['avg_fire_level']:.2f}")
+                print(f"    test {xp}: avg extinguished: {strategy_results['avg_extinguished_fires']:.2f}")
+
+        
+        print(f"Completed all tests for strategy: {strategy_name}\n")
+    
     return result_agg
 
-
-def print_results_summary(result_agg):
-    """
-    Print a clear summary of the collected results.
-    """
-    print("\n" + "="*60)
-    print("SIMULATION RESULTS SUMMARY")
-    print("="*60)
-    
-    for test_id, strategies in result_agg.items():
-        print(f"\nTest {test_id + 1} (Time Limit: {test_id}):")
-        print("-" * 40)
-        
-        for strategy_name, results in strategies.items():
-            print(f"  Strategy: {strategy_name}")
-            print(f"    Avg Burned Sectors: {results['avg_burned_sectors']:.3f}")
-            print(f"    Avg Fire Level: {results['avg_fire_level']:.3f}")
-            print(f"    Epochs Completed: {results['epochs_completed']}/{NO_EPOCHS}")
-            print()
-
 if __name__ == "__main__":
-    logging.disable(logging.CRITICAL)
-    logging.root.setLevel(logging.CRITICAL)
+    # logging.disable(logging.CRITICAL)
+    # logging.root.setLevel(logging.CRITICAL)
 
-    simulation_logger = logging.getLogger("simulation")
-    simulation_logger.setLevel(logging.CRITICAL)
-    simulation_logger.propagate = False
-    simulation_logger.disabled = True 
+    # simulation_logger = logging.getLogger("simulation")
+    # simulation_logger.setLevel(logging.CRITICAL)
+    # simulation_logger.propagate = False
+    # simulation_logger.disabled = True 
 
-    results = data_collector()
-    print_results_summary(results)
+    # results = data_collector()
+
+    run_mcts_test()

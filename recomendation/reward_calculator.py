@@ -9,7 +9,7 @@ from recomendation.reward_strategies import *
 
 class RewardCalculator:
     def __init__(self, config: str = ""):
-        self.config = get_config_by_name(str)
+        self.config = get_config_by_name(config)
     
     def calculate_reward(self, state) -> float:
         """
@@ -18,7 +18,6 @@ class RewardCalculator:
         penalties = self._calculate_penalties(state)
         rewards = self._calculate_rewards(state)
         total_reward = penalties + rewards
-
         # print(self.get_reward_breakdown(state))
         
         return total_reward
@@ -58,7 +57,7 @@ class RewardCalculator:
             if sector.fire_state == FireState.ACTIVE
         )
         
-        penalty = -total_fire_intensity
+        penalty = -total_fire_intensity * self.config.SECTOR_FIRE_LEVEL_PENALTY
         return penalty
     
     def _calculate_extinguished_fires_reward(self, state) -> float:

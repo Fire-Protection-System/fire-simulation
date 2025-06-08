@@ -2,13 +2,13 @@ import collections
 import copy
 import heapq
 import random
+import numpy as np
+
 from collections import defaultdict, namedtuple
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from itertools import permutations, product
 from typing import Any, Dict, FrozenSet, List, NamedTuple, Optional, Set, Tuple
-
-import numpy as np
 
 from recomendation.reward_calculator import RewardCalculator
 from recomendation.node import Node
@@ -42,18 +42,36 @@ class CalculationContext:
 
 class OptimizationConfig:
     MIN_DISTANCE_THRESHOLD = 1
-    DISTANCE_PENALTY_FACTOR = 1
-    MAX_RANDOM_ATTEMPTS = 10
+    DISTANCE_PENALTY_FACTOR = 2
+    MAX_RANDOM_ATTEMPTS = 8
     MAX_TOTAL_CHILDREN = 30
     AGENT_SECTOR_MULTIPLIER = 2
-    TOP_SECTOR_PERCENTAGE = 0.1
-    MAX_COORDINATED_SECTORS = 3
+    TOP_SECTOR_PERCENTAGE = 10
+    MAX_COORDINATED_SECTORS = 10
 
-class FireSimulationNode(Node):
-    __slots__ = ('sectors', 'sector_states', 'agents', 'agent_states', 'time_step', 
-                'max_steps', 'action', 'max_brigades', 'map', 'wind', '_children_cache',
-                '_sector_lookup', '_active_sector_ids')
-    
+class FireSimulationNode(Node):    
+    """
+        A node representing a specific state in a fire simulation
+        within a Monte Carlo Tree Search (MCTS).
+
+        Key aspect is to make sure the sectors and agents state is not 
+        shared between nodes, since it could make invalid and false predictions
+
+        Attributes:
+            sectors (List[Sector]): List of forest_map sectors for this state in simulation.
+            agents (List[Agent]): Firefighting agents.
+            time_step (int): Current step in MCTS simulation.
+            max_steps (int): Max MCTS simulation steps.
+            actions (Optional[List[Tuple[int, int]]]): actions taken by agents in this node
+            forest_map (Optional[ForestMap]): Main forest map class. Needed for sector-related calculation.
+            wind (Optional[Wind]): Wind class.
+            sector_states (FrozenSet): Cached immutable state of all sectors.
+            agent_states (Tuple): Cached immutable state of all agents.
+            _sector_lookup (Dict): Lookup for sectors by ID.
+            _active_sector_ids (FrozenSet): Lookup for sectors with fire.
+            reward_strategy (str): Strategy to compute node reward for MCTS.
+    """
+
     def __init__(
         self,
         sectors: List[Sector],
@@ -61,20 +79,24 @@ class FireSimulationNode(Node):
         time_step: int,
         max_steps: int = 10,
         action: Optional[List[Tuple[int, int]]] = None,
-        max_brigades: int = 2,
         forest_map: Optional[ForestMap] = None,
         wind: Optional[Wind] = None,
-
-        sector_states=None,
-        agent_states=None,
-        _sector_lookup=None,
-        _active_sector_ids=None,
-        reward_strategy = ""
+        sector_states: Optional[FrozenSet[Tuple[int, str, int, int, int]]] = None,
+        agent_states: Optional[Tuple[Tuple[str, float, float, Optional[float], Optional[float]], ...]] = None,
+        _sector_lookup: Optional[Dict[int, Sector]] = None,
+        _active_sector_ids: Optional[FrozenSet[int]] = None,
+        reward_strategy: str = ""
     ):
         self.sectors = sectors
         self.reward_strategy = reward_strategy
-        
-        """Caching every state/object possible to optimize computations."""
+        self.time_step = time_step
+        self.max_steps = max_steps
+        self.action = tuple(action) if action else None
+        self.map = forest_map
+        self.wind = wind or Wind()
+        self._children_cache = None
+        self.agents = agents
+
         if sector_states is None:
             self.sector_states = frozenset((
                 s.sector_id,
@@ -108,15 +130,7 @@ class FireSimulationNode(Node):
             self._active_sector_ids = frozenset(s.sector_id for s in sectors if s.fire_state == FireState.ACTIVE)
         else:
             self._active_sector_ids = _active_sector_ids
-        
-        self.time_step = time_step
-        self.max_steps = max_steps
-        self.action = tuple(action) if action else None
-        self.max_brigades = max_brigades
-        self.map = forest_map
-        self.wind = wind or Wind()
-        self._children_cache = None
-        self.agents = agents
+
         
     def __hash__(self):
         return hash((self.time_step, self.sector_states, self.agent_states))
@@ -127,163 +141,256 @@ class FireSimulationNode(Node):
                 self.sector_states == other.sector_states and
                 self.agent_states == other.agent_states)
 
-    def _calculate_all_distances(self, agent_locations: Dict, sector_locations: Dict, 
-                           sector_ids: Set[int], num_agents: int) -> Dict[Tuple[int, int], float]:
+
+    def _calculate_all_distances(
+        self, 
+        agent_locations: Dict, 
+        sector_locations: Dict, 
+        sector_ids: Set[int], 
+        num_agents: int
+    ) -> Dict[Tuple[int, int], float]:
         """ 
-            Obliczanie dystansów aktor-sektor
-        """
-        return {
-            (i, sid): np.hypot(
-                agent_locations[i][0] - sector_locations[sid].latitude,
-                agent_locations[i][1] - sector_locations[sid].longitude
-            )
-            for i in range(num_agents)
-            for sid in sector_ids
-        }
+        Calculate the Euclidean distance between each agent and each sector.
+        This is used for generating gready child selection policy. 
 
-    def _calculate_top_k(self, num_sectors: int, num_agents: int) -> int:
+        Returns:
+            Dictionary: with keys (agent_id, sector_id) and values with the distances agent-sector
         """
-            Opytmalizacja: Top k sektorów pod względem scoringu do rozważenia
-        """
-        return max(1, min(
-            num_sectors, 
-            num_agents * OptimizationConfig.AGENT_SECTOR_MULTIPLIER,
-            int(len(self.sectors) * OptimizationConfig.TOP_SECTOR_PERCENTAGE)
-        ))
+        distances = {}
+        for agent_id in range(num_agents):
+            agent_x, agent_y = agent_locations[agent_id]
+            for sector_id in sector_ids:
+                sector = sector_locations[sector_id]
 
-    def _calculate_agent_scores(self, num_agents: int, top_sectors: List, 
-                          sector_threat: Dict, distances: Dict) -> List[Tuple[int, float]]:
+                # hypot for Euclidean distance
+                distance = np.hypot(agent_x - sector.latitude, agent_y - sector.longitude)
+                distances[(agent_id, sector_id)] = distance
+        return distances
+
+    def _calculate_top_k(
+        self, 
+        num_sectors: int, 
+        num_agents: int
+    ) -> int:
         """
-            Scoring sektorów pod względem zagrożenia.
-            Scoring = zagrożenie sektora / dystans danego agenta. 
+        Calculates the maximum number of top-K sectors to consider
+        in the greedy assignment policy. The scoring logic can be
+        influenced by configuration parameters.
+
+        Returns:
+            int: Number of top-k sectors
+        """
+        by_multiplier = num_agents * OptimizationConfig.AGENT_SECTOR_MULTIPLIER
+        by_percentage = int(len(self.sectors) * OptimizationConfig.TOP_SECTOR_PERCENTAGE)
+
+        top_k = min(num_sectors, by_multiplier, by_percentage)
+        return max(1, top_k)
+
+
+    def _calculate_agent_scores(
+        self, 
+        num_agents: int, 
+        top_sectors: List,
+        sector_threat: Dict[int, float], 
+        distances: Dict[Tuple[int, int], float]
+    ) -> List[Tuple[int, float]]:
+        """
+        Scoring for each agent based of sector-thread.
+        By scoring i mean: sum(sector_thread/distance_to_sector)
+
+        Also one of approaches to find optimized gready solution. 
+        (Use Agents that can response for biggest thread in best time)        
+
+        Returns:
+            List[Tulpe] :(agent_id, scoring) sorted desc.
         """
         agent_scores = []
-        for i in range(num_agents):
-            score = sum(
-                sector_threat[s.sector_id] / max(OptimizationConfig.MIN_DISTANCE_THRESHOLD, 
-                                            distances[(i, s.sector_id)])
-                for s in top_sectors
-            )
-            agent_scores.append((i, score))
-        
+
+        for agent_id in range(num_agents):
+            score = 0.0
+            for sector in top_sectors:
+                sector_id = sector.sector_id
+                score += self._calculate_agent_sector_score(agent_id, sector_id, sector_threat, distances)
+            agent_scores.append((agent_id, score))
+
         agent_scores.sort(key=lambda x: x[1], reverse=True)
         return agent_scores
 
+    def _calculate_agent_sector_score(
+        self,
+        agent_id: int,
+        sector_id: int,
+        sector_threat: Dict[int, float],
+        distances: Dict[Tuple[int, int], float]
+    ) -> float:
+        """
+        Calculate the score for a given agent and sector based on
+        threat and distance with penalty.
+        """
+        threat = sector_threat[sector_id]
+        distance = distances.get((agent_id, sector_id), float('inf'))
+        safe_distance = max(OptimizationConfig.MIN_DISTANCE_THRESHOLD, distance)
+        return threat / (1 + safe_distance * OptimizationConfig.DISTANCE_PENALTY_FACTOR)
+
     def _generate_greedy_assignments(self, context: CalculationContext) -> Set:
         """
-            Zachłanna strategia szukania rozwiązania.
-            Najbardziej zagrożone, jednocześnie najbliższe sektory.
+        Greedy Assignment.
+
+        Assign agents in descending order of their score.
+        Each agent is assigned to the sector with the best threat-to-distance ratio.
+
+        Returns:
+            Set: Set of child nodes after greedy assignments.
         """
         children = set()
         assigned_sectors = set()
         threat_actions = []
         sector_brigade_counts = collections.defaultdict(int)
-        
+
         for agent_id, _ in context.agent_scores:
             best_assignment = self._find_best_sector_for_agent(
                 agent_id, context, assigned_sectors
             )
-            
+
             if best_assignment:
                 sector_id = best_assignment[0]
                 if sector_brigade_counts[sector_id] < context.required_brigades[sector_id]:
                     threat_actions.append((agent_id, sector_id))
                     assigned_sectors.add(sector_id)
                     sector_brigade_counts[sector_id] += 1
-        
+
         if threat_actions:
-            children.add(self._apply_step(threat_actions))
-        
+            new_state = self._apply_step(threat_actions)
+            children.add(new_state)
+
         return children
 
-    def _find_best_sector_for_agent(self, agent_id: int, context: CalculationContext, 
-                               assigned_sectors: Set[int]) -> Optional[Tuple[int, float]]:
+    def _find_best_sector_for_agent(
+        self,
+        agent_id: int,
+        context: CalculationContext,
+        assigned_sectors: Set[int]
+    ) -> Optional[Tuple[int, float]]:
         """
-            Znajdowanie najlepszego sektora dla danego agenta
-        """ 
-        best_options = [
-            (sid, context.sector_threat[sid] / (1 + context.agent_to_sector_distances[(agent_id, sid)] * OptimizationConfig.DISTANCE_PENALTY_FACTOR))
-            for sid in context.sector_threat
-            if sid not in assigned_sectors
-        ]
-        
-        if best_options:
-            return max(best_options, key=lambda x: x[1])
-        return None
+        Find the best sector for the given agent based on the highest score,
+        considering only sectors that have not been assigned yet.
+
+        Returns:
+            Tuple(sector_id, score) of the best sector, or None if no sector available.
+        """
+        best_options = []
+
+        for sector_id in context.sector_threat:
+            if sector_id in assigned_sectors:
+                continue
+
+            score = self._calculate_agent_sector_score(
+                agent_id,
+                sector_id,
+                context.sector_threat,
+                context.agent_to_sector_distances
+            )
+            best_options.append((sector_id, score))
+
+        if not best_options:
+            return None
+
+        best_sector = max(best_options, key=lambda x: x[1])
+        return best_sector
 
     def _generate_coordinated_assignments(self, context: CalculationContext) -> Set:
         """
-            Podział wszystkich brygad w większe grupy. 
+        Coordinated assignment policy.
+
+        Select up to MAX_COORDINATED_SECTORS sectors and assign groups of brigades
+        to each. The number of brigades = the maximum needed to extinguish fire.
+
+        This policy tries sending multiple brigades simultaneously to active sectors.
+        (Not so effective :( )
+
+        Returns:
+            Set: Set of child nodes after applying coordinated assignments.
         """
         children = set()
-        
+
         if context.num_agents <= 1:
             return children
-        
-        max_sectors_to_process = min(OptimizationConfig.MAX_COORDINATED_SECTORS, 
-                                    len(context.top_sectors))
-        
-        for sector in context.top_sectors[:max_sectors_to_process]:
+
+        max_sectors = min(OptimizationConfig.MAX_COORDINATED_SECTORS, len(context.top_sectors))
+
+        for sector in context.top_sectors[:max_sectors]:
             sector_id = sector.sector_id
-            required = context.required_brigades[sector_id]
-            
-            if required == 0:
-                continue
-            
-            assignment = self._create_coordinated_assignment(
-                sector_id, required, context
-            )
-            
+            required_brigades = context.required_brigades.get(sector_id, 0)
+
+            if required_brigades == 0:
+                continue  
+
+            assignment = self._create_coordinated_assignment(sector_id, required_brigades, context)
+
             if assignment:
                 children.add(self._apply_step(assignment))
-        
+
         return children
 
     def _create_coordinated_assignment(self, sector_id: int, required_brigades: int, 
                                  context: CalculationContext) -> List[Tuple[int, int]]:
-        """ Rozdysponowanie wielu brygad do danego sektora """
-        closest_agents = sorted(
-            [(i, context.agent_to_sector_distances[(i, sector_id)]) 
-            for i in range(context.num_agents)],
-            key=lambda x: x[1]
-        )[:min(required_brigades, context.num_agents)]
-        
+        """
+        Assigns the closest available firefighting brigades to a target sector.
+
+        Returns:
+            List[Tuple[int, int]]: A list of (agent_id, sector_id) assignments.
+        """
+        agent_distances = [
+            (agent_id, context.agent_to_sector_distances[(agent_id, sector_id)])
+            for agent_id in range(context.num_agents)
+        ]
+
+        closest_agents = sorted(agent_distances, key=lambda x: x[1])[:min(required_brigades, context.num_agents)]
         return [(agent_id, sector_id) for agent_id, _ in closest_agents]
 
     def _generate_probabilistic_assignments(self, context: CalculationContext) -> Set:
-        """ Random selection"""
+        """
+        Generate a set of unique child nodes by randomly sampling agent-to-sector assignments.
+        In current config 80% of all nodes is generated by this assgnment.
+
+        Returns:
+            Set[FireSimulationNode]: A set of newly generated child nodes with unique assignments.
+        """
         children = set()
         seen_assignments = set()
-        max_random = min(OptimizationConfig.MAX_RANDOM_ATTEMPTS, 
-                        OptimizationConfig.MAX_TOTAL_CHILDREN - len(children))
-        
+
+        max_random = min(
+            OptimizationConfig.MAX_RANDOM_ATTEMPTS,
+            OptimizationConfig.MAX_TOTAL_CHILDREN - len(children)
+        )
+
         agent_sector_probs = self._calculate_assignment_probabilities(context)
-        
+
         for _ in range(max_random):
-            assignment = self._generate_random_assignment(
-                context, agent_sector_probs
-            )
-            
+            assignment = self._generate_random_assignment(context, agent_sector_probs)
+
             if assignment and assignment not in seen_assignments:
                 seen_assignments.add(assignment)
-                children.add(self._apply_step(list(assignment)))
-        
+                child_node = self._apply_step(list(assignment))
+                children.add(child_node)
+
         return children
 
     def _calculate_assignment_probabilities(self, context: CalculationContext) -> Dict:
-        agent_sector_probs = {}
+        agent_sector_probs: Dict[int, Tuple[List[int], np.ndarray]] = {}
         sector_ids = list(context.sector_threat.keys())
-        
-        for i in range(context.num_agents):
-            probs = np.array([
-                context.sector_threat[sid] / (1 + context.agent_to_sector_distances[(i, sid)])
+
+        for agent_id in range(context.num_agents):
+            raw_scores = np.array([
+                context.sector_threat[sid] / (1 + context.agent_to_sector_distances[(agent_id, sid)])
                 for sid in sector_ids
             ])
-            
-            if probs.sum() > 0:
-                probs = probs / probs.sum()
-                agent_sector_probs[i] = (sector_ids, probs)
-        
+
+            total = raw_scores.sum()
+            if total > 0:
+                probabilities = raw_scores / total
+                agent_sector_probs[agent_id] = (sector_ids, probabilities)
+
         return agent_sector_probs
 
     def _generate_random_assignment(self, context: CalculationContext, 
@@ -302,7 +409,6 @@ class FireSimulationNode(Node):
         
         return tuple(sorted(actions)) if actions else None
 
-
     def _prepare_calculation_context(self) -> CalculationContext:
         """
             Precomputing
@@ -319,7 +425,7 @@ class FireSimulationNode(Node):
         }
 
         required_brigades = {
-            s.sector_id: s.required_fire_brigades()
+            s.sector_id: s.required_fire_brigades() * 2
             for s in active_sectors
         }
         
@@ -357,53 +463,85 @@ class FireSimulationNode(Node):
             agent_scores=agent_scores
         )
     
-    def _calculate_distance(self, loc1, loc2):
-        """Calculate distance between two locations using numpy for speed"""
-        lat_diff = loc1.latitude - loc2.latitude
-        lon_diff = loc1.longitude - loc2.longitude
-        return np.sqrt(lat_diff**2 + lon_diff**2)
-
     def find_children(self):
+        """
+        Generate all possible child nodes using strategies:
+        - Greedy
+        - Coordinated
+        - Probabilistic
+
+        Returns:
+            Set[FireSimulationNode]: A set of unique next possible states (children).
+        """
         if self._children_cache is not None:
             return self._children_cache
-
+        
         if not self._active_sector_ids:
             self._children_cache = set()
             return self._children_cache
-
+        
         context = self._prepare_calculation_context()
+        
+        greedy_children = self._generate_greedy_assignments(context)
+        coordinated_children = self._generate_coordinated_assignments(context)
+        probabilistic_children = self._generate_probabilistic_assignments(context)
+        
+        children = set()
+        children.update(greedy_children)
+        children.update(coordinated_children)
+        children.update(probabilistic_children)
 
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            futures = [
-                executor.submit(self._generate_greedy_assignments, context),
-                executor.submit(self._generate_coordinated_assignments, context),
-                executor.submit(self._generate_probabilistic_assignments, context),
-            ]
-            children = set()
-            for future in futures:
-                children.update(future.result())
-
+        total_nodes = len(children)
+        greedy_count = len(greedy_children)
+        coordinated_count = len(coordinated_children)
+        probabilistic_count = len(probabilistic_children)
+        
+        # print(f"Strategy node counts:")
+        # print(f"  Greedy: {greedy_count} nodes ({greedy_count/total_nodes*100:.1f}%)")
+        # print(f"  Coordinated: {coordinated_count} nodes ({coordinated_count/total_nodes*100:.1f}%)")
+        # print(f"  Probabilistic: {probabilistic_count} nodes ({probabilistic_count/total_nodes*100:.1f}%)")
+        # print(f"  Total: {total_nodes} nodes")
+        # print()
+        
+            
         self._children_cache = children
         return children
 
     def find_random_child(self):
-        """Find a random child using cached active sectors"""
+        """
+        Randomly generates a single child node by assigning agents to active sectors.
+
+        Returns:
+            Optional[FireSimulationNode]: A randomly generated child node or None if no active sectors.
+        """
         if not self._active_sector_ids:
             return None
-            
-        active_sectors = [self._sector_lookup[sid] for sid in self._active_sector_ids]
-        num_agents = len(self.agents)
-        actions = []
         
-        if len(active_sectors) >= num_agents:
-            chosen_sectors = random.sample(active_sectors, num_agents)
-            for i, sector in enumerate(chosen_sectors):
-                actions.append((i, sector.sector_id))
-        else:
-            for i in range(num_agents):
-                actions.append((i, random.choice(active_sectors).sector_id))
+        context = self._prepare_calculation_context()
+
+        greedy_children = self._generate_greedy_assignments(context)
+        coordinated_children = self._generate_coordinated_assignments(context)
+        probabilistic_children = self._generate_probabilistic_assignments(context)
+
+        all_actions = []
         
-        return self._apply_step(actions)
+        for child in greedy_children:
+            if child.action:
+                all_actions.append(child.action)
+        
+        for child in coordinated_children:
+            if child.action:
+                all_actions.append(child.action)
+        
+        for child in probabilistic_children:
+            if child.action:
+                all_actions.append(child.action)
+                
+        if not all_actions:
+            return None
+    
+        chosen_actions = random.choice(all_actions)
+        return self._apply_step(chosen_actions)
 
     def _apply_step(self, actions: List[Tuple[int, int]]):
         """Apply actions and create new state with optimized object creation"""
@@ -490,16 +628,17 @@ class FireSimulationNode(Node):
             time_step=self.time_step + 1,
             max_steps=self.max_steps,
             action=actions,
-            max_brigades=self.max_brigades,
             forest_map=new_map,
             wind=copy.copy(self.wind),
             sector_states=new_sector_states,
             agent_states=new_agent_states,
             _sector_lookup=new_sector_lookup,
-            _active_sector_ids=new_active_sector_ids
+            _active_sector_ids=new_active_sector_ids, 
+            reward_strategy=self.reward_strategy
         )
 
     def calculate_reward(self, state):
+        print(self.reward_strategy)
         calculator = RewardCalculator(self.reward_strategy)
         return calculator.calculate_reward(state)
 
@@ -508,8 +647,8 @@ class FireSimulationNode(Node):
         return self.time_step >= self.max_steps or not self._active_sector_ids
 
     def reward(self):
-        """Calculate reward"""
-        return self.calculate_reward(self)
+        calculator = RewardCalculator(self.reward_strategy)
+        return calculator.calculate_reward(self)
 
     def _update_position(self, agent: Agent) -> bool:
         """Update agent position with optimized movement calculation"""
