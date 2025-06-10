@@ -24,7 +24,6 @@ logger.disabled = True
 logger.setLevel(logging.CRITICAL)
 
 CONFIG_PATH = "./configs/forest_4x4_conf_20250607_164147.json"
-
 NUMBER_OF_SIMULATED_FIRES = 2
 NUMBER_OF_MAX_SEARCH_STEPS = 3
 MAX_SIMULATION_TIME = 4
