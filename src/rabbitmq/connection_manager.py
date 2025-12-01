@@ -4,28 +4,14 @@ import logging
 logger = logging.getLogger(__name__)
 app_settings = get_settings()
 
-def _connection_parameters() -> pika.ConnectionParameters:
-    credentials = pika.PlainCredentials(
-        app_settings.RABBITMQ_USERNAME, 
-        app_settings.RABBITMQ_PASSWORD
-    )
-   
-    return pika.ConnectionParameters(
-        host=app_settings.RABBITMQ_HOST,
-        port=app_settings.RABBITMQ_PORT,
-        credentials=credentials,
-        heartbeat=60,
-        blocked_connection_timeout=30
-    )
-
-def _connect() -> pika.BlockingConnection:
-    return pika.BlockingConnection(_connection_parameters())
-
 def create_queues(exchange_name, username, password):
     try:
-        connection = _connect()
-        channel = connection.channel()
-
+        client = PikaClient()
+        with client.connection_ctx() as (connection, channel):
+            if connection is None or channel is None:
+                logger.error("Cannot establish connection to RabbitMQ, exiting")
+                return None, None
+                
         for queue_name in app_settings.QUEUE_NAMES:
             channel.queue_declare(queue=queue_name)
             logger.info(f"Queue created: {queue_name}")

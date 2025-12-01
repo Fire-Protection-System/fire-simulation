@@ -50,25 +50,16 @@ class ForestMap:
 
     @classmethod
     def from_conf(cls, conf):
-        # Przetwórz dane lokalizacji
         location = cls._parse_locations(conf["location"])
-
-        # Przetwórz sektory
         sectors = cls._parse_sectors(conf)
-
-        # Oblicz parametry mapy na podstawie lokalizacji
         bounds = cls._calculate_bounds(location, conf["rows"], conf["columns"])
 
-        # Dodaj sensory do odpowiednich sektorów
         cls._assign_sensors_to_sectors(conf["sensors"], sectors, bounds)
-
         cls._assign_cameras_to_sectors(conf["cameras"], sectors, bounds)
 
         brigades = cls._parse_fire_brigades(conf)
         patrols = cls._parse_forester_patrols(conf)
         
-
-        # Stwórz i zwróć obiekt ForestMap
         return cls(
             forest_id=conf["forestId"],
             forest_name=conf["forestName"],
@@ -89,6 +80,7 @@ class ForestMap:
         json_conf = json.dumps(conf, indent=4)
 
         sectors = [[None for _ in range(conf["columns"])] for _ in range(conf["rows"])]
+
         for val in conf["sectors"]:
             initial_state = SectorState(
                 temperature=val["initialState"]["temperature"],
@@ -162,10 +154,11 @@ class ForestMap:
 
     @staticmethod
     def _calculate_bounds(locations, rows, columns):
-        min_lat = min(location.latitude for location in locations)
-        min_lon = min(location.longitude for location in locations)
-        diff_lat = max(location.latitude for location in locations) - min_lat
+        min_lat  = min(location.latitude  for location in locations)
+        min_lon  = min(location.longitude for location in locations)
+        diff_lat = max(location.latitude  for location in locations) - min_lat
         diff_lon = max(location.longitude for location in locations) - min_lon
+
         return {
             "min_lat": min_lat,
             "min_lon": min_lon,

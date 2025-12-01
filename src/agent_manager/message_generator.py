@@ -9,7 +9,6 @@ from simulation.forester_patrols.forest_patrols_state import FORESTERPATROL_STAT
 from simulation.sectors.fire_state import FireState
 
 def generate_traveling_message(agent: Agent):
-
     if isinstance(agent, FireBrigade):
 
         return {

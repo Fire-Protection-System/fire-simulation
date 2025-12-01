@@ -53,11 +53,11 @@ class EngineRunner:
                 break
             time.sleep(2)
 
-        for q in app_settings.WRITE_QUEUE_TOPICS:
+        for q_topic in app_settings.WRITE_QUEUE_TOPICS:
 
             producer_kargs = {
                 "exchange":    app_settings.EXCHANGE_NAME,
-                "routing_key": q,
+                "routing_key": q_topic,
                 "store":       self.store,
                 "username":    app_settings.RABBITMQ_USERNAME,
                 "password":    app_settings.RABBITMQ_PASSWORD
@@ -67,10 +67,16 @@ class EngineRunner:
             t.start()
             self._write_threads.append(t)
 
-        for q in app_settings.READ_QUEUE_TOPICS:
+        for q_topic in app_settings.READ_QUEUE_TOPICS:
 
+            consumer_kargs = {
+                "queue":       q_topic,
+                "store":       self.store,
+                "username":    app_settings.RABBITMQ_USERNAME,
+                "password":    app_settings.RABBITMQ_PASSWORD
+            }
 
-            t = threading.Thread(target=consumer.consume_messages_from_queue, args=(q, self.store, app_settings.RABBITMQ_USERNAME, app_settings.RABBITMQ_PASSWORD), daemon=True)
+            t = threading.Thread(target=consumer.consume_messages_from_queue, kwargs=consumer_kargs, daemon=True)
             t.start()
             self._read_threads.append(t)
 
@@ -78,10 +84,12 @@ class EngineRunner:
         result = await self.engine.step(1)
         sensor_messages = result.get("sensor_messages", {})
         sector_states = result.get("sector_states", [])
+
         for sensor_type, payloads in sensor_messages.items():
             topic = get_topic_for_sensor(sensor_type)
             for p in payloads:
                 self.store.add_message_to_sent(topic, p)
+                
         for s in sector_states:
             self.store.add_message_to_sent("Sector state topic", s)
 

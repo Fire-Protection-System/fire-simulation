@@ -32,7 +32,6 @@ class MessageStore:
                 #logger.info(f"No messages available in queue '{queue_name}'")
                 return None
 
-
     def get_sent_message(self):
         pass
 

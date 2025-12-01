@@ -34,22 +34,21 @@ def start_producing_messages(
     password: str, 
     stop_event
 ) -> None:
-    credentials = pika.PlainCredentials(username, password)
+    client = PikaClient()
     try:
-        connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host = app_settings.rabbitmq_host,
-                port = app_settings.rabbitmq_port,
-                credentials = credentials
-            )
-        )
-        channel = connection.channel()
-        
-        while not stop_event.is_set():
-            message = store.get_message_to_sent(routing_key)
-            if message:
-                produce_message(exchange, channel, routing_key, message)
-            time.sleep(0.5)
+        with client.connection_ctx() as (connection, channel):
+            if connection is None or channel is None:
+                logger.error("Cannot establish connection to RabbitMQ, producer exiting")
+                return
+
+            while not stop_event.is_set():
+                message = store.get_message_to_sent(routing_key)
+                if message:
+                    try:
+                        channel.basic_publish(exchange=exchange, routing_key=routing_key, body=json.dumps(message))
+                    except Exception as e:
+                        logger.exception("Error publishing message: %s", e)
+                time.sleep(0.5)
 
     except Exception as e:
         print(f"Connection error: {e}")

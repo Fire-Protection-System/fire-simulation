@@ -38,12 +38,10 @@ def _get_event_loop() -> asyncio.AbstractEventLoop:
         _loop_thread.start()
     return _loop
 
-
 def _run_async(coro):
     loop = _get_event_loop()
     future = asyncio.run_coroutine_threadsafe(coro, loop)
     return future.result(timeout=30)
-
 
 @app.route('/run_simulation', methods=['POST'])
 def run():
@@ -75,7 +73,6 @@ def stop():
 
 @app.route('/step', methods=['POST'])
 def step():
-    """Wykonaj ręcznie n kroków symulacji (domyślnie 1)."""
     data = request.get_json() or {}
     ticks = data.get("ticks", 1)
 
