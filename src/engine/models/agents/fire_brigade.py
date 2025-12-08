@@ -60,5 +60,5 @@ class FireBrigade(Agent):
             timestamp=self._timestamp, 
             initial_state=self._state,
             base_location=Location(self._base_location.latitude, self._base_location.longitude),
-            initial_location=Location(self._initial_location.latitude, self._initial_location.longitude)  # Assuming _initial_location exists
+            initial_location=Location(self._initial_location.latitude, self._initial_location.longitude)
         )

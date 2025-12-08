@@ -1,0 +1,2 @@
+[console_scripts]
+fire-simulation = main:app.run

@@ -4,20 +4,34 @@ import sys
 import threading
 from flask import Flask, request, jsonify
 
-from src.settings.settings import get_settings
+from settings.communucation_settings import get_communication_settings
 from src.engine.simple_simulation_engine import SimpleSimulationEngine
 from src.engine.runner import EngineRunner
 from src.logger.logging_config import setup_logging
 
 app = Flask(__name__)
 
-app_settings = get_settings()
+# Load default communication settings
+communication_settings = get_communication_settings()
 
+# Create SimpleSimulationEngine 
+# This will be default for now 
 engine = SimpleSimulationEngine()
-runner = EngineRunner(engine, settings=app_settings)
+
+# Runner will monitor the engine and handle communication
+# Send messages, receive commands, etc.
+runner = EngineRunner(engine, settings=communication_settings)
 
 _loop: asyncio.AbstractEventLoop | None = None
 _loop_thread: threading.Thread | None = None
+
+# ---------------------------------------------------------
+#  REST API Endpoints
+# ---------------------------------------------------------
+# API for controlling the simulation. This section should 
+# include all necessary commands / endpoints / procedures
+# for managing the simulation lifecycle and interactions.
+# ---------------------------------------------------------
 
 def _get_event_loop() -> asyncio.AbstractEventLoop:
     global _loop, _loop_thread
@@ -34,6 +48,10 @@ def _run_async(coro):
 
 @app.route('/run_simulation', methods=['POST'])
 def run():
+    '''
+        Start the simulation with the provided configuration.
+        
+    '''
     data = request.get_json()
     print("Received data:", data)
 

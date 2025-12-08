@@ -8,10 +8,10 @@ from datetime import timedelta
 import copy
 import math
 
-from configurations import conf_generator
-from engine.models.map.fire_state import FireState
-from engine.models.map.sector_state import SectorState
-from engine.models.map.sector_type import SectorType
+from configurations.generator import conf_generator
+from src.engine.models.map.fire_state import FireState
+from src.engine.models.map.sector_state import SectorState
+from src.engine.models.map.sector_type import SectorType
 
 logger = logging.getLogger(__name__)
 logger.disabled = True

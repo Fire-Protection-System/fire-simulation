@@ -11,7 +11,6 @@ DEFAULT_RABBITMQ_PORT = 5672
 DEFAULT_RABBITMQ_USER = "guest"
 DEFAULT_RABBITMQ_PASS = "guest"
 DEFAULT_EXCHANGE      = "fire-simulation-exchange"
-DEFAULT_TICK_INTERVAL = 5.0
 
 
 class Settings(BaseSettings):
@@ -20,8 +19,7 @@ class Settings(BaseSettings):
     rabbitmq_username: str   = Field(DEFAULT_RABBITMQ_USER, env="RABBITMQ_USERNAME")
     rabbitmq_password: str   = Field(DEFAULT_RABBITMQ_PASS, env="RABBITMQ_PASSWORD")
     exchange_name:     str   = Field(DEFAULT_EXCHANGE,      env="FIRE_SIMULATION_EXCHANGE_NAME")
-    tick_interval:     float = Field(DEFAULT_TICK_INTERVAL, env="TICK_INTERVAL")
 
 
-def get_settings() -> Settings:
+def get_communication_settings() -> Settings:
     return Settings()
