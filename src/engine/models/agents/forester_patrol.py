@@ -1,11 +1,10 @@
 import logging
 from datetime import datetime
 
-from simulation.agent import Agent
-from simulation.sectors.sector import Sector
-from simulation.agent_state import AGENT_STATE
-from simulation.location import Location
-
+from engine.models.agents.agent import Agent
+from engine.models.agents.agent_state import AGENT_STATE
+from engine.models.core.location import Location
+from engine.models.map.sector import Sector
 
 class ForesterPatrol(Agent):
     def __init__(

@@ -4,28 +4,17 @@ import sys
 import threading
 from flask import Flask, request, jsonify
 
-from engine.simple_simulation_engine import SimpleSimulationEngine
-from engine.runner import EngineRunner
-from logger.logging_config import setup_logging
-from settings.config import get_settings
+from src.settings.settings import get_settings
+from src.engine.simple_simulation_engine import SimpleSimulationEngine
+from src.engine.runner import EngineRunner
+from src.logger.logging_config import setup_logging
 
 app = Flask(__name__)
 
 app_settings = get_settings()
 
-sim_settings = SimulationSettings(
-    READ_QUEUE_TOPICS = app_settings.read_queue_topics,
-    WRITE_QUEUE_TOPICS = app_settings.write_queue_topics,
-    EXCHANGE_NAME = app_settings.exchange_name,
-    RABBITMQ_USERNAME = app_settings.rabbitmq_username,
-    RABBITMQ_PASSWORD = app_settings.rabbitmq_password,
-    RABBITMQ_HOST = app_settings.rabbitmq_host,
-    RABBITMQ_PORT = app_settings.rabbitmq_port,
-    TICK_INTERVAL = app_settings.tick_interval,
-)
-
 engine = SimpleSimulationEngine()
-runner = EngineRunner(engine, settings = sim_settings)
+runner = EngineRunner(engine, settings=app_settings)
 
 _loop: asyncio.AbstractEventLoop | None = None
 _loop_thread: threading.Thread | None = None

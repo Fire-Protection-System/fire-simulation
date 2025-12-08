@@ -6,26 +6,25 @@ from typing import TypeAlias
 from typing import Tuple
 from typing import List, Tuple, Optional
 
-from simulation.sectors.sector import Sector
-from simulation.location import Location
-from simulation.sectors.sector_state import SectorState
-from simulation.sectors.sector_type import SectorType
-from simulation.sectors.geographic_direction import GeographicDirection
-from simulation.sensors.temperature_and_air_humidity_sensor import TemperatureAndAirHumiditySensor
-from simulation.sensors.wind_speed_sensor import WindSpeedSensor
-from simulation.sensors.wind_direction_sensor import WindDirectionSensor
-from simulation.sensors.co2_sensor import CO2Sensor
-from simulation.sensors.litter_moisture_sensor import LitterMoistureSensor
-from simulation.sensors.pm2_5_sensor import PM2_5Sensor
-from simulation.cameras.camera import Camera
-from simulation.forester_patrols.forester_patrol import ForesterPatrol
-from simulation.fire_brigades.fire_brigade import FireBrigade
-from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
-from simulation.forester_patrols.forest_patrols_state import FORESTERPATROL_STATE
-from simulation.sectors.fire_state import FireState
+from src.engine.models.core.location import Location
+from src.engine.models.map.sector import Sector
+from src.engine.models.map.sector_type import SectorType
+from src.engine.models.map.sector_state import SectorState
+from src.engine.models.map.geographic_direction import GeographicDirection
+from src.engine.models.map.fire_state import FireState
+from src.engine.models.sensors.temperature_and_air_humidity_sensor import TemperatureAndAirHumiditySensor
+from src.engine.models.sensors.wind_speed_sensor import WindSpeedSensor
+from src.engine.models.sensors.wind_direction_sensor import WindDirectionSensor
+from src.engine.models.sensors.co2_sensor import CO2Sensor
+from src.engine.models.sensors.litter_moisture_sensor import LitterMoistureSensor
+from src.engine.models.sensors.pm2_5_sensor import PM2_5Sensor
+from src.engine.models.sensors.camera import Camera
+from src.engine.models.agents.forester_patrol import ForesterPatrol
+from src.engine.models.agents.fire_brigade import FireBrigade
+from src.engine.models.agents.fire_brigade_state import FIREBRIGADE_STATE
+from src.engine.models.agents.forest_patrols_state import FORESTERPATROL_STATE
 
 ForestMapCornerLocations: TypeAlias = tuple[Location, Location, Location, Location] 
-
 
 class ForestMap:
     def __init__(

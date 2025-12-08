@@ -3,7 +3,7 @@ import logging.handlers
 import os
 
 def setup_logging(service_name):
-    log_dir = f"/var/log/{service_name}"
+    log_dir = f"/home/dominiq/Desktop/studio-projektowe/deployment/fire-simulation/logs/{service_name}"
     os.makedirs(log_dir, exist_ok=True)
     
     formatter = logging.Formatter(

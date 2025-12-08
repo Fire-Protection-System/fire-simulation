@@ -1,7 +1,12 @@
 import pika
 import logging
 
+from rabbitmq.pika_client import PikaClient
+from settings.settings import get_settings
+
 logger = logging.getLogger(__name__)
+
+
 app_settings = get_settings()
 
 def create_queues(exchange_name, username, password):

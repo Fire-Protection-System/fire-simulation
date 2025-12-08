@@ -1,11 +1,15 @@
 import pika
 import logging
 import json
-from simulation.rabbitmq.message_store import MessageStore
 import functools
 import os
 
+from rabbitmq.message_store import MessageStore
+from rabbitmq.pika_client import PikaClient
+from settings.settings import get_settings
+
 logger = logging.getLogger(__name__)
+
 app_settings = get_settings()
 
 def callback(

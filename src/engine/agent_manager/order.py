@@ -1,7 +1,8 @@
 from abc import ABC
 from datetime import datetime
-from simulation.agent_manager.action_type import FIREBRIGADE_ACTION, FORESTERPATROL_ACTION
-from simulation.location import Location
+
+from engine.agent_manager.action_type import FIREBRIGADE_ACTION, FORESTERPATROL_ACTION
+from engine.models.core.location import Location
 
 class Order(ABC):
     def __init__(self, timestamp : datetime | None, location : Location | None):

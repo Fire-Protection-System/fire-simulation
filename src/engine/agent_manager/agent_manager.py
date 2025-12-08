@@ -1,15 +1,24 @@
 import json
 import logging
 
-from simulation.forest_map import ForestMap
-from simulation.rabbitmq.message_store import MessageStore
-from simulation.agent_state import AGENT_STATE
-from simulation.agent import Agent
-from simulation.agent_manager.message_generator import *
-from simulation.fire_brigades.fire_brigade import FireBrigade
-from simulation.forester_patrols.forester_patrol import ForesterPatrol
-from simulation.agent_manager.order import *
-from simulation.agent_manager.action_type import *
+from src.engine.agent_manager.action_type import FIREBRIGADE_ACTION, FORESTERPATROL_ACTION
+from src.engine.agent_manager.order import FireBrigadeOrder, ForesterPatrolOrder, Order
+from src.engine.models.agents.agent_state import AGENT_STATE
+from src.engine.models.agents.agent import Agent
+from src.engine.models.agents.fire_brigade import FireBrigade
+from src.engine.models.agents.forester_patrol import ForesterPatrol
+from src.engine.models.core.location import Location
+
+from src.rabbitmq.message_store import MessageStore
+from src.engine.models.map.forest_map import ForestMap
+
+from src.engine.agent_manager.message_generator import (
+    generate_message_available,
+    generate_message_extinguished,
+    generate_message_extinguishing,
+    generate_message_patrolling,
+    generate_traveling_message,
+)
 
 logger = logging.getLogger(__name__)
 

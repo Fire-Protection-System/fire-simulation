@@ -8,22 +8,10 @@ from datetime import timedelta
 import copy
 import math
 
-from simulation.sensors.sensor import Sensor
-from simulation.sectors.sector_state import SectorState
-from simulation.sectors.sector_type import SectorType
-from simulation.sectors.fire_state import FireState
-from simulation.sensors.sensor_type import SensorType
-from simulation.config import const
-from simulation.fire_spread import coef_generator
-
-from simulation.sensors.temperature_and_air_humidity_sensor import TemperatureAndAirHumiditySensor
-from simulation.sensors.wind_speed_sensor import WindSpeedSensor
-from simulation.sensors.wind_direction_sensor import WindDirectionSensor
-from simulation.sensors.co2_sensor import CO2Sensor
-from simulation.sensors.litter_moisture_sensor import LitterMoistureSensor
-from simulation.sensors.pm2_5_sensor import PM2_5Sensor
-from simulation.cameras.camera import Camera
-from simulation.location import Location
+from configurations import conf_generator
+from engine.models.map.fire_state import FireState
+from engine.models.map.sector_state import SectorState
+from engine.models.map.sector_type import SectorType
 
 logger = logging.getLogger(__name__)
 logger.disabled = True
@@ -69,7 +57,7 @@ class Sector:
         elif hasattr(initial_state, 'temperature'):
             self._initial_temperature = initial_state.temperature
             
-        self._coef_alpha = coef_alpha or coef_generator.calculate_alpha(self._sector_type)
+        self._coef_alpha = coef_alpha or conf_generator.calculate_alpha(self._sector_type)
 
     @property
     def sector_id(self) -> int:

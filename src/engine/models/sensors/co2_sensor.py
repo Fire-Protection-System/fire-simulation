@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
 
-from simulation.sensors.sensor import Sensor
-from simulation.sensors.sensor_type import SensorType
-from simulation.location import Location
+from configurations.conf_generator import SensorType
+from engine.models.core.location import Location
+from engine.models.sensors.camera_data import CameraData
+from engine.models.sensors.sensor import Sensor
 
 
 class CO2Sensor(Sensor):

@@ -2,10 +2,11 @@ import logging
 from datetime import datetime
 import json
 
-from simulation.sectors.sector import Sector
-from simulation.agent import Agent
-from simulation.location import Location
-from simulation.agent_state import AGENT_STATE
+from engine.models.agents.agent import Agent
+from engine.models.agents.agent_state import AGENT_STATE
+from engine.models.core.location import Location
+from engine.models.map.sector import Sector
+
 
 class FireBrigade(Agent):
     def __init__(

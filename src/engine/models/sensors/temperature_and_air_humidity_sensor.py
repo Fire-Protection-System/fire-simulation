@@ -1,9 +1,10 @@
 from datetime import datetime
 import logging
 
-from .sensor import Sensor
-from .sensor_type import SensorType
-from ..location import Location
+from configurations.conf_generator import SensorType
+from engine.models.core.location import Location
+from engine.models.sensors.camera_data import CameraData
+from engine.models.sensors.sensor import Sensor
 
 
 class TemperatureAndAirHumiditySensor(Sensor):

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
-from simulation.sectors.geographic_direction import GeographicDirection
-
+from src.engine.models.map.geographic_direction import GeographicDirection
 
 @dataclass(frozen=False)
 class SectorState:

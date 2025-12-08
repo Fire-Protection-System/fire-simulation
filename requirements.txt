@@ -3,3 +3,6 @@ opencv-python
 matplotlib
 pika
 flask
+pydantic
+pydantic-settings
+python-dotenv

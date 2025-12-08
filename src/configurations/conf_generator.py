@@ -1,9 +1,7 @@
 import json
-
 from datetime import datetime
 from enum import Enum
 import random
-
 import argparse
 
 DEFAULT_GRID_SIZE = 5
@@ -12,7 +10,6 @@ LON_START = 19.934967812541295
 LAT_START = 50.034952974941994
 LON_END = 19.979856325506027
 LAT_END = 50.07185882753423
-
 
 class SensorType(Enum):
     TEMPERATURE_AND_AIR_HUMIDITY = 1

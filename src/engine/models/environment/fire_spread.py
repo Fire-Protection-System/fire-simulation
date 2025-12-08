@@ -1,7 +1,9 @@
-from simulation.fire_spread.wind import Wind
-from simulation.sectors.sector_type import SectorType
-from simulation.sectors.geographic_direction import GeographicDirection
+
 from typing import Tuple
+
+from engine.models.environment.wind import Wind
+from engine.models.map.geographic_direction import GeographicDirection
+from engine.models.map.sector_type import SectorType
 
 def calculate_beta(wind: Wind, target_sector_type: SectorType, direction: GeographicDirection) -> float:
 

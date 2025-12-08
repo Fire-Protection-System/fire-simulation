@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from simulation.agent import Agent
-from simulation.sectors.sector import Sector
-from simulation.fire_brigades.fire_brigade import FireBrigade
-from simulation.fire_brigades.fire_brigade_state import FIREBRIGADE_STATE
-from simulation.forester_patrols.forester_patrol import ForesterPatrol
-from simulation.forester_patrols.forest_patrols_state import FORESTERPATROL_STATE
-from simulation.sectors.fire_state import FireState
+from engine.models.agents.agent import Agent
+from engine.models.agents.fire_brigade import FireBrigade
+from engine.models.agents.fire_brigade_state import FIREBRIGADE_STATE
+from engine.models.agents.forest_patrols_state import FORESTERPATROL_STATE
+from engine.models.agents.forester_patrol import ForesterPatrol
+from engine.models.map.sector import Sector
+
 
 def generate_traveling_message(agent: Agent):
     if isinstance(agent, FireBrigade):

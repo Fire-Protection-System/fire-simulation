@@ -1,7 +1,8 @@
 import random
 import logging
 
-from simulation.sectors.geographic_direction import GeographicDirection
+from engine.models.map.geographic_direction import GeographicDirection
+
 
 logger = logging.getLogger(__name__)
 

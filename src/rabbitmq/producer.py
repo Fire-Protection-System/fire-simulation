@@ -1,9 +1,13 @@
 import pika
 import logging
 import json
-from simulation.rabbitmq.message_store import MessageStore
 import time
 import os
+
+from rabbitmq.message_store import MessageStore
+from rabbitmq.pika_client import PikaClient
+from settings.settings import get_settings
+
 
 app_settings = get_settings()
 logger = logging.getLogger(__name__)

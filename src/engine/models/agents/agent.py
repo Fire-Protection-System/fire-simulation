@@ -1,18 +1,11 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-#from typing import TypeAlias, Union
 
-from simulation.sectors.sector import Sector
-from simulation.agent_state import AGENT_STATE
-# from simulation.forester_patrols.forester_patrol import ForesterPatrolState
-
-from simulation.location import Location
-
-#MovingAgentState: TypeAlias = Union[FireBrigadeState, ForesterPatrolState]
-
+from engine.models.agents.agent_state import AGENT_STATE
+from engine.models.core.location import Location
+from engine.models.map.sector import Sector
 
 class Agent(ABC):
-        
     def __init__(
         self,
         timestamp: datetime,
