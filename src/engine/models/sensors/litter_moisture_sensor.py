@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime
 
-from configurations.conf_generator import SensorType
-from engine.models.core.location import Location
-from engine.models.sensors.camera_data import CameraData
-from engine.models.sensors.sensor import Sensor
+from src.generator.conf_generator import SensorType
+from src.engine.models.core.location import Location
+from src.engine.models.sensors.camera_data import CameraData
+from src.engine.models.sensors.sensor import Sensor
 
 
 class LitterMoistureSensor(Sensor):
@@ -17,12 +17,7 @@ class LitterMoistureSensor(Sensor):
         sensor_id: str,
     ):
         Sensor.__init__(self, timestamp, location, sensor_id)
-        self._litter_moisture = None
-        if not self._litter_moisture:
-            logging.warning(
-                f"Sensor {self._sensor_id} of type {LitterMoistureSensor.sensor_type} "
-                f"is missing litter moisture data!"
-            )
+        self._litter_moisture = 30.0  # Default litter moisture in %
     
     @property
     def unit(self):
@@ -30,7 +25,8 @@ class LitterMoistureSensor(Sensor):
     
     @property
     def data(self):
-        return {"liiter_moisture" : round(self._litter_moisture, 2)}
+        litter_val = round(self._litter_moisture, 2) if self._litter_moisture is not None else 30.0
+        return {"litter_moisture" : litter_val}
 
     def next(self) -> None:
         pass

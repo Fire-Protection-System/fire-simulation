@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime
 
-from configurations.conf_generator import SensorType
-from engine.models.core.location import Location
-from engine.models.sensors.camera_data import CameraData
-from engine.models.sensors.sensor import Sensor
+from src.generator.conf_generator import SensorType
+from src.engine.models.core.location import Location
+from src.engine.models.sensors.camera_data import CameraData
+from src.engine.models.sensors.sensor import Sensor
 
 
 class PM2_5Sensor(Sensor):
@@ -17,16 +17,12 @@ class PM2_5Sensor(Sensor):
         sensor_id: str,
     ):
         Sensor.__init__(self, timestamp, location, sensor_id)
-        self._pm2_5 = None
-        if not self._pm2_5:
-            logging.warning(
-                f"Sensor {self._sensor_id} of type {PM2_5Sensor.sensor_type} "
-                f"is missing PM2.5 concentration data!"
-            )
+        self._pm2_5 = 10.0  # Default PM2.5 concentration in ppm
 
     @property
     def data(self):
-        return {"pm2_5" : round(self._pm2_5, 2)}
+        pm_val = round(self._pm2_5, 2) if self._pm2_5 is not None else 10.0
+        return {"pm2_5" : pm_val}
 
     @property
     def unit(self) -> str:

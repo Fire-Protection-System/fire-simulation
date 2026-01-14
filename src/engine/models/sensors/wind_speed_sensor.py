@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime
 
-from configurations.conf_generator import SensorType
-from engine.models.core.location import Location
-from engine.models.sensors.camera_data import CameraData
-from engine.models.sensors.sensor import Sensor
+from src.generator.conf_generator import SensorType
+from src.engine.models.core.location import Location
+from src.engine.models.sensors.camera_data import CameraData
+from src.engine.models.sensors.sensor import Sensor
 
 
 class WindSpeedSensor(Sensor):
@@ -17,18 +17,13 @@ class WindSpeedSensor(Sensor):
         sensor_id: str,        
     ):
         Sensor.__init__(self, timestamp, location, sensor_id)
-        self._wind_speed = None
-
-        if not self._wind_speed:
-            logging.warning(
-                f"Sensor {self._sensor_id} of type {WindSpeedSensor.sensor_type} "
-                f"is missing wind direction data!"
-            )
+        self._wind_speed = 5.0  # Default wind speed in m/s
     
     @property
     def data(self) -> float:
+        speed_val = round(self._wind_speed, 2) if self._wind_speed is not None else 5.0
         return {
-            "windSpeed": round(self._wind_speed, 2)
+            "windSpeed": speed_val
         }
     
     @property

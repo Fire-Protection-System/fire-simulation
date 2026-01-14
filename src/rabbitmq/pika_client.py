@@ -3,13 +3,13 @@ import logging
 from contextlib import contextmanager
 from typing import Iterator, Tuple, Optional
 
-from settings.settings import get_settings
+from src.settings.communucation_settings import get_communication_settings
 
 logger = logging.getLogger(__name__)
 
 class PikaClient:
     def __init__(self):
-        self._settings = get_settings()
+        self._settings = get_communication_settings()
 
     def connection_parameters(self) -> pika.ConnectionParameters:
         creds = pika.PlainCredentials(
@@ -43,6 +43,8 @@ class PikaClient:
             yield conn, ch
         except Exception as e:
             logger.exception("Pika connection error: %s", e)
+            if hasattr(e, 'args') and e.args and '404' in str(e.args[0]):
+                import pdb; pdb.set_trace()
             yield None, None
         finally:
             try:

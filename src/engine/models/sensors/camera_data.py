@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from engine.models.core.location import Location
+from src.engine.models.core.location import Location
 
 @dataclass
 class CameraData:

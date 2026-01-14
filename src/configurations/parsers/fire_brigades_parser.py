@@ -9,24 +9,23 @@ from src.engine.models.agents.fire_brigade_state import FIREBRIGADE_STATE
 
 logger = logging.getLogger(__name__)
 
-def parse_fire_brigades(data: List[Dict[str, Any]]) -> List[FireBrigade]:
+def parse_fire_brigades(fire_brigades_json_data: List[Dict[str, Any]]) -> List[FireBrigade]:
     '''
     Parsing fire brigades data from JSON input from selected configuration
     
-    :param data: json input containing fire brigades information
-    :type data: List[Dict[str, Any]]
+    :param fire_brigades_json_data: json input containing fire brigades information
+    :type fire_brigades_json_data: List[Dict[str, Any]]
     :return: list of FireBrigade objects parsed from the input data
     :rtype: List[FireBrigade]
     '''
-    
     brigades = []
     
-    fire_brigades_data = data.get('fireBrigades', [])
+    fire_brigades_data = fire_brigades_json_data.get('fireBrigades', [])
     if not isinstance(fire_brigades_data, list):
         logger.error("'fireBrigades' is missing or is not a list")
         return brigades
     
-    for item in fire_brigades_data:
+    for idx, item in enumerate(fire_brigades_data):
         try:
             fire_brigade_id = item["fireBrigadeId"]
             timestamp = datetime.fromisoformat(item["timestamp"]) 
@@ -50,12 +49,18 @@ def parse_fire_brigades(data: List[Dict[str, Any]]) -> List[FireBrigade]:
             ))
        
         except KeyError as e:
-            logger.error(f"ERROR: Fire Brigade Parser Missing key in data: {e}")
+            brigade_id = item.get("fireBrigadeId", f"index_{idx}")
+            logger.error(f"Resource not found: Missing required field in fire brigade {brigade_id} at index {idx}. Missing key: {e}", exc_info=True)
+            continue
         
         except ValueError as e:
-            logger.error(f"ERROR: Fire Brigade Parser Value error: {e}")
+            brigade_id = item.get("fireBrigadeId", f"index_{idx}")
+            logger.error(f"Invalid data format: Error parsing fire brigade {brigade_id} at index {idx}. Value error: {e}", exc_info=True)
+            continue
         
         except TypeError as e:
-            logger.error(f"ERROR: Fire Brigade Parser Type error: {e}")
+            brigade_id = item.get("fireBrigadeId", f"index_{idx}")
+            logger.error(f"Invalid data format: Error parsing fire brigade {brigade_id} at index {idx}. Type error: {e}", exc_info=True)
+            continue
         
     return brigades

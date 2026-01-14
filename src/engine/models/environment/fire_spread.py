@@ -1,15 +1,15 @@
 
 from typing import Tuple
 
-from engine.models.environment.wind import Wind
-from engine.models.map.geographic_direction import GeographicDirection
-from engine.models.map.sector_type import SectorType
+from src.engine.models.environment.wind import Wind
+from src.engine.models.map.geographic_direction import GeographicDirection
+from src.engine.models.map.sector_type import SectorType
 
 def calculate_beta(wind: Wind, target_sector_type: SectorType, direction: GeographicDirection) -> float:
 
     speed_coef = wind._speed / 40
 
-    diff = abs(wind.get_direction.value - direction.value)
+    diff = abs(wind.direction.value - direction.value)
     diff = min(diff, 8 - diff)
     match diff:
         case 0:
@@ -29,7 +29,7 @@ def calculate_beta(wind: Wind, target_sector_type: SectorType, direction: Geogra
 
 
 def calculate_alpha(sector_type: SectorType) -> float:
-
+    type_coef = 0
     if sector_type == SectorType.DECIDUOUS:
         type_coef = 0.8  # Lasy liściaste zmniejszają wpływ wiatru
     elif sector_type == SectorType.MIXED:

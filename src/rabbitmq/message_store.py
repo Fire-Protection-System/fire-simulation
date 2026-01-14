@@ -13,23 +13,20 @@ class MessageStore:
     def add_received_message(self, message: str,  queue_name: str) -> None:
         with self.lock:
             self.received_messages[queue_name].append(message)
-            logger.info(f"Received message: {message}")
+            logger.debug(f"Received message: {message}")
 
     def add_message_to_sent(self, queue_name: str, message: str) -> None:
         """Dodaje wiadomość do określonej kolejki."""
         with self.lock:
             self.messages_to_sent[queue_name].append(message)
-            #logger.info(f"Added message to queue '{queue_name}': {message}")
 
     def get_message_to_sent(self, queue_name: str) -> str:
         """Pobiera i usuwa najstarszą wiadomość z danej kolejki."""
         with self.lock:
             if self.messages_to_sent[queue_name]:
                 oldest_message = self.messages_to_sent[queue_name].popleft()
-                #logger.info(f"Retrieved oldest sent message from queue '{queue_name}': {oldest_message}")
                 return oldest_message
             else:
-                #logger.info(f"No messages available in queue '{queue_name}'")
                 return None
 
     def get_sent_message(self):
@@ -39,12 +36,17 @@ class MessageStore:
         with self.lock:
             if self.received_messages[queue_name]:
                 oldest_message = self.received_messages[queue_name].popleft()  # Pobiera i usuwa najstarszą wiadomość
-                logger.info(f"Retrieved oldest received message: {oldest_message} from  queue: {queue_name}")
+                logger.debug(f"Retrieved oldest received message: {oldest_message} from  queue: {queue_name}")
                 return oldest_message
             else:
-                #logger.info("No received messages available")
                 return None
 
-# Stworzenie globalnego obiektu MessageStore
+    def clear(self):
+        """Clear all messages from the store."""
+        with self.lock:
+            self.messages_to_sent.clear()
+            self.received_messages.clear()
+            logger.info("Message store cleared")
+
 message_store = MessageStore()
 

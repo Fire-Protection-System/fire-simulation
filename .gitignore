@@ -1,3 +1,14 @@
 __pycache__/
 */__pycache__/
 **/__pycache__/
+.env 
+fire-simulation.egg-info/
+.pytest_cache/
+logs/application.log
+.pytest_cache/
+.mvn
+mvnw 
+mvnw.cmd 
+package-lock.json
+start.sh 
+forest_fire_simulation.egg-info/

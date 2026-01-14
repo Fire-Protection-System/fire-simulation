@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime
 
-from configurations.conf_generator import SensorType
-from engine.models.core.location import Location
-from engine.models.sensors.camera_data import CameraData
-from engine.models.sensors.sensor import Sensor
+from src.generator.conf_generator import SensorType
+from src.engine.models.core.location import Location
+from src.engine.models.sensors.camera_data import CameraData
+from src.engine.models.sensors.sensor import Sensor
 
 
 class CO2Sensor(Sensor):
@@ -17,12 +17,7 @@ class CO2Sensor(Sensor):
         sensor_id: str,
     ):
         Sensor.__init__(self, timestamp, location, sensor_id)
-        self._co2 = None
-        if not self._co2:
-            logging.warning(
-                f"Sensor {self._sensor_id} of type {CO2Sensor.sensor_type} "
-                f"is missing CO₂ concentration data!"
-            )
+        self._co2 = 400.0  # Default CO2 concentration in μg/m³
 
     @property
     def unit(self):
@@ -30,7 +25,8 @@ class CO2Sensor(Sensor):
     
     @property
     def data(self):
-        return {"co2" : round(self._co2, 2)}
+        co2_val = round(self._co2, 2) if self._co2 is not None else 400.0
+        return {"co2" : co2_val}
 
     def next(self) -> None:
         pass

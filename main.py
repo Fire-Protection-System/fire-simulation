@@ -4,23 +4,27 @@ import sys
 import threading
 from flask import Flask, request, jsonify
 
-from settings.communucation_settings import get_communication_settings
+from src.settings.communucation_settings import get_communication_settings
+from src.settings.simulation_settings import get_simulation_settings
 from src.engine.simple_simulation_engine import SimpleSimulationEngine
 from src.engine.runner import EngineRunner
 from src.logger.logging_config import setup_logging
 
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 
-# Load default communication settings
+# Load default settings
 communication_settings = get_communication_settings()
+simulation_settings = get_simulation_settings()
 
 # Create SimpleSimulationEngine 
 # This will be default for now 
-engine = SimpleSimulationEngine()
+engine = SimpleSimulationEngine(simulation_settings, communication_settings)
 
 # Runner will monitor the engine and handle communication
 # Send messages, receive commands, etc.
-runner = EngineRunner(engine, settings=communication_settings)
+runner = EngineRunner(engine, settings=communication_settings, simulation_settings=simulation_settings)
 
 _loop: asyncio.AbstractEventLoop | None = None
 _loop_thread: threading.Thread | None = None
@@ -50,7 +54,6 @@ def _run_async(coro):
 def run():
     '''
         Start the simulation with the provided configuration.
-        
     '''
     data = request.get_json()
     print("Received data:", data)
@@ -62,7 +65,11 @@ def run():
         _run_async(runner.start(data))
         return jsonify({"status": "ok", "message": "Simulation started"})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        import traceback
+        error_msg = str(e)
+        traceback_str = traceback.format_exc()
+        logger.error(f"Error starting simulation: {error_msg}\n{traceback_str}")
+        return jsonify({"status": "error", "message": error_msg}), 500
 
 
 @app.route('/stop_simulation', methods=['POST'])
@@ -117,24 +124,89 @@ def health():
     })
 
 
+@app.route('/set_speed', methods=['POST'])
+def set_speed():
+    """
+    Update simulation speed at runtime.
+
+    Payload format:
+    {
+        "tickInterval": 1.0  # seconds between simulation ticks
+    }
+    """
+    data = request.get_json() or {}
+    tick_interval = data.get("tickInterval")
+
+    if tick_interval is None:
+        return jsonify({"status": "error", "message": "tickInterval is required"}), 400
+
+    try:
+        value = float(tick_interval)
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "tickInterval must be a number"}), 400
+
+    if value <= 0:
+        return jsonify({"status": "error", "message": "tickInterval must be > 0"}), 400
+
+    runner.set_tick_interval(value)
+    return jsonify({"status": "ok", "tickInterval": value})
+
+@app.route('/orderFireBrigade', methods=['POST'])
+def order_fire_brigade():
+    """Receive fire brigade order from backend and forward to agent manager via RabbitMQ."""
+    try:
+        data = request.get_json()
+        logger.debug(f"Received orderFireBrigade: {data}")
+        
+        if not runner.engine.is_running():
+            return jsonify({"status": "error", "message": "Simulation not running"}), 400
+        
+        # Add order to message store for agent manager to process
+        # Use queue name (with underscores) to match how RabbitMQ consumers store messages
+        from src.messaging.topics import TopicRegistry
+        queue_name = TopicRegistry.FIRE_BRIGADE_ACTIONS.value.replace('.', '_')
+        runner.store.add_received_message(data, queue_name)
+        
+        return jsonify({"status": "ok", "message": "Order received"})
+    except Exception as e:
+        logger.error(f"Error processing fire brigade order: {e}", exc_info=True)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/orderForestPatrol', methods=['POST'])
+def order_forest_patrol():
+    """Receive forester patrol order from backend and forward to agent manager via RabbitMQ."""
+    try:
+        data = request.get_json()
+        logger.debug(f"Received orderForestPatrol: {data}")
+        
+        if not runner.engine.is_running():
+            return jsonify({"status": "error", "message": "Simulation not running"}), 400
+        
+        # Add order to message store for agent manager to process
+        # Use queue name (with underscores) to match how RabbitMQ consumers store messages
+        from src.messaging.topics import TopicRegistry
+        queue_name = TopicRegistry.FORESTER_ACTIONS.value.replace('.', '_')
+        runner.store.add_received_message(data, queue_name)
+        
+        return jsonify({"status": "ok", "message": "Order received"})
+    except Exception as e:
+        logger.error(f"Error processing forester patrol order: {e}", exc_info=True)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 if __name__ == '__main__':
     setup_logging("fire-simulation")
-
-    simulation_logger = logging.getLogger("simulation")
-    simulation_logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    simulation_logger.addHandler(handler)
-
-    logging.getLogger("recommendation").setLevel(logging.CRITICAL + 1)
 
     print("Starting Fire Simulation API...")
     print("Endpoints:")
     print("  POST /run_simulation  - start simulation with config")
     print("  POST /stop_simulation - stop simulation")
     print("  POST /step            - manual step (body: {ticks: n})")
+    print("  POST /orderFireBrigade - send fire brigade order")
+    print("  POST /orderForestPatrol - send forester patrol order")
     print("  GET  /snapshot        - get current state")
     print("  GET  /health          - health check")
+    print("  POST /set_speed       - update simulation tick interval")
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)

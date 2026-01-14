@@ -4,12 +4,12 @@ from enum import Enum
 import random
 import argparse
 
-DEFAULT_GRID_SIZE = 5
+DEFAULT_GRID_SIZE = 6
 
-LON_START = 19.934967812541295
-LAT_START = 50.034952974941994
-LON_END = 19.979856325506027
-LAT_END = 50.07185882753423
+LON_START = 20.59695852606007
+LAT_START = 49.93705195152758
+LON_END = 20.69067696504037
+LAT_END = 49.90311928923877
 
 class SensorType(Enum):
     TEMPERATURE_AND_AIR_HUMIDITY = 1
@@ -25,17 +25,16 @@ def main(grid_size):
     fireBrigades = []
 
     sensor_id = 0
-    brigade_id = 0
 
     lon_step = (LON_END - LON_START) / grid_size
     lat_step = (LAT_END - LAT_START) / grid_size
 
-    for i in range(grid_size):
-        for j in range(grid_size):
-            sector_id = j * grid_size + i
-            lon_min = LON_START + j * lon_step
+    for row in range(grid_size):
+        for col in range(grid_size):
+            sector_id = row * grid_size + col + 1
+            lon_min = LON_START + col * lon_step
             lon_max = lon_min + lon_step
-            lat_min = LAT_START + i * lat_step
+            lat_min = LAT_START + row * lat_step
             lat_max = lat_min + lat_step
 
             center_lon = (lon_min + lon_max) / 2
@@ -49,9 +48,9 @@ def main(grid_size):
             ]
 
             sectors.append({
-                "sectorId": sector_id + 1,
-                "row": i + 1,
-                "column": j + 1,
+                "sectorId": sector_id,  # 1-indexed, row-major
+                "row": row + 1,         # 1-indexed
+                "column": col + 1,      # 1-indexed
                 "sectorType": "DECIDUOUS",
                 "initialState": {
                     "temperature": 20,
@@ -67,12 +66,11 @@ def main(grid_size):
             })
 
             for sensor in SensorType:
-
                 rand_lon = lon_min + random.uniform(0, lon_step)
                 rand_lat = lat_min + random.uniform(0, lat_step)
 
                 sensors.append({
-                    "sensorId": sensor_id,  
+                    "sensorId": sensor_id,
                     "sensorType": sensor.name,
                     "location": {
                         "longitude": rand_lon,
@@ -80,11 +78,10 @@ def main(grid_size):
                     },
                     "timestamp": str(int(datetime.now().timestamp() * 1000))
                 })
-
                 sensor_id += 1
-            
+
             fireBrigades.append({
-                "fireBrigadeId": brigade_id,
+                "fireBrigadeId": sector_id,
                 "timestamp": datetime.now().isoformat(),
                 "state": "AVAILABLE",
 
@@ -97,8 +94,6 @@ def main(grid_size):
                     "latitude": center_lat
                 }
             })
-
-            brigade_id += 1
 
     forest_name = f"forest_{grid_size}x{grid_size}"
 

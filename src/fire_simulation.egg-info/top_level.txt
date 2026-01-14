@@ -1,6 +1,0 @@
-configurations
-engine
-logger
-messaging
-rabbitmq
-settings

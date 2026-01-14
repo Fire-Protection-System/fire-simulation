@@ -3,7 +3,7 @@ Tests for settings module.
 """
 import os
 import pytest
-from src.settings.settings import get_settings, DEFAULT_EXCHANGE, DEFAULT_RABBITMQ_HOST
+from settings.communucation_settings import get_settings, DEFAULT_EXCHANGE, DEFAULT_RABBITMQ_HOST
 
 
 def test_get_settings_defaults():

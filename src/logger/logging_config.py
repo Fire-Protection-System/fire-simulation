@@ -1,28 +1,59 @@
 import logging
 import logging.handlers
 import os
+from pathlib import Path
 
-def setup_logging(service_name):
-    log_dir = f"/home/dominiq/Desktop/studio-projektowe/deployment/fire-simulation/logs/{service_name}"
-    os.makedirs(log_dir, exist_ok=True)
-    
+
+def _get_log_level_from_env(default: str = "INFO") -> int:
+    level_name = os.getenv("LOG_LEVEL", default).upper()
+    return getattr(logging, level_name, logging.INFO)
+
+
+def setup_logging(service_name: str) -> logging.Logger:
+    """
+    Configure root logging for the simulation service.
+
+    Environment variables:
+    - LOG_DIR: base directory for logs (default: ./logs/<service_name>)
+    - LOG_LEVEL: DEBUG, INFO, WARNING, ERROR, CRITICAL (default: INFO)
+    """
+    log_dir = os.getenv("LOG_DIR", f"./logs")
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+
+    log_file = Path(log_dir) / f"application.log"
+
     formatter = logging.Formatter(
         '%(asctime)s.%(msecs)03dZ [%(levelname)s] %(name)s - %(message)s',
         datefmt='%Y-%m-%dT%H:%M:%S'
     )
-    
-    file_handler = logging.handlers.RotatingFileHandler(
-        f"{log_dir}/application.log",
-        maxBytes=1024*1024*1024,  
-        backupCount=30
-    )
-    file_handler.setFormatter(formatter)
-    
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    
-    logging.root.setLevel(logging.INFO)
-    logging.root.addHandler(file_handler)
-    logging.root.addHandler(console_handler)
-    
-    return logging.getLogger(service_name)
+
+    level = _get_log_level_from_env()
+
+    root = logging.getLogger()
+
+    if not any(isinstance(h, logging.handlers.RotatingFileHandler) and getattr(h, "baseFilename", "") == str(log_file) for h in root.handlers):
+        file_handler = logging.handlers.RotatingFileHandler(
+            str(log_file),
+            maxBytes=1024 * 1024 * 1024,  # 1GB
+            backupCount=30,
+        )
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(level)
+        root.addHandler(file_handler)
+
+    if not any(isinstance(h, logging.StreamHandler) for h in root.handlers):
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(level)
+        root.addHandler(console_handler)
+
+    root.setLevel(level)
+
+    # Reduce noise from pika internals unless explicitly overridden
+    if level > logging.DEBUG:
+        logging.getLogger('pika').setLevel(logging.WARNING)
+        logging.getLogger('pika.adapters').setLevel(logging.WARNING)
+
+    logger = logging.getLogger(service_name)
+    logger.info("Logging initialized. Log file: %s, level: %s", log_file, logging.getLevelName(level))
+    return logger

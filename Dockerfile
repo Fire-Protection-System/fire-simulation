@@ -7,4 +7,7 @@ COPY src/ src/
 RUN pip install --no-cache-dir .
 COPY . /code
 
-CMD ["python", "./main.py"])
+# Ensure log directory exists for log file mount
+RUN mkdir -p /var/log/fire-simulation
+
+CMD ["python", "./main.py"]

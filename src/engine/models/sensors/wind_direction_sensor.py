@@ -1,11 +1,11 @@
 import logging
 from datetime import datetime
 
-from configurations.conf_generator import SensorType
-from engine.models.core.location import Location
-from engine.models.map.geographic_direction import GeographicDirection
-from engine.models.sensors.camera_data import CameraData
-from engine.models.sensors.sensor import Sensor
+from src.generator.conf_generator import SensorType
+from src.engine.models.core.location import Location
+from src.engine.models.map.geographic_direction import GeographicDirection
+from src.engine.models.sensors.camera_data import CameraData
+from src.engine.models.sensors.sensor import Sensor
 
 
 class WindDirectionSensor(Sensor):
@@ -18,12 +18,7 @@ class WindDirectionSensor(Sensor):
         sensor_id: str,       
     ):
         Sensor.__init__(self, timestamp, location, sensor_id)
-        self._wind_direction:GeographicDirection | None = None
-        if not self._wind_direction:
-            logging.warning(
-                f"Sensor {self._sensor_id} of type {WindDirectionSensor.sensor_type} "
-                f"is missing wind direction data!"
-            )
+        self._wind_direction: GeographicDirection | None = GeographicDirection.N  # Default to North
 
     
 
@@ -34,7 +29,8 @@ class WindDirectionSensor(Sensor):
     
     @property
     def data(self):
-        return {"windDirection": self.wind_direction.name}
+        direction_name = self.wind_direction.name if self.wind_direction is not None else "N"
+        return {"windDirection": direction_name}
 
     @property
     def unit(self):

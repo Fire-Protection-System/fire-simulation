@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime
 
-from configurations.generator.conf_generator import SensorType
-from engine.models.core.location import Location
-from engine.models.sensors.camera_data import CameraData
-from engine.models.sensors.sensor import Sensor
+from src.engine.models.sensors.sensor_type import SensorType
+from src.engine.models.core.location import Location
+from src.engine.models.sensors.camera_data import CameraData
+from src.engine.models.sensors.sensor import Sensor
 
 
 

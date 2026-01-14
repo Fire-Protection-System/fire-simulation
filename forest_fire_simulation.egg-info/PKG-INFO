@@ -1,4 +1,0 @@
-Metadata-Version: 2.1
-Name: forest_fire_simulation
-Version: 0.1.0
-Requires-Dist: flask

@@ -1,7 +1,7 @@
 import random
 import logging
 
-from engine.models.map.geographic_direction import GeographicDirection
+from src.engine.models.map.geographic_direction import GeographicDirection
 
 
 logger = logging.getLogger(__name__)
@@ -32,9 +32,9 @@ class Wind:
         # logger.info(f"New wind: {self._speed} {self._direction}")
 
     @property 
-    def get_speed(self) -> float:
+    def speed(self) -> float:
         return self._speed
 
     @property
-    def get_direction(self) -> GeographicDirection:
+    def direction(self) -> GeographicDirection:
         return self._direction
