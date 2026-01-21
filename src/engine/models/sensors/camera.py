@@ -6,8 +6,6 @@ from src.engine.models.core.location import Location
 from src.engine.models.sensors.camera_data import CameraData
 from src.engine.models.sensors.sensor import Sensor
 
-
-
 class Camera(Sensor):
     def __init__(
         self,

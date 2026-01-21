@@ -12,15 +12,11 @@ logger = logging.getLogger(__name__)
 def parse_fire_brigades(fire_brigades_json_data: List[Dict[str, Any]]) -> List[FireBrigade]:
     '''
     Parsing fire brigades data from JSON input from selected configuration
-    
-    :param fire_brigades_json_data: json input containing fire brigades information
-    :type fire_brigades_json_data: List[Dict[str, Any]]
-    :return: list of FireBrigade objects parsed from the input data
-    :rtype: List[FireBrigade]
     '''
+
     brigades = []
-    
     fire_brigades_data = fire_brigades_json_data.get('fireBrigades', [])
+    
     if not isinstance(fire_brigades_data, list):
         logger.error("'fireBrigades' is missing or is not a list")
         return brigades
@@ -35,17 +31,18 @@ def parse_fire_brigades(fire_brigades_json_data: List[Dict[str, Any]]) -> List[F
                 longitude = float(item["baseLocation"]["longitude"]),
                 latitude  = float(item["baseLocation"]["latitude"])
             )
+
             current_location = Location(
                 longitude = float(item["currentLocation"]["longitude"]),
                 latitude  = float(item["currentLocation"]["latitude"])
             )
 
             brigades.append(FireBrigade(
-                fire_brigade_id=fire_brigade_id,
-                timestamp=timestamp,
-                initial_state=state,
-                base_location=base_location,
-                initial_location=current_location
+                fire_brigade_id  = fire_brigade_id,
+                timestamp        = timestamp,
+                initial_state    = state,
+                base_location    = base_location,
+                initial_location = current_location
             ))
        
         except KeyError as e:

@@ -15,22 +15,30 @@ class TopicRegistry(str, Enum):
     PM2_5                = "simulation.telemetry.sensors.pm2_5"
     CAMERA               = "simulation.telemetry.sensors.camera"
     SECTOR_STATE         = "simulation.telemetry.map.sector_state"
+    SECTOR_STATE_FAST    = "simulation.telemetry.map.sector_state_fast"
     FIRE_BRIGADE_STATE   = "simulation.telemetry.agents.fire_brigade"
+    FIRE_BRIGADE_STATE_BATCH = "simulation.telemetry.agents.fire_brigade_batch"
     FORESTER_STATE       = "simulation.telemetry.agents.forester"
+    FORESTER_STATE_BATCH = "simulation.telemetry.agents.forester_batch"
     FIRE_BRIGADE_ACTIONS = "simulation.control.fire_brigade_actions"
     FORESTER_ACTIONS     = "simulation.control.forester_actions"
     SIMULATION_CONTROL   = "simulation.control.lifecycle"
     EVENTS               = "simulation.events"
     RECOMMENDATIONS      = "simulation.recommendations"
-    SUPPORT_ANALYSIS_REQUESTS = "support.analysis.requests"
-    SUPPORT_RECOMMENDATIONS   = "support.recommendations"
-    SUPPORT_AGGREGATED_DATA   = "support.data.aggregated"
     LLM_REQUESTS         = "support.llm.requests"
     LLM_RESPONSES        = "support.llm.responses"
+    LLM_PROPOSITIONS     = "support.llm.propositions"
     ANALYTICS            = "support.analytics.insights"
     TASK_QUEUE           = "backend.tasks.queue"
     DATA_AGGREGATION     = "backend.data.aggregated"
     USER_COMMANDS        = "backend.commands.user"
+    AGENT_ANNOUNCEMENTS  = "simulation.agents.announcements" 
+    AGENT_COMMUNICATION  = "simulation.agents.communication"
+
+    # Support system topics
+    SUPPORT_ANALYSIS_REQUESTS = "support.analysis.requests"
+    SUPPORT_RECOMMENDATIONS   = "support.recommendations"
+    SUPPORT_AGGREGATED_DATA   = "support.data.aggregated"
 
 class TopicDomain(str, Enum):
     """Top-level domain separation"""
@@ -57,17 +65,27 @@ class SimulationTopics:
     AGENTS: List[str] = [
         TopicRegistry.FIRE_BRIGADE_STATE.value,
         TopicRegistry.FORESTER_STATE.value,
+        TopicRegistry.FIRE_BRIGADE_STATE_BATCH.value,
+        TopicRegistry.FORESTER_STATE_BATCH.value,
     ]
     
     MAP: List[str] = [
         TopicRegistry.SECTOR_STATE.value,
+        TopicRegistry.SECTOR_STATE_FAST.value,
     ]
     
     EVENTS: List[str] = [
         TopicRegistry.EVENTS.value,
     ]
     
-    ALL: List[str] = SENSORS + AGENTS + MAP + EVENTS
+    COMMUNICATION: List[str] = [
+        TopicRegistry.AGENT_ANNOUNCEMENTS.value,
+        TopicRegistry.AGENT_COMMUNICATION.value,
+        TopicRegistry.LLM_REQUESTS.value,
+        TopicRegistry.LLM_PROPOSITIONS.value,
+    ]
+    
+    ALL: List[str] = SENSORS + AGENTS + MAP + EVENTS + COMMUNICATION
 
 class ControlTopics:
     """
@@ -111,7 +129,6 @@ def get_all_topics() -> List[str]:
     return [topic.value for topic in TopicRegistry]
 
 ALL_TOPICS = get_all_topics()
-
 SENSOR_TO_TOPIC = {
     SensorType.TEMPERATURE_AND_AIR_HUMIDITY: TopicRegistry.TEMPERATURE_HUMIDITY,
     SensorType.WIND_SPEED:                   TopicRegistry.WIND_SPEED,
@@ -127,3 +144,4 @@ def get_topic_for_sensor(sensor_type: SensorType) -> str:
     if topic is None:
         raise ValueError(f"No topic mapping for sensor type: {sensor_type}")
     return topic.value
+

@@ -2,53 +2,25 @@ import pika
 import logging
 from contextlib import contextmanager
 from typing import Iterator, Tuple, Optional
-
 from src.settings.communucation_settings import get_communication_settings
+from src.rabbitmq.connection_manager import RabbitMQConnectionManager
 
 logger = logging.getLogger(__name__)
 
 class PikaClient:
     def __init__(self):
         self._settings = get_communication_settings()
-
-    def connection_parameters(self) -> pika.ConnectionParameters:
-        creds = pika.PlainCredentials(
-            self._settings.rabbitmq_username, 
-            self._settings.rabbitmq_password
-        )
-        
-        return pika.ConnectionParameters(
-            host=self._settings.rabbitmq_host,
-            port=self._settings.rabbitmq_port,
-            credentials=creds,
-            heartbeat=60,
-            blocked_connection_timeout=30,
-        )
+        self._connection_manager = RabbitMQConnectionManager(self._settings)
 
     def create_connection(self) -> pika.BlockingConnection:
-        params = self.connection_parameters()
-        return pika.BlockingConnection(params)
-
-    def create_channel(self) -> pika.channel.Channel:
-        conn = self.create_connection()
-        return conn.channel()
+        return self._connection_manager.get_connection()
 
     @contextmanager
     def connection_ctx(self) -> Iterator[Tuple[Optional[pika.BlockingConnection], Optional[pika.channel.Channel]]]:
-        conn = None
-        ch = None
         try:
-            conn = self.create_connection()
+            conn = self._connection_manager.get_connection()
             ch = conn.channel()
             yield conn, ch
         except Exception as e:
             logger.exception("Pika connection error: %s", e)
-            if hasattr(e, 'args') and e.args and '404' in str(e.args[0]):
-                import pdb; pdb.set_trace()
             yield None, None
-        finally:
-            try:
-                if conn and not conn.is_closed:
-                    conn.close()
-            except Exception:
-                pass

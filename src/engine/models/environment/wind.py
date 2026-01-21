@@ -28,7 +28,6 @@ class Wind:
             new_direction_value = 1 
 
         self._direction = GeographicDirection(new_direction_value)
-
         # logger.info(f"New wind: {self._speed} {self._direction}")
 
     @property 

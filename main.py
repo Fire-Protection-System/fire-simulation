@@ -14,28 +14,14 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Load default settings
 communication_settings = get_communication_settings()
 simulation_settings = get_simulation_settings()
 
-# Create SimpleSimulationEngine 
-# This will be default for now 
+
 engine = SimpleSimulationEngine(simulation_settings, communication_settings)
-
-# Runner will monitor the engine and handle communication
-# Send messages, receive commands, etc.
 runner = EngineRunner(engine, settings=communication_settings, simulation_settings=simulation_settings)
-
 _loop: asyncio.AbstractEventLoop | None = None
 _loop_thread: threading.Thread | None = None
-
-# ---------------------------------------------------------
-#  REST API Endpoints
-# ---------------------------------------------------------
-# API for controlling the simulation. This section should 
-# include all necessary commands / endpoints / procedures
-# for managing the simulation lifecycle and interactions.
-# ---------------------------------------------------------
 
 def _get_event_loop() -> asyncio.AbstractEventLoop:
     global _loop, _loop_thread
@@ -52,9 +38,7 @@ def _run_async(coro):
 
 @app.route('/run_simulation', methods=['POST'])
 def run():
-    '''
-        Start the simulation with the provided configuration.
-    '''
+    '''Start the simulation with the provided configuration.'''
     data = request.get_json()
     print("Received data:", data)
 
@@ -74,15 +58,22 @@ def run():
 
 @app.route('/stop_simulation', methods=['POST'])
 def stop():
-    """Zatrzymaj symulację."""
-    if not runner.engine.is_running():
-        return jsonify({"status": "error", "message": "Simulation not running"}), 400
+    """Stop the simulation. Idempotent - succeeds even if already stopped."""
+    was_running = runner.engine.is_running()
+    
+    if not was_running:
+        logger.info("Stop requested but simulation was already stopped")
+        return jsonify({"status": "ok", "message": "Simulation was already stopped"})
 
     try:
         _run_async(runner.stop())
         return jsonify({"status": "ok", "message": "Simulation stopped"})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        import traceback
+        error_msg = str(e)
+        traceback_str = traceback.format_exc()
+        logger.error(f"Error stopping simulation: {error_msg}\n{traceback_str}")
+        return jsonify({"status": "error", "message": error_msg}), 500
 
 
 @app.route('/step', methods=['POST'])
@@ -128,18 +119,14 @@ def health():
 def set_speed():
     """
     Update simulation speed at runtime.
-
-    Payload format:
-    {
-        "tickInterval": 1.0  # seconds between simulation ticks
-    }
+    Payload format:{ "tickInterval": 1.0  # seconds between simulation ticks }
     """
     data = request.get_json() or {}
     tick_interval = data.get("tickInterval")
 
     if tick_interval is None:
         return jsonify({"status": "error", "message": "tickInterval is required"}), 400
-
+    
     try:
         value = float(tick_interval)
     except (TypeError, ValueError):
@@ -156,7 +143,7 @@ def order_fire_brigade():
     """Receive fire brigade order from backend and forward to agent manager via RabbitMQ."""
     try:
         data = request.get_json()
-        logger.debug(f"Received orderFireBrigade: {data}")
+        logger.info(f"[HTTP] /orderFireBrigade from {request.remote_addr} payload: {data}")
         
         if not runner.engine.is_running():
             return jsonify({"status": "error", "message": "Simulation not running"}), 400
@@ -178,7 +165,7 @@ def order_forest_patrol():
     """Receive forester patrol order from backend and forward to agent manager via RabbitMQ."""
     try:
         data = request.get_json()
-        logger.debug(f"Received orderForestPatrol: {data}")
+        logger.info(f"[HTTP] /orderForestPatrol from {request.remote_addr} payload: {data}")
         
         if not runner.engine.is_running():
             return jsonify({"status": "error", "message": "Simulation not running"}), 400

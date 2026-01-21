@@ -1,0 +1,91 @@
+import pika
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+
+RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST', 'rabbitmq-service')
+RABBITMQ_PORT = int(os.environ.get('RABBITMQ_PORT', 5672))
+RABBITMQ_USERNAME = os.environ.get('RABBITMQ_USER', 'guest')
+RABBITMQ_PASSWORD = os.environ.get('RABBITMQ_PASS', 'guest')
+
+QUEUE_NAMES = [
+    "Forester patrol action queue",
+    "Forester patrol state queue",
+    "Camera queue",
+    "Temp and air humidity queue",
+    "Wind speed queue",
+    "Wind direction queue",
+    "Litter moisture queue",
+    "CO2 queue",
+    "PM2.5 queue",
+    "Fire brigades action queue",
+    "Fire brigades state queue",
+    "Recommended action queue",
+    "Sector state queue"
+]
+
+TOPIC_NAMES = [
+    "Forester patrol action topic",
+    "Forester patrol state topic",
+    "Camera topic",
+    "Temp and air humidity topic",
+    "Wind speed topic",
+    "Wind direction topic",
+    "Litter moisture topic",
+    "CO2 topic",
+    "PM2.5 topic",
+    "Fire brigades action topic",
+    "Fire brigades state topic",
+    "Recommended action topic",
+    "Sector state topic"
+]
+
+def create_queues(exchange_name, username, password):
+    try:
+        credentials = pika.PlainCredentials(username, password)
+        connection = pika.BlockingConnection(pika.ConnectionParameters(
+            host=RABBITMQ_HOST,
+            port=RABBITMQ_PORT,
+            credentials=credentials
+        ))
+        channel = connection.channel()
+
+        for queue_name in QUEUE_NAMES:
+            channel.queue_declare(queue=queue_name)
+            logger.info(f"Queue created: {queue_name}")
+
+        channel.exchange_declare(exchange=exchange_name, exchange_type='topic')
+
+        for topic_name, queue_name in zip(TOPIC_NAMES, QUEUE_NAMES):
+            channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=topic_name)
+            logger.info(f"Queue '{queue_name}' bound to topic '{topic_name}'")
+
+        logger.info("All queues and topics are created and bound.")
+
+        return connection, channel
+
+    except Exception as e:
+        logger.error(f"Error connecting to RabbitMQ: {e}")
+        return None, None
+
+def remove_queues(exchange_name, username, password):
+    try:
+        credentials = pika.PlainCredentials(username, password)
+        connection = pika.BlockingConnection(pika.ConnectionParameters(
+            host=RABBITMQ_HOST,
+            port=RABBITMQ_PORT,
+            credentials=credentials
+        ))
+        channel = connection.channel()
+        channel.exchange_delete(exchange=exchange_name)
+
+        for queue_name in QUEUE_NAMES:
+            channel.queue_delete(queue=queue_name)
+            logger.info(f"Queue deleted: {queue_name}")
+
+        return True
+
+    except Exception as e:
+        logger.error(f"Error connecting to RabbitMQ: {e}")
+        return False

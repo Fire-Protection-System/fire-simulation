@@ -8,7 +8,6 @@ from src.engine.models.map.sector_type import SectorType
 def calculate_beta(wind: Wind, target_sector_type: SectorType, direction: GeographicDirection) -> float:
 
     speed_coef = wind._speed / 40
-
     diff = abs(wind.direction.value - direction.value)
     diff = min(diff, 8 - diff)
     match diff:

@@ -1,2 +1,6 @@
-FIRE_FIGHTERS_MULTIPLIER = 5
-FIRE_LEVEL_MULTIPLIER = 1
+FOREST_NAME = "forestName"
+ROWS = "rows"
+COLUMNS = "columns"
+SECTORS = "sectors"
+FIRE_BRIGADES = "fireBrigades"
+FORESTER_PATROLS = "foresterPatrols"

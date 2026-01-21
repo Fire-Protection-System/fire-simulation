@@ -1,11 +1,10 @@
 import logging
 from datetime import datetime
 
-from src.generator.conf_generator import SensorType
+from src.engine.models.sensors.sensor_type import SensorType
 from src.engine.models.core.location import Location
 from src.engine.models.sensors.camera_data import CameraData
 from src.engine.models.sensors.sensor import Sensor
-
 
 class PM2_5Sensor(Sensor):
     _sensor_type: SensorType = SensorType.PM2_5

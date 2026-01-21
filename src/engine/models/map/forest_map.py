@@ -3,9 +3,7 @@ import random
 import logging
 
 from datetime import datetime
-from typing import TypeAlias
-from typing import Tuple
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, TypeAlias
 
 logger = logging.getLogger(__name__)
 
@@ -50,178 +48,291 @@ class ForestMap:
         self._forester_patrols = foresterPatrols
         self._fire_brigades = fireBrigades
 
+    def update_extinguish_levels(self):
+        """Centrally recalculate extinguish levels based on current agent positions and states."""
+
+        for row in self._sectors:
+            for sector in row:
+                if sector.extinguish_level > 0:
+                    sector.extinguish_level = 0.0
+                    sector._is_modified = True
+                sector._number_of_fire_brigades = 0
+        
+        # Count current fire brigades in EXECUTING state
+        for brigade in self._fire_brigades:
+            if brigade.state.value == "executing":
+                sector = self.find_sector(brigade.location)
+                if sector:
+                    sector._number_of_fire_brigades += 1
+                    sector.extinguish_level = sector._number_of_fire_brigades * 5.0
+                    sector._is_modified = True
+
     @classmethod
     def from_conf(cls, conf):
         import logging
         logger = logging.getLogger(__name__)
         
         logger.info("Parsing ForestMap from configuration...")
-        logger.info(f"Forest: {conf.get('forestName')}, ID: {conf.get('forestId')}")
-        
-        logger.debug("Parsing locations...")
-        location = cls._parse_locations(conf["location"])
-        logger.debug(f"Parsed {len(location)} corner locations")
-        
-        logger.debug(f"Parsing {conf['rows']}x{conf['columns']} sector grid...")
-        sectors = cls._parse_sectors(conf)
-        logger.debug("Sectors parsed successfully")
-        
-        logger.debug("Calculating sector bounds...")
-        bounds = cls._calculate_bounds(location, conf["rows"], conf["columns"])
-        logger.debug("Bounds calculated")
 
-        logger.debug(f"Assigning {len(conf.get('sensors', []))} sensors to sectors...")
-        cls._assign_sensors_to_sectors(conf["sensors"], sectors, bounds)
-        logger.debug("Sensors assigned")
-        
-        logger.debug(f"Assigning {len(conf.get('cameras', []))} cameras to sectors...")
-        cls._assign_cameras_to_sectors(conf["cameras"], sectors, bounds)
-        logger.debug("Cameras assigned")
+        try:
+            ''' Parse config layout '''
+            location = cls._parse_locations(conf["location"])
+            sectors  = cls._parse_sectors(conf)
+            bounds   = cls._calculate_bounds(location, conf["rows"], conf["columns"])
+            brigades = cls._parse_fire_brigades(conf)
+            patrols  = cls._parse_forester_patrols(conf)
 
-        logger.debug("Parsing fire brigades...")
-        brigades = cls._parse_fire_brigades(conf)
+            ''' Assign sensors and cameras to sectors '''
+            cls._assign_sensors_to_sectors(conf["sensors"], sectors, bounds)
+            cls._assign_cameras_to_sectors(conf["cameras"], sectors, bounds)
+        except Exception as e:
+            raise RuntimeError(f"Error constructing ForestMap: {e}") from e
+
+        logger.info(f"Parsed {len(location)} corner locations")
+        logger.info(f"Sectors parsed successfully")
+        logger.info(f"Bounds calculated")
+        logger.info(f"Sensors assigned")
+        logger.info(f"Cameras assigned")
         logger.info(f"Parsed {len(brigades)} fire brigades")
-        
-        logger.debug("Parsing forester patrols...")
-        patrols = cls._parse_forester_patrols(conf)
         logger.info(f"Parsed {len(patrols)} forester patrols")
-        
-        logger.info("ForestMap construction complete")
+        logger.info(f"ForestMap construction complete")
+
+        ''' Create ForestMap instance '''
+        # Use parameter names that match __init__ signature (camelCase for agent lists)
         return cls(
-            forest_id=conf["forestId"],
-            forest_name=conf["forestName"],
-            rows=conf["rows"],
-            columns=conf["columns"],
-            location=location,
-            sectors=sectors,
-            foresterPatrols=patrols,
-            fireBrigades=brigades
+            forest_id        = conf["forestId"],
+            forest_name      = conf["forestName"],
+            rows             = conf["rows"],
+            columns          = conf["columns"],
+            location         = location,
+            sectors          = sectors,
+            foresterPatrols  = patrols,
+            fireBrigades     = brigades
         )
 
     @staticmethod
     def _parse_locations(locations_conf):
-        return tuple(Location(**location) for location in locations_conf)
+        try: 
+            return tuple(Location(**location) for location in locations_conf)
+        except Exception as e:
+            raise RuntimeError(f"Error constructing ForestMap: {e}") from e
 
     @staticmethod
     def _parse_sectors(conf):        
+        if conf["rows"] <= 0 or conf["columns"] <= 0:
+            raise ValueError("Map rows and columns must be positive integers.")
+
         rows = conf["rows"]
         columns = conf["columns"]
         sectors = [[None for _ in range(columns)] for _ in range(rows)]
 
-        for val in conf["sectors"]:
-            initial_state = SectorState(
-                temperature=val["initialState"]["temperature"],
-                wind_speed=val["initialState"]["windSpeed"],
-                wind_direction=GeographicDirection[val["initialState"]["windDirection"]],
-                air_humidity=val["initialState"]["airHumidity"],
-                plant_litter_moisture=val["initialState"]["plantLitterMoisture"],
-                co2_concentration=val["initialState"]["co2Concentration"],
-                pm2_5_concentration=val["initialState"]["pm2_5Concentration"],
-            )
-            # fireLevel may be missing in older configs; default to 0.0 and log a warning.
-            fire_level = val["initialState"].get("fireLevel", 0.0)
-            if "fireLevel" not in val["initialState"]:
-                logger.warning("Missing 'fireLevel' in sector initialState for sectorId %s; defaulting to 0.0", val.get("sectorId"))
+        # Detect whether sector coordinates in configuration are 1-indexed (common in frontend configs).
+        # Compute once for efficiency and handle malformed entries gracefully.
+        rows_vals = []
+        cols_vals = []
+        for s in conf["sectors"]:
+            try:
+                if "row" in s and s["row"] is not None:
+                    rows_vals.append(int(s["row"]))
+                if "column" in s and s["column"] is not None:
+                    cols_vals.append(int(s["column"]))
+            except Exception:
+                # ignore malformed values
+                pass
 
-            # Determine if coordinates are 1-indexed or 0-indexed.
-            # If any row or column equals the total rows/columns, it must be 1-indexed.
-            # Also if min row/col is 1 and max matches rows/cols, it's 1-indexed.
-            raw_row = val["row"]
-            raw_col = val["column"]
-            
-            # Simple heuristic: if max value matches total, it's likely 1-indexed
-            # Most of our configs are 1-indexed for frontend compatibility
-            is_one_indexed = any(s.get("row") == rows or s.get("column") == columns for s in conf["sectors"])
-            
-            if is_one_indexed:
-                row = raw_row - 1
-                col = raw_col - 1
-                logger.debug(f"Sector {val.get('sectorId')}: Detected 1-indexed config. Mapping ({raw_row}, {raw_col}) -> index ({row}, {col})")
-            else:
-                row = raw_row
-                col = raw_col
-                logger.debug(f"Sector {val.get('sectorId')}: Detected 0-indexed config. Using index ({row}, {col})")
-            
-            # Ensure indices are within bounds
-            row = max(0, min(rows - 1, row))
-            col = max(0, min(columns - 1, col))
-            
-            # Use sectorId from configuration if present so IDs match backend/frontend.
-            # Fallback to row-major 1-indexed ID when sectorId is missing.
-            calculated_sector_id = row * columns + col + 1
-            config_sector_id = val.get("sectorId")
-            sector_id = config_sector_id if config_sector_id is not None else calculated_sector_id
-            if config_sector_id is not None and config_sector_id != calculated_sector_id:
-                logger.debug(
-                    "Sector at row=%d col=%d has config sectorId=%s; calculated=%d, using config value.",
-                    row, col, config_sector_id, calculated_sector_id
+        is_one_indexed = False
+        if rows_vals or cols_vals:
+            try:
+                is_one_indexed = (
+                    (max(rows_vals, default=0) == rows) or
+                    (max(cols_vals, default=0) == columns) or
+                    (min(rows_vals, default=rows) == 1 and max(rows_vals, default=0) == rows) or
+                    (min(cols_vals, default=columns) == 1 and max(cols_vals, default=0) == columns)
+                )
+            except Exception:
+                is_one_indexed = False
+
+        logger.debug(f"[MAP] Sector index scheme detected: {'1-indexed' if is_one_indexed else '0-indexed'}")
+
+        try: 
+            for val in conf["sectors"]:
+                initial_state = SectorState(
+                    temperature           = val["initialState"]["temperature"],
+                    wind_speed            = val["initialState"]["windSpeed"],
+                    wind_direction        = GeographicDirection[val["initialState"]["windDirection"]],
+                    air_humidity          = val["initialState"]["airHumidity"],
+                    plant_litter_moisture = val["initialState"]["plantLitterMoisture"],
+                    co2_concentration     = val["initialState"]["co2Concentration"],
+                    pm2_5_concentration   = val["initialState"]["pm2_5Concentration"],
                 )
 
-            sectors[row][col] = Sector(
-                sector_id=sector_id,
-                row=row,
-                column=col,
-                sector_type=SectorType[val["sectorType"]],
-                initial_state=initial_state,
-                fire_level=fire_level,
-                fire_state=FireState.ACTIVE if (fire_level > 0) else FireState.INACTIVE
-            )
+                fire_level = val["initialState"].get("fireLevel", 0.0)
+                if "fireLevel" not in val["initialState"]:
+                    logger.warning("Missing 'fireLevel' in sector initialState for sectorId %s; defaulting to 0.0", val.get("sectorId"))
+
+                # Determine if coordinates are 1-indexed or 0-indexed.
+                # If any row or column equals the total rows/columns, it must be 1-indexed.
+                # Also if min row/col is 1 and max matches rows/cols, it's 1-indexed.
+                raw_row = val["row"]
+                raw_col = val["column"]
+                
+                # Use pre-computed is_one_indexed flag (computed once before the loop)
+                if is_one_indexed:
+                    row = raw_row - 1
+                    col = raw_col - 1
+                    logger.debug(f"Sector {val.get('sectorId')}: Detected 1-indexed config. Mapping ({raw_row}, {raw_col}) -> index ({row}, {col})")
+                else:
+                    row = raw_row
+                    col = raw_col
+                    logger.debug(f"Sector {val.get('sectorId')}: Detected 0-indexed config. Using index ({row}, {col})")
+                
+                # Ensure indices are within bounds
+                row = max(0, min(rows - 1, row))
+                col = max(0, min(columns - 1, col))
+                
+                # Use sectorId from configuration if present so IDs match backend/frontend.
+                # Fallback to row-major 1-indexed ID when sectorId is missing.
+                calculated_sector_id = row * columns + col + 1
+                config_sector_id = val.get("sectorId")
+                sector_id = config_sector_id if config_sector_id is not None else calculated_sector_id
+                
+                if config_sector_id is not None and config_sector_id != calculated_sector_id:
+                    logger.debug(
+                        "Sector at row=%d col=%d has config sectorId=%s; calculated=%d, using config value.",
+                        row, col, config_sector_id, calculated_sector_id
+                    )
+
+                sectors[row][col] = Sector(
+                    sector_id     = sector_id,
+                    row           = row,
+                    column        = col,
+                    sector_type   = SectorType[val["sectorType"]],
+                    initial_state = initial_state,
+                    fire_level    = fire_level,
+                    fire_state    = FireState.ACTIVE if (fire_level > 0) else FireState.INACTIVE
+                )
+                logger.debug(f"[MAP] Sector {sector_id} assigned to row {row}, col {col}")
+        except Exception as e:
+            raise RuntimeError(f"Error constructing ForestMap: {e}") from e
+
         return sectors
     
     def _parse_fire_brigades(conf):
         fire_brigades = []
-        for fb_data in conf["fireBrigades"]:
-            # Use fireBrigadeId from config (1-indexed, matches sectorId)
-            fire_brigade_id = str(fb_data["fireBrigadeId"])
-            
-            timestamp = datetime.fromisoformat(fb_data["timestamp"]) 
-            state = FIREBRIGADE_STATE[fb_data["state"]]
-            
-            base_location = Location(
-                longitude=float(fb_data["baseLocation"]["longitude"]),
-                latitude=float(fb_data["baseLocation"]["latitude"])
-            )
-            current_location = Location(
-                longitude=float(fb_data["currentLocation"]["longitude"]),
-                latitude=float(fb_data["currentLocation"]["latitude"])
-            )
 
-            fire_brigades.append(FireBrigade(
-                fire_brigade_id=fire_brigade_id,
-                timestamp=timestamp,
-                initial_state=state,
-                base_location=base_location,
-                initial_location=current_location
-            ))
+        try: 
+            for fb_data in conf.get("fireBrigades", []):
+                if not fb_data:
+                    logger.warning("[MAP] Skipping empty fireBrigade entry in configuration")
+                    continue
+
+                fire_brigade_id = str(fb_data.get("fireBrigadeId", "unknown"))
+
+                ts_str = fb_data.get("timestamp")
+                if ts_str:
+                    try:
+                        timestamp = datetime.fromisoformat(ts_str)
+                    except Exception:
+                        logger.warning(f"[MAP] FireBrigade {fire_brigade_id}: invalid timestamp '{ts_str}', using now")
+                        timestamp = datetime.now()
+                else:
+                    logger.warning(f"[MAP] FireBrigade {fire_brigade_id}: missing timestamp, using now")
+                    timestamp = datetime.now()
+
+                state_str = fb_data.get("state")
+                try:
+                    state = FIREBRIGADE_STATE[state_str]
+                except Exception:
+                    logger.warning(f"[MAP] FireBrigade {fire_brigade_id}: unknown initial state '{state_str}', defaulting to AVAILABLE")
+                    state = FIREBRIGADE_STATE.AVAILABLE
+                
+                base_location = Location(
+                    longitude=ForestMap._safe_float(fb_data.get("baseLocation", {}).get("longitude"), context=f"fireBrigade {fire_brigade_id} baseLocation.longitude"),
+                    latitude=ForestMap._safe_float(fb_data.get("baseLocation", {}).get("latitude"), context=f"fireBrigade {fire_brigade_id} baseLocation.latitude")
+                )
+
+                current_location = None
+
+                if fb_data.get("currentLocation") is None:
+                    logger.warning(f"[MAP] FireBrigade {fire_brigade_id}: missing currentLocation, defaulting to baseLocation")
+                    current_location = Location(
+                        longitude = base_location.longitude,
+                        latitude  = base_location.latitude
+                    )
+                else:
+                    current_location = Location(
+                        longitude = ForestMap._safe_float(fb_data.get("currentLocation", {}).get("longitude"), context=f"fireBrigade {fire_brigade_id} currentLocation.longitude"),
+                        latitude  = ForestMap._safe_float(fb_data.get("currentLocation", {}).get("latitude"), context=f"fireBrigade {fire_brigade_id} currentLocation.latitude")
+                    )
+                
+                fire_brigades.append(FireBrigade(
+                    fire_brigade_id=fire_brigade_id,
+                    timestamp=timestamp,
+                    initial_state=state,
+                    base_location=base_location,
+                    initial_location=current_location
+                ))
+        except Exception as e:
+            raise RuntimeError(f"Error constructing ForestMap: {e}") from e
 
         return fire_brigades
     
     def _parse_forester_patrols(conf):
         foresterPatrols = []
-        for fb_data in conf["foresterPatrols"]:
-            # Use foresterPatrolId from config (1-indexed)
-            forester_patrol_id = str(fb_data["foresterPatrolId"])
-            
-            timestamp = datetime.fromisoformat(fb_data["timestamp"]) 
-            state = FORESTERPATROL_STATE[fb_data["state"]]
-            base_location = Location(
-                longitude=float(fb_data["baseLocation"]["longitude"]),
-                latitude=float(fb_data["baseLocation"]["latitude"])
-            )
-            current_location = Location(
-                longitude=float(fb_data["currentLocation"]["longitude"]),
-                latitude=float(fb_data["currentLocation"]["latitude"])
-            )
+        try:
+            for fb_data in conf["foresterPatrols"]:
+                forester_patrol_id = str(fb_data["foresterPatrolId"])
+                timestamp = datetime.fromisoformat(fb_data["timestamp"]) 
+                state = FORESTERPATROL_STATE[fb_data["state"]]
 
-            foresterPatrols.append(ForesterPatrol(
-                forester_patrol_id=forester_patrol_id,
-                timestamp=timestamp,
-                initial_state=state,
-                base_location=base_location,
-                initial_location=current_location
-            ))
+                base_location = Location(
+                    longitude = ForestMap._safe_float(fb_data.get("baseLocation", {}).get("longitude"), context=f"foresterPatrol {forester_patrol_id} baseLocation.longitude"),
+                    latitude  = ForestMap._safe_float(fb_data.get("baseLocation", {}).get("latitude"), context=f"foresterPatrol {forester_patrol_id} baseLocation.latitude")
+                )
+
+                current_location = None
+
+                if fb_data.get("currentLocation") is None:
+                    logger.warning(f"[MAP] ForesterPatrol {forester_patrol_id}: missing currentLocation, defaulting to baseLocation")
+                    current_location = Location(
+                        longitude = base_location.longitude,
+                        latitude  = base_location.latitude
+                    )
+                else:
+                    current_location = Location(
+                        longitude = ForestMap._safe_float(fb_data.get("currentLocation", {}).get("longitude"), context=f"foresterPatrol {forester_patrol_id} currentLocation.longitude"),
+                        latitude  = ForestMap._safe_float(fb_data.get("currentLocation", {}).get("latitude"), context=f"foresterPatrol {forester_patrol_id} currentLocation.latitude")
+                    )
+
+                # Forester patrol construction 
+                foresterPatrols.append(ForesterPatrol(
+                    forester_patrol_id = forester_patrol_id,
+                    timestamp          = timestamp,
+                    initial_state      = state,
+                    base_location      = base_location,
+                    initial_location   = current_location
+                ))
+        except Exception as e:
+            raise RuntimeError(f"Error constructing ForestMap: {e}") from e
 
         return foresterPatrols
+
+    @staticmethod
+    def _safe_float(value, default=0.0, context="value"):
+        """Safely parse a float from various input types.
+
+        - Handles None, empty string, ints, floats, and strings with comma or dot decimal separators.
+        - Logs a warning and returns the default on failure.
+        """
+        try:
+            if value is None or value == "":
+                raise ValueError("None or empty")
+            if isinstance(value, str):
+                value = value.replace(",", ".")
+            return float(value)
+        except Exception:
+            logger.warning(f"[MAP] Could not parse float for {context}: {value}. Using default {default}")
+            return float(default)
 
     @staticmethod
     def _calculate_bounds(locations, rows, columns):
@@ -237,7 +348,6 @@ class ForestMap:
             "height_sectors": diff_lat / rows
         }
 
-    
     @staticmethod
     def _assign_sensors_to_sectors(sensors, sectors, bounds):
         for sensor in sensors:
@@ -246,12 +356,27 @@ class ForestMap:
                 continue
 
             sensor_location = Location(**sensor["location"])
-            row = int((sensor_location.latitude - bounds["min_lat"]) / bounds["height_sectors"])
-            column = int((sensor_location.longitude - bounds["min_lon"]) / bounds["width_sectors"])
+            
+            # Map latitude to row: min_lat (South) -> row = rows-1, max_lat (North) -> row = 0
+            lat_span = bounds["height_sectors"] * len(sectors)
+            if lat_span > 0:
+                lat_interpolation = (sensor_location.latitude - bounds["min_lat"]) / lat_span
+                row = int((1 - lat_interpolation) * len(sectors))
+            else:
+                row = 0
+                
+            if bounds["width_sectors"] > 0:
+                column = int((sensor_location.longitude - bounds["min_lon"]) / bounds["width_sectors"])
+            else:
+                column = 0
+                
+            row = max(0, min(len(sectors) - 1, row))
+            column = max(0, min(len(sectors[0]) - 1, column))
 
-            if 0 <= row < len(sectors) and 0 <= column < len(sectors[0]) and sectors[row][column]:
+            if sectors[row][column]:
                 sectors[row][column].add_sensor(sensor_obj)
 
+    @staticmethod
     def _assign_cameras_to_sectors(cameras, sectors, bounds):
         for camera in cameras:
             camera_obj = ForestMap._create_camera(camera)
@@ -260,10 +385,24 @@ class ForestMap:
                 continue
 
             camera_location = Location(**camera["location"])
-            row = int((camera_location.latitude - bounds["min_lat"]) / bounds["height_sectors"])
-            column = int((camera_location.longitude - bounds["min_lon"]) / bounds["width_sectors"])
+            
+            # Map latitude to row: min_lat (South) -> row = rows-1, max_lat (North) -> row = 0
+            lat_span = bounds["height_sectors"] * len(sectors)
+            if lat_span > 0:
+                lat_interpolation = (camera_location.latitude - bounds["min_lat"]) / lat_span
+                row = int((1 - lat_interpolation) * len(sectors))
+            else:
+                row = 0
+                
+            if bounds["width_sectors"] > 0:
+                column = int((camera_location.longitude - bounds["min_lon"]) / bounds["width_sectors"])
+            else:
+                column = 0
+                
+            row = max(0, min(len(sectors) - 1, row))
+            column = max(0, min(len(sectors[0]) - 1, column))
 
-            if 0 <= row < len(sectors) and 0 <= column < len(sectors[0]) and sectors[row][column]:
+            if sectors[row][column]:
                 sectors[row][column].add_sensor(camera_obj)
 
     @staticmethod
@@ -292,7 +431,6 @@ class ForestMap:
     @staticmethod
     def _create_camera(camera_conf):
         return Camera(datetime.now(), Location(camera_conf["location"]["latitude"], camera_conf["location"]["longitude"]), camera_conf["cameraId"])
-
 
     @property
     def forester_patrols(self):
@@ -346,21 +484,27 @@ class ForestMap:
     def get_sector_location(self, sector: Sector) -> Location:
         """
         Compute the geographic center of a given sector based on the four map corners.
-        Assumes row 0 is the southernmost row.
+        Assumes row 0 is the southernmost row (bottom).
         """
-        bottom_left = self._location[0]
-        top_right = self._location[2]
+        lats = [loc.latitude for loc in self._location]
+        lons = [loc.longitude for loc in self._location]
+        
+        min_lat, max_lat = min(lats), max(lats)
+        min_lon, max_lon = min(lons), max(lons)
 
-        total_lon_span = top_right.longitude - bottom_left.longitude
-        total_lat_span = top_right.latitude - bottom_left.latitude
+        total_lon_span = max_lon - min_lon
+        total_lat_span = max_lat - min_lat
 
         sector_width = total_lon_span / self._columns
         sector_height = total_lat_span / self._rows
 
-        center_lon = bottom_left.longitude + (sector.column + 0.5) * sector_width
-        center_lat = bottom_left.latitude + (sector.row + 0.5) * sector_height
+        center_lon = min_lon + (sector.column + 0.5) * sector_width
+        # Row 0 is at min_lat, Row rows-1 is at max_lat
+        center_lat = min_lat + (sector.row + 0.5) * sector_height
 
-        return Location(longitude=center_lon, latitude=center_lat)
+        loc = Location(longitude=center_lon, latitude=center_lat)
+        logger.debug(f"[MAP] Sector {sector.sector_id} (row {sector.row}) location: ({loc.latitude:.6f}, {loc.longitude:.6f})")
+        return loc
 
     def get_sector(self, sector_id: int) -> Sector:
         for row in self._sectors:
@@ -370,35 +514,32 @@ class ForestMap:
         return None
 
     def find_sector(self, location: Location):
-        bottom_left = self._location[0]
-        bottom_right = self._location[1]
-        top_right = self._location[2]
-        top_left = self._location[3]
+        """Find sector based on location. Row 0 is South."""
+        lats = [loc.latitude for loc in self._location]
+        lons = [loc.longitude for loc in self._location]
+        
+        min_lat, max_lat = min(lats), max(lats)
+        min_lon, max_lon = min(lons), max(lons)
 
-        min_lat = bottom_left.latitude
-        max_lat = top_left.latitude
-        min_lon = bottom_left.longitude
-        max_lon = bottom_right.longitude
+        lat_span = max_lat - min_lat
+        lon_span = max_lon - min_lon
 
-        lat_diff = max_lat - min_lat
-        lon_diff = max_lon - min_lon
-
-        if lat_diff == 0 or lon_diff == 0:
+        if lat_span == 0 or lon_span == 0:
             return None  
 
-        lat_interpolation = (location.latitude - min_lat) / lat_diff
-        lon_interpolation = (location.longitude - min_lon) / lon_diff
+        lat_interpolation = (location.latitude - min_lat) / lat_span
+        lon_interpolation = (location.longitude - min_lon) / lon_span
 
-        # height_index should increase as latitude increases if row 0 is at the bottom
-        # In our configuration (and JSON), row 1 is the southern-most row.
-        # So lat_interpolation = 0 (min_lat) should map to height_index = 0
+        # height_index 0 is South (min_lat), so interpolation 0.0 -> index 0
         height_index = int(lat_interpolation * self.rows)
         width_index = int(lon_interpolation * self.columns)
 
         height_index = max(0, min(self.rows - 1, height_index))
         width_index = max(0, min(self.columns - 1, width_index))
 
-        return self._sectors[height_index][width_index]
+        sector = self._sectors[height_index][width_index]
+        logger.debug(f"[MAP] Location ({location.latitude:.6f}, {location.longitude:.6f}) mapped to sector {sector.sector_id} (row {height_index}, col {width_index})")
+        return sector
 
 
     def get_adjacent_sectors(self, sector: Sector) -> list[Tuple[Sector, GeographicDirection]]:
@@ -440,7 +581,6 @@ class ForestMap:
 
         cloned_brigades = [brigade.clone() for brigade in self._fire_brigades]
         cloned_patrols = [patrol.clone() for patrol in self._forester_patrols]
-
         return ForestMap(
             forest_id=self._forest_id,
             forest_name=self._forest_name,

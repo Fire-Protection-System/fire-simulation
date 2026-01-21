@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class SectorType(Enum):
     DECIDUOUS = 1
     MIXED = 2

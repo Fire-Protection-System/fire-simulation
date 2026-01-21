@@ -2,14 +2,13 @@ import asyncio
 import threading
 import time
 import logging
+import random
+from typing import Any, Dict, Optional
 
-from typing import Any, Dict
-
-from engine.simple_simulation_engine import SimpleSimulationEngine
-
-from src.settings.communucation_settings import CommunicationSettings
-from src.settings.simulation_settings import SimulationSettings
+from src.settings.communucation_settings import CommunicationSettings, SimulatorCommunicationSettings, get_simulator_settings
+from src.settings.simulation_settings import SimulationSettings, get_simulation_settings
 from src.engine.base import SimulationEngine
+from src.engine.simple_simulation_engine import SimpleSimulationEngine
 from src.engine.models.sensors.sensor_type import SensorType
 from src.messaging.topics import (
     TopicRegistry, 
@@ -21,96 +20,104 @@ from src.messaging.topics import (
 from src.rabbitmq.message_store import MessageStore
 from src.rabbitmq.pika_client import PikaClient
 from src.rabbitmq import producer, consumer, connection_manager
+from src.llm.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
 class EngineRunner:
     def __init__(
         self, 
-        engine: SimulationEngine                = SimpleSimulationEngine(), 
-        settings: CommunicationSettings         = CommunicationSettings(), 
-        simulation_settings: SimulationSettings = SimulationSettings(),
-        store: MessageStore                     = MessageStore(),
-        client: PikaClient                      = PikaClient()
+        engine: SimulationEngine                = None, 
+        settings: SimulatorCommunicationSettings = None, 
+        simulation_settings: SimulationSettings = None,
+        store: MessageStore                     = None,
+        client: PikaClient                      = None
     ):
-        '''
-            Initialize the EngineRunner with the given simulation engine and settings.
-        '''    
-        self.engine: SimulationEngine   = engine
-        self.settings                   = settings
-        self.simulation_settings        = simulation_settings 
-        self.store                      = store
-        self.client                     = client
+        self.engine = engine if engine else SimpleSimulationEngine()
+        self.settings = settings if settings else get_simulator_settings()
+        self.simulation_settings = simulation_settings if simulation_settings else get_simulation_settings()
+        self.store = store if store else MessageStore()
+        self.client = client if client else PikaClient()
 
-        # Internal control. The idea was to make it possible to stop the runner cleanly
-        # Not fully implemented yet though, sorry
-        self._stop                                 = threading.Event()
-        self._loop_thread: threading.Thread | None = None
-        self._write_threads                        = []
-        self._read_threads                         = []
-        self._tick_interval                        = simulation_settings.tick_interval
-        self._base_tick_interval                   = simulation_settings.tick_interval
-        self._min_tick_interval                    = 0.5  # Fastest tick: 0.5 seconds
-        self._max_tick_interval                    = 10.0  # Slowest tick: 10 seconds
-        self._command_consumer                     = None
-        self._original_config                      = None
-        self._last_fire_count                       = 0
+        self._stop = threading.Event()
+        self._loop_thread: Optional[threading.Thread] = None
+        self._write_threads = []
+        self._read_threads = []
+        self._tick_interval = self.simulation_settings.tick_interval
+        self._base_tick_interval = self.simulation_settings.tick_interval
+        self._min_tick_interval = 0.05
+        self._max_tick_interval = 2.0
+        self._command_consumer = None
+        self._original_config = None
+        self._last_fire_count = 0
 
     def set_tick_interval(self, seconds: float) -> None:
-        """
-        Update simulation tick interval (seconds between engine steps).
-
-        This controls how often `_do_step_and_send` is executed.
-        """
         try:
             value = float(seconds)
+            if value > 0:
+                logger.info("Updating EngineRunner tick interval to %s seconds", value)
+                self._tick_interval = value
+                self.simulation_settings.tick_interval = value
         except (TypeError, ValueError):
-            logger.warning("Invalid tick interval value %r – keeping previous %s", seconds, self._tick_interval)
-            return
-
-        if value <= 0:
-            logger.warning("Attempted to set non-positive tick interval %s – keeping previous %s", value, self._tick_interval)
-            return
-
-        logger.info("Updating EngineRunner tick interval from %s to %s seconds", self._tick_interval, value)
-        self._tick_interval = value
+            pass
 
     async def start(self, config: Dict[str, Any]) -> None:
-        # Store original config for state restoration
+        import random 
+
         self._original_config = config.copy() if config else None
+        self._simulation_session_id = f"sim_{int(time.time())}_{random.randint(1000, 9999)}"
+        self._original_config['simulationSessionId'] = self._simulation_session_id if self._original_config else None
+            
+        logger.info(f"Starting new simulation session: {self._simulation_session_id}")
         
         await self.engine.load_config(config)
         
         if hasattr(self.engine, 'agents_manager') and self.engine.agents_manager:
             self.engine.agents_manager._message_store = self.store
+            
+            try:
+                shared_llm_client = LLMClient()
+                logger.debug("[LLM] Initialized shared LLM client for agents")
+            except Exception as e:
+                logger.error(f"[LLM] Failed to init LLM client: {e}")
+                shared_llm_client = None
+
+            if self.engine.agents_manager._agent_communication is None and self.engine.agents_manager._enable_llm_agents:
+                try:
+                    from src.llm.agent_communication import AgentCommunication
+                    comm = AgentCommunication(self.store)
+                    self.engine.agents_manager._agent_communication = comm
+                    for agent in self.engine.agents_manager._agents.values():
+                        agent.set_communication(comm)
+                        agent.set_llm_client(shared_llm_client) # Pass LLM to agent
+                        agent._llm_chat_enabled = True
+                    logger.debug("[LLM] Late-bound agent communication and LLM via EngineRunner")
+                except Exception as e:
+                    logger.error(f"[LLM] Failed late-bound communication init: {e}")
             logger.info("Message store set for agent manager")
         
         await self.engine.start()
+
         self._setup_queues()
+        self._publish_support_config()
         
         if hasattr(self.engine, 'agents_manager') and self.engine.agents_manager:
             from src.engine.agent_manager.command_consumer import CommandConsumer
+
             self._command_consumer = CommandConsumer(
-                message_store=self.store,
-                command_callback=self.engine.agents_manager.process_command
+                message_store    = self.store,
+                command_callback = self.engine.agents_manager.process_command,
+                forest_map       = self.engine._map
             )
             self._command_consumer.start()
-            logger.info("CommandConsumer started for processing agent orders")
 
-        logger.info("Waiting 2.5 seconds for queues to initialize...")
-        await asyncio.sleep(2.5)
+            logger.info("CommandConsumer started")
 
-        def loop():
-            while not self._stop.is_set():
-                try:
-                    self._do_step_and_send()
-                    # Adaptive tick rate: faster when fires are active
-                    self._adjust_tick_interval()
-                except Exception as e:
-                    logger.exception(f"Error in simulation loop: {e}")
-                time.sleep(self._tick_interval)
+        logger.info("Waiting for queues to initialize...")
+        await asyncio.sleep(1.0)
 
-        self._loop_thread = threading.Thread(target=loop, daemon=True)
+        self._stop.clear()
+        self._loop_thread = threading.Thread(target=self._run_loop, daemon=True, name="EngineRunnerLoop")
         self._loop_thread.start()
         logger.info("Simulation loop started")
 
@@ -123,39 +130,51 @@ class EngineRunner:
                         exchange_type = 'topic',
                         durable       = False
                     )
-                    logger.info(f"Exchange '{self.settings.exchange_name}' ready")
                     
-                    # Use new topics API instead of deprecated TOPIC_NAMES/QUEUE_NAMES
                     all_topics = get_all_topics()
                     for topic in all_topics:
-                        # Queue name = topic name (simplified, no separate queue names)
                         queue_name = topic.replace('.', '_')
-                        
                         channel.queue_declare(queue=queue_name, durable=False)
                         channel.queue_bind(
                             exchange    = self.settings.exchange_name,
                             queue       = queue_name,
                             routing_key = topic
                         )
-                        logger.debug(f"Queue '{queue_name}' bound to topic '{topic}'")
-                    
                     logger.info(f"Created and bound {len(all_topics)} queues")
                 except Exception as e:
-                    logger.error(f"Error setting up queues: {e}", exc_info=True)
+                    logger.error(f"Error setting up queues: {e}")
 
-        # Only start producer threads for topics the simulation actually publishes
-        # Use SimulationTopics.ALL instead of all TopicRegistry topics
         for topic_value in SimulationTopics.ALL:
-            # Find the TopicRegistry enum for this topic value
             topic_enum = next((t for t in TopicRegistry if t.value == topic_value), None)
             if topic_enum:
+                logger.info(f"Starting producer thread for topic: {topic_enum.value} (enum: {topic_enum.name})")
                 self._start_producer_thread(topic_enum)
+            else:
+                logger.warning(f"No TopicRegistry enum found for topic value: {topic_value}")
+        
+        self._start_producer_thread(TopicRegistry.SUPPORT_AGGREGATED_DATA)
 
-        for topic in [TopicRegistry.FORESTER_ACTIONS, TopicRegistry.FIRE_BRIGADE_ACTIONS]:
+        for topic in [
+            TopicRegistry.FORESTER_ACTIONS, 
+            TopicRegistry.FIRE_BRIGADE_ACTIONS,
+            TopicRegistry.LLM_RESPONSES,
+            TopicRegistry.AGENT_ANNOUNCEMENTS
+        ]:
             self._start_consumer_thread(topic)
 
+    def _publish_support_config(self) -> None:
+        if not self._original_config:
+            logger.warning("Support config publish skipped: missing original config")
+            return
+
+        try:
+            support_topic = TopicRegistry.SUPPORT_AGGREGATED_DATA.value
+            self.store.add_message_to_sent(support_topic, self._original_config)
+            logger.info("Published configuration to support.data.aggregated")
+        except Exception as e:
+            logger.error(f"Failed to publish support config: {e}")
+
     def _start_producer_thread(self, topic):
-        """Start a producer thread for the given topic."""
         thread = threading.Thread(
             target=producer.start_producing_messages,
             kwargs={
@@ -166,15 +185,13 @@ class EngineRunner:
                 "password": self.settings.rabbitmq_password,
                 "stop_event": self._stop
             },
-            daemon=True
+            daemon=True,
+            name=f"Producer-{topic.name}"
         )
         thread.start()
         self._write_threads.append(thread)
-        logger.info(f"Started producer thread for '{topic.value}'")
 
     def _start_consumer_thread(self, topic):
-        """Start a consumer thread for the given topic."""
-        # Convert routing key (with dots) to queue name (with underscores)
         queue_name = topic.value.replace('.', '_')
         thread = threading.Thread(
             target=consumer.consume_messages_from_queue,
@@ -185,156 +202,280 @@ class EngineRunner:
                 "password": self.settings.rabbitmq_password,
                 "stop_event": self._stop
             },
-            daemon=True
+            daemon=True,
+            name=f"Consumer-{topic.name}"
         )
         thread.start()
         self._read_threads.append(thread)
-        logger.info(f"Started consumer thread for routing key '{topic.value}' (queue: '{queue_name}')")
 
-    def _adjust_tick_interval(self):
-        """
-        Adaptively adjust tick interval based on simulation state.
-        Faster ticks when fires are active, slower when stable.
-        """
-        if not hasattr(self.engine, 'sectors_on_fire'):
-            return
-        
-        current_fire_count = len(self.engine.sectors_on_fire)
-        
-        # If fire count changed significantly, adjust tick rate
-        if abs(current_fire_count - self._last_fire_count) > 2:
-            if current_fire_count > 0:
-                # Active fires: use faster tick rate
-                # Scale: more fires = faster ticks (but not too fast)
-                # Formula: base * (1 - min(fires/20, 0.6))
-                fire_factor = min(current_fire_count / 20.0, 0.6)
-                new_interval = self._base_tick_interval * (1.0 - fire_factor)
-                new_interval = max(new_interval, self._min_tick_interval)
-            else:
-                # No fires: use slower tick rate to save resources
-                new_interval = min(self._base_tick_interval * 1.5, self._max_tick_interval)
-            
-            if abs(new_interval - self._tick_interval) > 0.5:  # Only log significant changes
-                logger.debug(f"Adaptive tick interval: {self._tick_interval:.2f}s -> {new_interval:.2f}s (fires: {current_fire_count})")
-                self._tick_interval = new_interval
-        
-        self._last_fire_count = current_fire_count
-    
+    def _run_loop(self):
+        logger.info("Starting EngineRunner loop execution")
+        while not self._stop.is_set():
+            try:
+                self._do_step_and_send()
+                self._adjust_tick_interval()
+                time.sleep(self._tick_interval)
+            except Exception as e:
+                logger.exception(f"Error in simulation loop: {e}")
+                break
+
     def _do_step_and_send(self):
         result = self.engine.step(1)
         
         sector_states = result.get("sector_states", [])
+        sector_states_fast = result.get("sector_states_fast", [])
         sensor_messages = result.get("sensor_messages", {})
         agent_states = result.get("agent_states", [])
         events = result.get("events", [])
         
-        # Removed verbose logging - only log errors
-        
         self._process_sensor_messages(sensor_messages)
         self._process_sector_states(sector_states)
+        self._process_sector_states_fast(sector_states_fast)
         self._process_agent_states(agent_states)
         self._process_events(events)
+        
+        # Throttle support data updates to ~2Hz (every 500ms)
+        # This prevents flooding the support service with high-frequency agent updates
+        now = time.time()
+        if not hasattr(self, '_last_support_update'):
+            self._last_support_update = 0
+            
+        if now - self._last_support_update >= 0.5:
+            self._process_support_aggregated_data(sector_states, agent_states)
+            self._last_support_update = now
 
-    async def stop(self):
-        logger.info("Stopping simulation runner...")
-        self._stop.set()
-        
-        # Stop CommandConsumer if it exists
-        if self._command_consumer:
-            logger.info("Stopping CommandConsumer...")
-            self._command_consumer.stop()
-            self._command_consumer = None
-        
-        # Stop main simulation loop
-        if self._loop_thread and self._loop_thread.is_alive():
-            logger.info("Waiting for simulation loop to stop...")
-            self._loop_thread.join(timeout=2)
-            if self._loop_thread.is_alive():
-                logger.warning("Simulation loop thread did not stop within timeout")
-        
-        # Stop producer and consumer threads
-        logger.info("Stopping producer and consumer threads...")
-        for t in self._write_threads + self._read_threads:
-            if t.is_alive():
-                t.join(timeout=1)
-                if t.is_alive():
-                    logger.warning(f"Thread {t.name} did not stop within timeout")
-        
-        # Stop engine
-        logger.info("Stopping engine...")
-        await self.engine.stop()
-        
-        # Flush and remove queues
-        logger.info("Flushing and removing queues...")
-        while True:
-            if connection_manager.flush_and_remove_queues(
-                self.settings.exchange_name, 
-                self.settings.rabbitmq_username, 
-                self.settings.rabbitmq_password
-            ):
-                break
-            time.sleep(1)
-        
-        # Clear message store
-        logger.info("Clearing message store...")
-        self.store.clear()
-        
-        # Restore original state by reloading config
-        if self._original_config:
-            logger.info("Restoring original state...")
-            try:
-                await self.engine.load_config(self._original_config)
-                logger.info("Original state restored successfully")
-            except Exception as e:
-                logger.error(f"Failed to restore original state: {e}", exc_info=True)
-        
-        logger.info("Simulation runner stopped")
-
-    def snapshot(self) -> Dict[str, Any]:
-        return self.engine.snapshot()
-
-    async def manual_step(self, ticks: int) -> Dict[str, Any]:
-        result = self.engine.step(ticks)
-        # Process and send messages even for manual steps
-        self._process_sensor_messages(result.get("sensor_messages", {}))
-        self._process_sector_states(result.get("sector_states", []))
-        self._process_agent_states(result.get("agent_states", []))
-        self._process_events(result.get("events", []))
-        return result
-
-#    # Processing methods for different message types
-    # -----------------------------------------------
-    
     def _process_sensor_messages(self, sensor_messages):
-        """Process and store sensor messages."""
         for sensor_type_name, payloads in sensor_messages.items():
             try:
                 sensor_type = SensorType[sensor_type_name]
                 topic = get_topic_for_sensor(sensor_type)
                 for payload in payloads:
                     self.store.add_message_to_sent(topic, payload)
-            except (KeyError, ValueError) as e:
-                logger.warning(f"Unknown sensor type: {sensor_type_name}, error: {e}")
+            except (KeyError, ValueError):
+                pass
 
     def _process_sector_states(self, sector_states):
-        """Process and store sector states."""
         routing_key = TopicRegistry.SECTOR_STATE.value
+        session_id = getattr(self, '_simulation_session_id', None)
         for state in sector_states:
+            if session_id:
+                state['simulationSessionId'] = session_id
+            self.store.add_message_to_sent(routing_key, state)
+
+    def _process_sector_states_fast(self, sector_states_fast):
+        routing_key = TopicRegistry.SECTOR_STATE_FAST.value
+        session_id = getattr(self, '_simulation_session_id', None)
+        for state in sector_states_fast:
+            if session_id:
+                state['simulationSessionId'] = session_id
             self.store.add_message_to_sent(routing_key, state)
 
     def _process_agent_states(self, agent_states):
-        """Process and store agent states."""
-        topic_map = {
-            "forester": TopicRegistry.FORESTER_STATE.value,
-            "fire_brigade": TopicRegistry.FIRE_BRIGADE_STATE.value
+        batches = {
+            "fireBrigade": [],
+            "foresterPatrol": []
         }
         
+        session_id = getattr(self, '_simulation_session_id', None)
+        
         for agent_state in agent_states:
+            if session_id:
+                agent_state['simulationSessionId'] = session_id
+                
             agent_type = agent_state.get("type")
-            if topic := topic_map.get(agent_type):
-                self.store.add_message_to_sent(topic, agent_state)
+            
+            # Map agent types to batch categories
+            if agent_type in ["fire_brigade", "fireBrigade"]:
+                batches["fireBrigade"].append(agent_state)
+            elif agent_type in ["forester", "foresterPatrol"]:
+                batches["foresterPatrol"].append(agent_state)
+                
+        # Send batches
+        if batches["fireBrigade"]:
+            self.store.add_message_to_sent(
+                TopicRegistry.FIRE_BRIGADE_STATE_BATCH.value, 
+                {"batch": batches["fireBrigade"]}
+            )
+            
+        if batches["foresterPatrol"]:
+            self.store.add_message_to_sent(
+                TopicRegistry.FORESTER_STATE_BATCH.value, 
+                {"batch": batches["foresterPatrol"]}
+            )
 
     def _process_events(self, events):
-        """Process and store events."""
+        session_id = getattr(self, '_simulation_session_id', None)
         for event in events:
+            if session_id:
+                event['simulationSessionId'] = session_id
             self.store.add_message_to_sent(TopicRegistry.EVENTS.value, event)
+
+    def _process_support_aggregated_data(self, sector_states, agent_states):
+        """Aggregate and publish data for support service"""
+        sectors_dict = {}
+        forest_id = self._original_config.get('forestId') if self._original_config else None
+
+        # Prefer explicit sector_states from the engine; if empty, synthesize
+        # a full view from the current map so support always sees something.
+        sector_state_source = sector_states
+        if (not sector_state_source) and hasattr(self.engine, "all_sectors"):
+            sector_state_source = []
+            try:
+                for sector in getattr(self.engine, "all_sectors", []):
+                    if hasattr(sector, "make_sector_json"):
+                        sector_state_source.append(sector.make_sector_json())
+            except Exception:
+                # fall back to original (possibly empty) list
+                sector_state_source = sector_states
+
+        for sector_state in sector_state_source:
+            sector_id = sector_state.get('sectorId')
+            if sector_id is not None:
+                sector_for_support = {
+                    "sectorId": sector_id,
+                    "forestId": forest_id,
+                    "simulationSessionId": getattr(self, '_simulation_session_id', None),
+                    "state": {
+                        "fireLevel": sector_state.get('fireLevel', 0.0),
+                        "burnLevel": sector_state.get('burnLevel', 0.0),
+                        "extinguishLevel": sector_state.get('extinguishLevel', 0.0)
+                    }
+                }
+                sectors_dict[str(sector_id)] = sector_for_support
+        
+        fire_brigades_list = []
+        forester_patrols_list = []
+        
+        for agent_state in agent_states:
+            agent_type = agent_state.get("type", "")
+            if agent_type in ["fire_brigade", "fireBrigade"]:
+                brigade_for_support = {
+                    "fireBrigadeId": agent_state.get('fireBrigadeId') or agent_state.get('id') or agent_state.get('agentId'),
+                    "forestId": forest_id,
+                    "simulationSessionId": getattr(self, '_simulation_session_id', None),
+                    "state": agent_state.get("state", "AVAILABLE"),
+                    "location": agent_state.get("location", {})
+                }
+                if brigade_for_support["fireBrigadeId"] is not None:
+                    fire_brigades_list.append(brigade_for_support)
+            elif agent_type in ["forester", "foresterPatrol"]:
+                patrol_for_support = {
+                    "foresterPatrolId": agent_state.get('foresterPatrolId') or agent_state.get('id') or agent_state.get('agentId'),
+                    "forestId": forest_id,
+                    "simulationSessionId": getattr(self, '_simulation_session_id', None),
+                    "state": agent_state.get("state", "AVAILABLE"),
+                    "location": agent_state.get("location", {})
+                }
+                if patrol_for_support["foresterPatrolId"] is not None:
+                    forester_patrols_list.append(patrol_for_support)
+        
+        fire_brigades_dict = {}
+        for brigade in fire_brigades_list:
+            brigade_id = str(brigade.get('fireBrigadeId', ''))
+            if brigade_id:
+                fire_brigades_dict[brigade_id] = brigade
+        
+        forester_patrols_dict = {}
+        for patrol in forester_patrols_list:
+            patrol_id = str(patrol.get('foresterPatrolId', ''))
+            if patrol_id:
+                forester_patrols_dict[patrol_id] = patrol
+        
+        aggregated_message = {
+            "timestamp": time.time(),
+            "forestId": forest_id,
+            "simulationSessionId": getattr(self, '_simulation_session_id', None),
+            "sectors": sectors_dict,
+            "fireBrigades": fire_brigades_dict if fire_brigades_dict else fire_brigades_list,
+            "foresterPatrols": forester_patrols_dict if forester_patrols_dict else forester_patrols_list
+        }
+        
+        support_topic = TopicRegistry.SUPPORT_AGGREGATED_DATA.value
+        self.store.add_message_to_sent(support_topic, aggregated_message)
+        
+        logger.debug(f"Published to support.data.aggregated: sectors={len(sectors_dict)}, "
+                    f"fireBrigades={len(fire_brigades_dict) or len(fire_brigades_list)}, "
+                    f"foresterPatrols={len(forester_patrols_dict) or len(forester_patrols_list)}")
+
+    def _adjust_tick_interval(self):
+        if not hasattr(self.engine, 'sectors_on_fire'):
+            return
+        
+        current_fire_count = len(self.engine.sectors_on_fire)
+        if abs(current_fire_count - self._last_fire_count) > 2:
+            if current_fire_count > 0:
+                fire_factor = min(current_fire_count / 20.0, 0.6)
+                new_interval = self._base_tick_interval * (1.0 - fire_factor)
+                new_interval = max(new_interval, self._min_tick_interval)
+            else:
+                new_interval = min(self._base_tick_interval * 1.5, self._max_tick_interval)
+            
+            self._tick_interval = new_interval
+        self._last_fire_count = current_fire_count
+
+    async def stop(self):
+        logger.info("Stopping EngineRunner...")
+        self._stop.set()
+        
+        # Stop command consumer
+        if self._command_consumer:
+            try:
+                self._command_consumer.stop()
+            except Exception as e:
+                logger.error(f"Error stopping command consumer: {e}", exc_info=True)
+        
+        # Wait for main loop thread
+        if self._loop_thread and self._loop_thread.is_alive():
+            logger.debug("Waiting for main loop thread to stop...")
+            self._loop_thread.join(timeout=2.0)
+            if self._loop_thread.is_alive():
+                logger.warning("Main loop thread did not stop within timeout")
+
+        # Wait for producer and consumer threads
+        all_threads = self._write_threads + self._read_threads
+        if all_threads:
+            logger.debug(f"Waiting for {len(all_threads)} producer/consumer threads to stop...")
+            for t in all_threads:
+                if t.is_alive():
+                    try:
+                        t.join(timeout=1.0)
+                        if t.is_alive():
+                            logger.warning(f"Thread {t.name} did not stop within timeout")
+                    except Exception as e:
+                        logger.error(f"Error waiting for thread {t.name}: {e}", exc_info=True)
+        
+        # Stop engine
+        try:
+            await self.engine.stop()
+        except Exception as e:
+            logger.error(f"Error stopping engine: {e}", exc_info=True)
+
+        # Clear message store (this clears all queues)
+        if self.store:
+            try:
+                self.store.clear()
+                logger.debug("Message store cleared")
+            except Exception as e:
+                logger.error(f"Error clearing message store: {e}", exc_info=True)
+
+        # Clear thread lists and config
+        self._write_threads = []
+        self._read_threads = []
+        self._original_config = None
+        self._command_consumer = None
+        
+        logger.info("EngineRunner stopped and cleaned up")
+
+    def snapshot(self) -> Dict[str, Any]:
+        snapshot = self.engine.snapshot()
+        if self._original_config:
+            snapshot["config"] = self._original_config
+        return snapshot
+
+    async def manual_step(self, ticks: int) -> Dict[str, Any]:
+        result = self.engine.step(ticks)
+        self._process_sensor_messages(result.get("sensor_messages", {}))
+        self._process_sector_states(result.get("sector_states", []))
+        self._process_agent_states(result.get("agent_states", []))
+        self._process_events(result.get("events", []))
+        return result

@@ -1,52 +1,39 @@
 import logging
-import threading
-from collections import defaultdict, deque
+from collections import deque
+from typing import Dict, Any, Optional, List
 
 logger = logging.getLogger(__name__)
 
 class MessageStore:
-    def __init__(self):
-        self.messages_to_sent = defaultdict(deque)
-        self.received_messages = defaultdict(deque) 
-        self.lock = threading.Lock() 
+    def __init__(self, max_size: int = 1000):
+        self._received_messages: Dict[str, deque] = {}
+        self._sent_messages: Dict[str, deque] = {}
+        self._max_size = max_size
 
-    def add_received_message(self, message: str,  queue_name: str) -> None:
-        with self.lock:
-            self.received_messages[queue_name].append(message)
-            logger.debug(f"Received message: {message}")
+    def add_received_message(self, message: Dict[str, Any], queue_name: str):
+        if queue_name not in self._received_messages:
+            self._received_messages[queue_name] = deque(maxlen=self._max_size)
+        self._received_messages[queue_name].append(message)
 
-    def add_message_to_sent(self, queue_name: str, message: str) -> None:
-        """Dodaje wiadomość do określonej kolejki."""
-        with self.lock:
-            self.messages_to_sent[queue_name].append(message)
+    def get_received_message(self, queue_name: str) -> Optional[Dict[str, Any]]:
+        if queue_name in self._received_messages and self._received_messages[queue_name]:
+            return self._received_messages[queue_name].popleft()
+        return None
 
-    def get_message_to_sent(self, queue_name: str) -> str:
-        """Pobiera i usuwa najstarszą wiadomość z danej kolejki."""
-        with self.lock:
-            if self.messages_to_sent[queue_name]:
-                oldest_message = self.messages_to_sent[queue_name].popleft()
-                return oldest_message
-            else:
-                return None
+    def add_message_to_sent(self, topic: str, message: Dict[str, Any]):
+        if topic not in self._sent_messages:
+            self._sent_messages[topic] = deque(maxlen=self._max_size)
+        self._sent_messages[topic].append(message)
 
-    def get_sent_message(self):
-        pass
+    def get_all_sent_messages(self, topic: str) -> List[Dict[str, Any]]:
+        if topic in self._sent_messages:
+            return list(self._sent_messages[topic])
+        return []
 
-    def get_received_message(self, queue_name):
-        with self.lock:
-            if self.received_messages[queue_name]:
-                oldest_message = self.received_messages[queue_name].popleft()  # Pobiera i usuwa najstarszą wiadomość
-                logger.debug(f"Retrieved oldest received message: {oldest_message} from  queue: {queue_name}")
-                return oldest_message
-            else:
-                return None
+    def clear_sent_messages(self, topic: str):
+        if topic in self._sent_messages:
+            self._sent_messages[topic].clear()
 
     def clear(self):
-        """Clear all messages from the store."""
-        with self.lock:
-            self.messages_to_sent.clear()
-            self.received_messages.clear()
-            logger.info("Message store cleared")
-
-message_store = MessageStore()
-
+        self._received_messages.clear()
+        self._sent_messages.clear()

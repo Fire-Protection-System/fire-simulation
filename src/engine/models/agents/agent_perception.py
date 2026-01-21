@@ -11,5 +11,5 @@ class AgentPerception:
     current_sector: Optional[Sector]
     destination: Location
     distance_to_destination: float
-    task_progress: float  # 0.0 - 1.0
+    task_progress: float  
     base_location: Location

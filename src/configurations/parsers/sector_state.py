@@ -1,7 +1,9 @@
 
 from datetime import datetime
+from tkinter import E
 from typing import List, Dict, Any
 import logging
+from uu import Error
 
 from src.engine.models.map.fire_state import FireState
 from src.engine.models.map.geographic_direction import GeographicDirection
@@ -25,11 +27,8 @@ def parse_sector_state(data: List[Dict[str, Any]]) -> List[Sector]:
     try:
         sector_list = data["sectors"]
         
-    except KeyError as e:
+    except Exception as e:
         logger.error(f"Resource not found: Missing key 'sectors' in sector data. Error: {e}", exc_info=True)
-        return sectors
-    except (TypeError, AttributeError) as e:
-        logger.error(f"Invalid data format: Expected dict but got {type(data).__name__}. Error: {e}", exc_info=True)
         return sectors
 
     for idx, val in enumerate(sector_list):
@@ -60,13 +59,9 @@ def parse_sector_state(data: List[Dict[str, Any]]) -> List[Sector]:
             )
             sectors.append(sector)
             
-        except KeyError as e:
+        except Exception as e:
             sector_id = val.get("sectorId", f"index_{idx}")
             logger.error(f"Resource not found: Missing required field in sector {sector_id} at index {idx}. Missing key: {e}", exc_info=True)
             continue
-        except (ValueError, TypeError) as e:
-            sector_id = val.get("sectorId", f"index_{idx}")
-            logger.error(f"Invalid data format: Error parsing sector {sector_id} at index {idx}. Error: {e}", exc_info=True)
-            continue
-    
+
     return sectors

@@ -2,9 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Dict
 from datetime import datetime
 
-from src.generator.conf_generator import SensorType
+from src.engine.models.sensors.sensor_type import SensorType
 from src.engine.models.core.location import Location
-
 
 class Sensor(ABC):
     def __init__(
