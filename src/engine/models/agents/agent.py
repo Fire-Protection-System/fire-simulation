@@ -196,6 +196,28 @@ class Agent(ABC):
         find_sector = map_ref.find_sector if hasattr(map_ref, "find_sector") else None
 
         self._process_task_queue(map_ref)
+
+        # SAFETY: if mamy aktywne zadanie z ustawionym celem, ale agent formalnie
+        # jest jeszcze w stanie IDLE, wymuś przejście do TRAVELING, żeby ruch się rozpoczął.
+        try:
+            if (
+                self._state == AgentState.IDLE
+                and self._current_task is not None
+                and self._destination is not None
+                and (
+                    self._destination.latitude != self._location.latitude
+                    or self._destination.longitude != self._location.longitude
+                )
+            ):
+                logger.debug(
+                    "[STATE-SAFETY] Agent %s: forcing state idle -> traveling "
+                    "because there is an active task and a different destination",
+                    self._agent_id,
+                )
+                self._state = AgentState.TRAVELING
+        except Exception:
+            # nie blokuj fizyki jeśli coś pójdzie nie tak w powyższej heurystyce
+            pass
         
         if self._state in (AgentState.TRAVELING, AgentState.RETURNING):
             old_location   = (self._location.latitude, self._location.longitude)

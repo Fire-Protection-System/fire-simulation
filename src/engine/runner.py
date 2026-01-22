@@ -210,17 +210,28 @@ class EngineRunner:
 
     def _run_loop(self):
         logger.info("Starting EngineRunner loop execution")
+        step_count = 0
         while not self._stop.is_set():
             try:
+                step_count += 1
+                logger.info(f"Loop iteration {step_count}, calling step... (tick_interval={self._tick_interval}, _stop.is_set()={self._stop.is_set()})")
                 self._do_step_and_send()
+                logger.info(f"Step {step_count} completed, sleeping for {self._tick_interval}s")
                 self._adjust_tick_interval()
                 time.sleep(self._tick_interval)
             except Exception as e:
                 logger.exception(f"Error in simulation loop: {e}")
                 break
+        logger.info(f"Simulation loop exited after {step_count} steps")
 
     def _do_step_and_send(self):
-        result = self.engine.step(1)
+        logger.info("_do_step_and_send: calling engine.step(1)")
+        try:
+            result = self.engine.step(1)
+            logger.info(f"_do_step_and_send: step completed, tick={result.get('tick', 'unknown')}, sectors={len(result.get('sector_states', []))}, agents={len(result.get('agent_states', []))}")
+        except Exception as e:
+            logger.exception(f"Error in engine.step(1): {e}")
+            raise
         
         sector_states = result.get("sector_states", [])
         sector_states_fast = result.get("sector_states_fast", [])
@@ -228,11 +239,40 @@ class EngineRunner:
         agent_states = result.get("agent_states", [])
         events = result.get("events", [])
         
-        self._process_sensor_messages(sensor_messages)
-        self._process_sector_states(sector_states)
-        self._process_sector_states_fast(sector_states_fast)
-        self._process_agent_states(agent_states)
-        self._process_events(events)
+        try:
+            self._process_sensor_messages(sensor_messages)
+            logger.debug(f"Processed {len(sensor_messages)} sensor message types")
+        except Exception as e:
+            logger.exception(f"Error in _process_sensor_messages: {e}")
+            raise
+        
+        try:
+            self._process_sector_states(sector_states)
+            logger.debug(f"Processed {len(sector_states)} sector states")
+        except Exception as e:
+            logger.exception(f"Error in _process_sector_states: {e}")
+            raise
+        
+        try:
+            self._process_sector_states_fast(sector_states_fast)
+            logger.debug(f"Processed {len(sector_states_fast)} fast sector states")
+        except Exception as e:
+            logger.exception(f"Error in _process_sector_states_fast: {e}")
+            raise
+        
+        try:
+            self._process_agent_states(agent_states)
+            logger.debug(f"Processed {len(agent_states)} agent states")
+        except Exception as e:
+            logger.exception(f"Error in _process_agent_states: {e}")
+            raise
+        
+        try:
+            self._process_events(events)
+            logger.debug(f"Processed {len(events)} events")
+        except Exception as e:
+            logger.exception(f"Error in _process_events: {e}")
+            raise
         
         # Throttle support data updates to ~2Hz (every 500ms)
         # This prevents flooding the support service with high-frequency agent updates
@@ -241,8 +281,13 @@ class EngineRunner:
             self._last_support_update = 0
             
         if now - self._last_support_update >= 0.5:
-            self._process_support_aggregated_data(sector_states, agent_states)
-            self._last_support_update = now
+            try:
+                self._process_support_aggregated_data(sector_states, agent_states)
+                self._last_support_update = now
+                logger.debug("Published support aggregated data")
+            except Exception as e:
+                logger.exception(f"Error in _process_support_aggregated_data: {e}")
+                # Don't raise here - support data is not critical for simulation loop
 
     def _process_sensor_messages(self, sensor_messages):
         for sensor_type_name, payloads in sensor_messages.items():

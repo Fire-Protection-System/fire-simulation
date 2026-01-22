@@ -95,7 +95,22 @@ class Sector:
     
     @fire_level.setter
     def fire_level(self, fire):
-        self._fire_level = fire
+        """
+        Set fire level, clamped to a non-negative value.
+        Negative values can appear due to numerical effects of repeated
+        extinguishing – from the simulation point of view anything <= 0
+        means "no fire".
+        """
+        try:
+            fire_val = float(fire)
+        except (TypeError, ValueError):
+            fire_val = 0.0
+
+        # Clamp to [0, +inf)
+        if fire_val < 0.0:
+            fire_val = 0.0
+
+        self._fire_level = fire_val
         self._is_modified = True
 
     @burn_level.setter

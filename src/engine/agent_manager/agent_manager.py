@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from typing import Dict, List, Optional
 from datetime import datetime
 import asyncio
@@ -41,6 +42,12 @@ class AgentManager:
         self._enable_llm_agents = os.environ.get("ENABLE_LLM_AGENTS", "true").lower() == "true"
         self._telemetry_batch: Dict[str, List[dict]] = {}
         self._last_telemetry_flush_ts: float = 0.0
+        # Metrics for debugging agent update frequency
+        self._pos_update_count: int = 0
+        self._pos_update_window_start: float = 0.0
+        # Throttling: publish telemetry max once per 3 seconds per agent (20 updates per 60s)
+        self._agent_last_telemetry_ts: Dict[str, float] = {}
+        self._telemetry_throttle_interval: float = 3.0  # seconds between telemetry publishes per agent
         
         for brigade in forest_map.fire_brigades:
             agent_id = f"FB-{brigade.fire_brigade_id}"
@@ -96,9 +103,40 @@ class AgentManager:
             new_state = agent.state.value
             
             if publish_telemetry:
-                current_sector = self._map.find_sector(agent.location)
-                self._agent_sectors[agent_id] = current_sector
-                self._publish_telemetry(agent, event, current_sector)
+                # Throttling: only publish telemetry once per 3 seconds per agent (20 updates per 60s)
+                now = time.time()
+                last_telemetry_ts = self._agent_last_telemetry_ts.get(agent_id, 0.0)
+                time_since_last = now - last_telemetry_ts
+                
+                if time_since_last >= self._telemetry_throttle_interval:
+                    # Metrics: count position updates for debug logging
+                    if self._pos_update_window_start == 0.0:
+                        self._pos_update_window_start = now
+                    self._pos_update_count += 1
+
+                    current_sector = self._map.find_sector(agent.location)
+                    self._agent_sectors[agent_id] = current_sector
+                    self._publish_telemetry(agent, event, current_sector)
+                    self._agent_last_telemetry_ts[agent_id] = now
+
+        # Periodically log how many position updates we're sending, to verify
+        # that \"fast\" mode really działa jak trzeba.
+        if publish_telemetry and self._pos_update_window_start > 0.0:
+            now = time.time()
+            window = now - self._pos_update_window_start
+            if window >= 60.0:  # co minutę
+                updates_per_sec = self._pos_update_count / window
+                updates_per_min = updates_per_sec * 60.0
+                logger.info(
+                    "[AGENT-METRICS] Position updates: %d in %.1fs (%.1f / sec, %.1f / min)",
+                    self._pos_update_count,
+                    window,
+                    updates_per_sec,
+                    updates_per_min,
+                )
+                # reset window
+                self._pos_update_count = 0
+                self._pos_update_window_start = now
     
     def process_command(self, command: dict):
         agent_id = str(command.get("agentId", ""))

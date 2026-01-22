@@ -143,6 +143,12 @@ class FireBrigade(Agent):
 
         task_complete = self.execute_task(delta, current_sector)
 
+        # Extra safety: if for any reason the sector reference changed or
+        # fire_level was clamped to 0 elsewhere, treat it as task complete.
+        if current_sector and current_sector.fire_level <= 0.0 and not task_complete:
+            logger.debug(f"[EXTINGUISH] Agent {self._agent_id}: fire_level <= 0 detected post-update, forcing task_complete")
+            task_complete = True
+
         if current_sector:
             new_extinguish_level = current_sector.extinguish_level
             if old_fire_level is not None:

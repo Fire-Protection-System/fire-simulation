@@ -17,7 +17,6 @@ app = Flask(__name__)
 communication_settings = get_communication_settings()
 simulation_settings = get_simulation_settings()
 
-
 engine = SimpleSimulationEngine(simulation_settings, communication_settings)
 runner = EngineRunner(engine, settings=communication_settings, simulation_settings=simulation_settings)
 _loop: asyncio.AbstractEventLoop | None = None

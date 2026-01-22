@@ -138,7 +138,7 @@ class SimpleSimulationEngine(SimulationEngine):
             logger.warning(f"Failed to start fire at ({row}, {column}): {e}")
 
     def step(self, ticks: int = 1) -> Dict[str, Any]:
-        logger.debug(f"Engine step called for {ticks} ticks")
+        logger.info(f"Engine step called for {ticks} ticks (tick_count={self._tick_count})")
         out_messages: Dict[str, List[Any]] = {}
         sector_states: List[Any]           = []
         sector_states_fast: List[Any]      = []

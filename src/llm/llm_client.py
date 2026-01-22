@@ -32,7 +32,8 @@ class LLMClient:
         NO MOCKS: if LLM is not available, returns empty string.
         """
         if not self.api_key:
-            logger.error("LLMClient: complete() called but OPENAI_API_KEY is not set; LLM is disabled")
+            # LLM is disabled - this is expected when OPENAI_API_KEY is not set, so use debug level
+            logger.debug("LLMClient: complete() called but OPENAI_API_KEY is not set; LLM is disabled")
             return ""
 
         try:
@@ -71,7 +72,8 @@ class LLMClient:
         NO MOCKS: if LLM is not available, returns None.
         """
         if not self.api_key:
-            logger.error("LLMClient: chat_completion() called but OPENAI_API_KEY is not set; LLM is disabled")
+            # LLM is disabled - this is expected when OPENAI_API_KEY is not set, so use debug level
+            logger.debug("LLMClient: chat_completion() called but OPENAI_API_KEY is not set; LLM is disabled")
             return None
         
         try:
