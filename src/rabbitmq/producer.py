@@ -39,7 +39,6 @@ class RabbitMQProducer:
             if not self._channel:
                 logger.error("Failed to reconnect producer, message not sent.")
                 return
-
         try:
             self._channel.basic_publish(
                 exchange    = self._settings.exchange_name,
@@ -96,10 +95,10 @@ def start_producing_messages(exchange, routing_key, store: MessageStore, usernam
                 
                 for msg in messages:
                     channel.basic_publish(
-                        exchange=exchange,
-                        routing_key=routing_key,
-                        body=json.dumps(msg),
-                        properties=pika.BasicProperties(delivery_mode=1)
+                        exchange    = exchange,
+                        routing_key = routing_key,
+                        body        = json.dumps(msg),
+                        properties  = pika.BasicProperties(delivery_mode=1)
                     )
                 
                 # Toggle logging state for LLM queues
@@ -127,7 +126,6 @@ def start_producing_messages(exchange, routing_key, store: MessageStore, usernam
             if not connection.is_closed:
                 connection.close()
         except Exception as e:
-            # Connection may already be closed or lost - this is expected during shutdown
             logger.debug(f"Error closing connection on thread exit (expected during shutdown): {e}")
     
     logger.info(f"Producer thread for {routing_key} stopped")

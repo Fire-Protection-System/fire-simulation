@@ -4,6 +4,8 @@ import time
 from typing import Dict, List, Optional
 from datetime import datetime
 import asyncio
+import threading
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 
 from src.engine.models.agents.agent import Agent
 from src.engine.models.agents.fire_brigade import FireBrigade
@@ -40,20 +42,22 @@ class AgentManager:
         self._llm_brains: Dict[str, any] = {} 
         self._agent_communication = None
         self._enable_llm_agents = os.environ.get("ENABLE_LLM_AGENTS", "true").lower() == "true"
+        # Thread pool for non-blocking LLM calls in announcements
+        self._announcement_executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix="agent-announce")
+        self._announcement_timeout = 1.0  # Max 1s for LLM call, then use template (allows time for network but not too long)
         self._telemetry_batch: Dict[str, List[dict]] = {}
         self._last_telemetry_flush_ts: float = 0.0
         # Metrics for debugging agent update frequency
         self._pos_update_count: int = 0
         self._pos_update_window_start: float = 0.0
-        # Throttling: publish telemetry max once per 3 seconds per agent (20 updates per 60s)
         self._agent_last_telemetry_ts: Dict[str, float] = {}
-        self._telemetry_throttle_interval: float = 3.0  # seconds between telemetry publishes per agent
+        self._telemetry_throttle_interval: float = 1.0  # seconds between telemetry publishes per agent
         
         for brigade in forest_map.fire_brigades:
             agent_id = f"FB-{brigade.fire_brigade_id}"
             self._agents[agent_id] = brigade
-            numeric_id = str(brigade.fire_brigade_id)
-            self._brigades[numeric_id] = brigade
+            # numeric_id = str(brigade.fire_brigade_id)
+            self._brigades[ str(brigade.fire_brigade_id)] = brigade
             self._agent_sectors[agent_id] = forest_map.find_sector(brigade.location)
             
         
@@ -66,16 +70,18 @@ class AgentManager:
         
         if self._enable_llm_agents and self._message_store:
             try:
+                logger.info("[LLM] Initializing agent communication system...")
                 from src.llm.agent_communication import AgentCommunication
                 self._agent_communication = AgentCommunication(self._message_store)
-                logger.debug("[LLM] Agent communication system initialized")
+                logger.info("[LLM] Agent communication system initialized successfully")
                 
                 for agent in self._agents.values():
                     agent.set_communication(self._agent_communication)
-                logger.debug(f"[LLM] Assigned communication adapter to {len(self._agents)} agents")
+                logger.info(f"[LLM] Assigned communication adapter to {len(self._agents)} agents")
 
             except Exception as e:
-                logger.warning(f"[LLM] Failed to initialize agent communication: {e}")
+                logger.error(f"[LLM] Failed to initialize agent communication: {e}", exc_info=True)
+                self._agent_communication = None  # Ensure it's None on failure
         
         if self._agent_communication:
             for agent in self._agents.values():
@@ -86,24 +92,68 @@ class AgentManager:
         logger.info(f"AgentManager initialized with {len(self._agents)} agents")
 
     def update(self, delta_time: float, publish_telemetry: bool = True):
-        speed_factor = getattr(self._engine, 'speed_factor', 1.0)
-        adjusted_delta = delta_time * speed_factor
+        adjusted_delta = delta_time * self._engine.speed_factor
 
         for agent_id, agent in list(self._agents.items()):
             old_state = agent.state.value
-            
-            if publish_telemetry and self._enable_llm_agents and isinstance(agent, FireBrigade) and self._agent_communication:
+
+            if (
+                publish_telemetry                    # Only publish telemetry if enabled
+                and self._enable_llm_agents          # Only if LLM agents are enabled   
+                and isinstance(agent, FireBrigade)   # Only FireBrigades can announce
+                and self._agent_communication        # Only if communication is enabled
+                and agent.state.value != old_state   # Only if state has changed
+            ): 
                 self._announce_agent_state_changes(agent_id, agent, old_state)
+            
+            if publish_telemetry and self._agent_communication:
+                try:
+                    
+                    try:
+                        current_sector = self._map.find_sector(agent.location)
+                    except Exception as e:
+                        logger.error(f"[AGENT-STATUS] Failed to find sector for {agent_id}: {e}")
+                        continue
+
+                    try:
+                        announcement = None
+                        try:
+                            announcement = self._generate_announcement_non_blocking(agent, current_sector)
+                        except Exception as e:
+                            logger.debug(f"[AGENT-STATUS] Announcement generation exception for {agent_id}: {type(e).__name__}")
+                            pass
+                        
+                        if announcement and self._agent_communication:
+                            try:
+                                self._agent_communication.announce_action(
+                                    agent_id         = announcement['agent_id'],
+                                    action           = "status_update",
+                                    target_sector_id = announcement.get('sector'),
+                                    location         = announcement.get('location'),
+                                    reasoning        = announcement.get('natural_language'),
+                                    additional_data={
+                                        "natural_language": announcement.get('natural_language'),
+                                        "status": announcement.get('status')
+                                    }
+                                )
+                            except Exception as e:
+                                logger.debug(f"[AGENT-STATUS] Failed to send announcement for {agent_id}: {e}")
+                    except Exception as e:
+                        logger.error(f"[AGENT-STATUS] Failed to generate announcement for {agent_id}: {e}")
+                        continue
+                    
+
+                except Exception as e:
+                    logger.debug(f"[AGENT-STATUS] Failed to publish status announcement for {agent_id}: {e}")
             
             '''
             Update agent physics and state
             Update state tasks 
             '''
             event = agent.update_physics(adjusted_delta, self._map)
-            new_state = agent.state.value
+            # new_state = agent.state.value
             
             if publish_telemetry:
-                # Throttling: only publish telemetry once per 3 seconds per agent (20 updates per 60s)
                 now = time.time()
                 last_telemetry_ts = self._agent_last_telemetry_ts.get(agent_id, 0.0)
                 time_since_last = now - last_telemetry_ts
@@ -112,31 +162,30 @@ class AgentManager:
                     # Metrics: count position updates for debug logging
                     if self._pos_update_window_start == 0.0:
                         self._pos_update_window_start = now
-                    self._pos_update_count += 1
+                    # self._pos_update_count += 1
 
                     current_sector = self._map.find_sector(agent.location)
                     self._agent_sectors[agent_id] = current_sector
                     self._publish_telemetry(agent, event, current_sector)
                     self._agent_last_telemetry_ts[agent_id] = now
 
-        # Periodically log how many position updates we're sending, to verify
-        # that \"fast\" mode really działa jak trzeba.
-        if publish_telemetry and self._pos_update_window_start > 0.0:
-            now = time.time()
-            window = now - self._pos_update_window_start
-            if window >= 60.0:  # co minutę
-                updates_per_sec = self._pos_update_count / window
-                updates_per_min = updates_per_sec * 60.0
-                logger.info(
-                    "[AGENT-METRICS] Position updates: %d in %.1fs (%.1f / sec, %.1f / min)",
-                    self._pos_update_count,
-                    window,
-                    updates_per_sec,
-                    updates_per_min,
-                )
-                # reset window
-                self._pos_update_count = 0
-                self._pos_update_window_start = now
+
+        # if publish_telemetry and self._pos_update_window_start > 0.0:
+        #     now = time.time()
+        #     window = now - self._pos_update_window_start
+        #     if window >= 60.0:  # co minutę
+        #         updates_per_sec = self._pos_update_count / window
+        #         updates_per_min = updates_per_sec * 60.0
+        #         logger.info(
+        #             "[AGENT-METRICS] Position updates: %d in %.1fs (%.1f / sec, %.1f / min)",
+        #             self._pos_update_count,
+        #             window,
+        #             updates_per_sec,
+        #             updates_per_min,
+        #         )
+        #         # reset window
+        #         self._pos_update_count = 0
+        #         self._pos_update_window_start = now
     
     def process_command(self, command: dict):
         agent_id = str(command.get("agentId", ""))
@@ -167,12 +216,38 @@ class AgentManager:
         state_val = s_map.get(agent.state.value, "AVAILABLE")
         session_id = getattr(self._engine, '_simulation_session_id', None)
         
+        # Ensure location is always set - use base_location as fallback
+        if agent.location:
+            location = {
+                "latitude": agent.location.latitude, 
+                "longitude": agent.location.longitude
+            }
+        elif agent.base_location:
+            # Fallback to base_location if location is not set
+            location = {
+                "latitude": agent.base_location.latitude,
+                "longitude": agent.base_location.longitude
+            }
+        else:
+            # Last resort: use (0, 0) if neither is available
+            logger.warning(f"Agent {agent_id_val} has no location or base_location in _publish_telemetry, using (0,0) as fallback")
+            location = {"latitude": 0.0, "longitude": 0.0}
+        
+        # Handle destination similarly
+        if agent.destination:
+            destination = {
+                "latitude": agent.destination.latitude, 
+                "longitude": agent.destination.longitude
+            }
+        else:
+            destination = location  # Use current location as fallback
+        
         message = {
             "timestamp": datetime.now().isoformat(),
             "event" : event.get("event", "idle"),
-            "location": {"latitude": agent.location.latitude, "longitude": agent.location.longitude},
+            "location": location,
             "sectorId": sector.sector_id if sector else None,
-            "destination": {"latitude": agent.destination.latitude, "longitude": agent.destination.longitude},
+            "destination": destination,
             "state": state_val,
             config.id_field_name: agent_id_val,
             "type": config.type_name,
@@ -203,8 +278,7 @@ class AgentManager:
             try:
                 self._message_store.add_message_to_sent(topic, batch_msg)
             except Exception:
-                # swallow to avoid interrupting simulation
-                pass
+                logger.exception("Error sending telemetry batch for topic %s", topic)
         self._telemetry_batch.clear()
 
     def get_agent_states(self) -> List[dict]:
@@ -225,10 +299,22 @@ class AgentManager:
                 "longitude": agent.destination.longitude
             } if agent.destination else None
 
-            location = {
-                "latitude": agent.location.latitude, 
-                "longitude": agent.location.longitude
-            } if agent.location else None
+            # Ensure location is always set - use base_location as fallback
+            if agent.location:
+                location = {
+                    "latitude": agent.location.latitude, 
+                    "longitude": agent.location.longitude
+                }
+            elif agent.base_location:
+                # Fallback to base_location if location is not set
+                location = {
+                    "latitude": agent.base_location.latitude,
+                    "longitude": agent.base_location.longitude
+                }
+            else:
+                # Last resort: use (0, 0) if neither is available
+                logger.warning(f"Agent {agent_id} has no location or base_location, using (0,0) as fallback")
+                location = {"latitude": 0.0, "longitude": 0.0}
 
             baseLocation = {
                 "latitude": agent.base_location.latitude, 
@@ -236,7 +322,6 @@ class AgentManager:
             } if agent.base_location else None
 
 
-            # Determine the actual ID value for this agent (not the field name)
             if isinstance(agent, FireBrigade):
                 id_value = agent.fire_brigade_id
             elif isinstance(agent, ForesterPatrol):
@@ -244,7 +329,6 @@ class AgentManager:
             else:
                 id_value = agent.agent_id
 
-            # Coerce numeric ID strings to integers to match backend types when possible
             try:
                 if isinstance(id_value, str) and id_value.isdigit():
                     id_value = int(id_value)
@@ -283,6 +367,81 @@ class AgentManager:
                 logger.debug(f"[LLM] No announcement rule for state change {old_state} -> {curr} for agent {agent_id}")
 
 
+
+    def _generate_announcement_non_blocking(self, agent: Agent, current_sector: Optional[Sector]) -> Optional[Dict]:
+        """
+        Generate announcement non-blocking with timeout.
+        If LLM call takes too long, immediately use template fallback.
+        """
+        if not hasattr(agent, '_generate_status_announcement'):
+            return None
+        
+        # Check throttling first (fast check)
+        current_time = time.time()
+        if hasattr(agent, '_last_status_announcement_time'):
+            if current_time - agent._last_status_announcement_time < 1.0:
+                return None
+        
+        # Try to get announcement with timeout
+        try:
+            future = self._announcement_executor.submit(agent._generate_status_announcement, current_sector)
+            announcement = future.result(timeout=self._announcement_timeout)
+            return announcement
+        except FutureTimeoutError:
+            # LLM call took too long (>1s), generate template-based announcement immediately
+            # This is expected behavior - not an error
+            logger.debug(f"[AGENT-STATUS] LLM timeout for {agent._agent_id} (>{self._announcement_timeout}s), using fast template")
+            return self._generate_fast_template_announcement(agent, current_sector)
+        except Exception as e:
+            # Any other exception - fall back to template (expected for network issues, etc.)
+            logger.debug(f"[AGENT-STATUS] Announcement generation failed for {agent._agent_id}: {type(e).__name__}")
+            return self._generate_fast_template_announcement(agent, current_sector)
+    
+    def _generate_fast_template_announcement(self, agent: Agent, current_sector: Optional[Sector]) -> Optional[Dict]:
+        """Fast template-based announcement (no LLM, always works)"""
+        try:
+            import random
+            current_time = time.time()
+            
+            # Update throttle time
+            agent._last_status_announcement_time = current_time
+            
+            sector_id = current_sector.sector_id if current_sector else None
+            status_map = {
+                "idle": "AVAILABLE",
+                "traveling": "TRAVELLING",
+                "executing": "EXTINGUISHING" if hasattr(agent, 'fire_brigade_id') else "PATROLLING",
+                "returning": "TRAVELLING"
+            }
+            status = status_map.get(agent._state.value, "AVAILABLE")
+            
+            # Fast template selection
+            templates = {
+                "AVAILABLE": ["ready to respond", "available and waiting", "standing by"],
+                "TRAVELLING": ["moving to destination", "en route", "traveling"],
+                "EXTINGUISHING": ["fighting fires", "extinguishing", "fire suppression"],
+                "PATROLLING": ["patrolling area", "on patrol", "monitoring"]
+            }
+            
+            action = random.choice(templates.get(status, templates["AVAILABLE"]))
+            nl_response = f"Hey, Agent {agent._agent_id}, my status is {status}, I'm {action}"
+            if sector_id is not None:
+                nl_response += f", {{SECTOR: {sector_id}, STATUS: {status}}}"
+            
+            return {
+                "timestamp": datetime.now().isoformat(),
+                "agent_id": agent._agent_id,
+                "natural_language": nl_response,
+                "sector": sector_id,
+                "status": status,
+                "location": {
+                    "latitude": agent._location.latitude,
+                    "longitude": agent._location.longitude
+                }
+            }
+        except Exception as e:
+            logger.debug(f"[AGENT-STATUS] Fast template failed for {agent._agent_id}: {e}")
+            return None
 
     def _announce_action(self, agent_id: str, action: str, target_sector_id: Optional[int] = None, reasoning: Optional[str] = None):
         if not self._agent_communication: return

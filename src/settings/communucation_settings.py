@@ -3,7 +3,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 from src.messaging.topics import ControlTopics, SimulationTopics
 
-DEFAULT_RABBITMQ_HOST = "rabbitmq-service"
+DEFAULT_RABBITMQ_HOST = "rabbitmq"
 DEFAULT_RABBITMQ_PORT = 5672
 DEFAULT_RABBITMQ_USER = "guest"
 DEFAULT_RABBITMQ_PASS = "guest"

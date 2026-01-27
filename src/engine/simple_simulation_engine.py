@@ -149,7 +149,8 @@ class SimpleSimulationEngine(SimulationEngine):
             logger.warning("Step called but engine not fully initialized")
             return {"tick": self._tick_count, "sensor_messages": {}, "sector_states": [], "agent_states": [], "events": []}
 
-        for _ in range(ticks):
+        for tick_idx in range(ticks):
+            logger.debug(f"Processing tick {tick_idx + 1}/{ticks}")
             self._tick_count += 1
             self._agent_tick_count += 1
 
@@ -160,25 +161,36 @@ class SimpleSimulationEngine(SimulationEngine):
             tick_delta = self.simulation_settings.tick_interval
             sub_update_count = self._agent_updates_per_sim_tick
             sub_delta = tick_delta / sub_update_count
+            logger.debug(f"Tick delta: {tick_delta}, sub_update_count: {sub_update_count}, sub_delta: {sub_delta}")
 
             '''
                 Update agents in smaller sub-steps for smoother simulation.
                 Telemetry is enabled so backend/support/frontend see live positions.
             '''
-            for _ in range(sub_update_count):
+            logger.debug(f"Starting agent updates: {sub_update_count} sub-updates")
+            for i in range(sub_update_count):
+                if i % 10 == 0:
+                    logger.debug(f"Agent update {i}/{sub_update_count}")
                 self.agents_manager.update(sub_delta, publish_telemetry=True)
+            logger.debug(f"Finished agent updates")
 
+            logger.debug("Getting agent states")
             agent_states = self.agents_manager.get_agent_states()
+            logger.debug("Flushing telemetry")
             try:
                 self.agents_manager.flush_telemetry()
+                logger.debug("Telemetry flushed")
             except Exception:
+                logger.exception("Error flushing agent telemetry")
                 pass
 
             ''' 
                 Update actual simulation state: fires, sectors, sensors, etc.
                 Sector updates are throttled by _sector_update_interval to slow down fire spread relative to agent updates.
             '''
+            logger.debug("Checking sector update")
             sector_update_due = (self._sector_update_interval > 0) and (self._tick_count % self._sector_update_interval == 0)
+            logger.debug(f"Sector update due: {sector_update_due}")
 
             if sector_update_due:
                 self._map.update_extinguish_levels()
@@ -236,6 +248,7 @@ class SimpleSimulationEngine(SimulationEngine):
                 if sector.fire_state == FireState.ACTIVE or sector.is_modified or has_agents:
                     sectors_for_sensors.add(sector)
 
+            logger.debug(f"Updating sensors for {len(sectors_for_sensors)} sectors")
             for sector in sectors_for_sensors:
                 sector_sensor_data = sector.update_sensors()
                 for sensor_type, sensor_list in sector_sensor_data.items():
@@ -246,6 +259,9 @@ class SimpleSimulationEngine(SimulationEngine):
                     sector_states.append(sector.make_sector_json())
                     if sector.is_modified:
                         sector.reset_modified_flag()
+            logger.debug("Finished updating sensors")
+
+        logger.info(f"Engine step finished for {ticks} ticks (tick_count={self._tick_count})")
 
         return {
             "tick": self._tick_count,

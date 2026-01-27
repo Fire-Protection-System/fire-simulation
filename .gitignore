@@ -12,3 +12,7 @@ mvnw.cmd
 package-lock.json
 start.sh 
 forest_fire_simulation.egg-info/
+.local.env
+venv
+
+.DS_Store

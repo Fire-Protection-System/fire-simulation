@@ -674,6 +674,144 @@ class Agent(ABC):
                 logger.debug(f"[AGENT-CHAT] {self._agent_id} announced: {nl_msg}")
         except Exception as e:
             logger.error(f"[AGENT-CHAT] Failed to announce order for {self._agent_id}: {e}")
+    
+    def _generate_status_announcement(self, current_sector: Optional[Sector] = None) -> Optional[Dict[str, Any]]:
+        """
+        Generate a natural language status announcement with sector and status info.
+        Called every second to publish agent status updates.
+        
+        ALWAYS WORKS - uses LLM if available, otherwise uses template-based generation with randomization.
+        Messages always vary to avoid mocking/static content.
+        
+        Returns announcement dict with natural_language, sector, status, and location.
+        """
+        if not self._communication:
+            return None
+        
+        # Throttle to once per second
+        current_time = time.time()
+        if not hasattr(self, '_last_status_announcement_time'):
+            self._last_status_announcement_time = 0.0
+        
+        if current_time - self._last_status_announcement_time < 1.0:
+            return None
+        
+        try:
+            # Get current sector ID
+            sector_id = current_sector.sector_id if current_sector else None
+            
+            # Map state to readable status
+            status_map = {
+                "idle": "AVAILABLE",
+                "traveling": "TRAVELLING",
+                "executing": "EXTINGUISHING" if hasattr(self, 'fire_brigade_id') else "PATROLLING",
+                "returning": "TRAVELLING"
+            }
+            status = status_map.get(self._state.value, "AVAILABLE")
+            
+            # Generate natural language - try LLM first, fallback to templates
+            nl_response = None
+            
+            if self._llm_client:
+                # Use LLM for varied, natural language (with shorter prompt for speed)
+                try:
+                    import random
+                    # Shorter, faster prompt
+                    action_description = "ready" if status == "AVAILABLE" else \
+                                       "moving" if status == "TRAVELLING" else \
+                                       "fighting fires" if status == "EXTINGUISHING" else \
+                                       "patrolling" if status == "PATROLLING" else \
+                                       "returning"
+                    
+                    user_prompt = (
+                        f"Agent {self._agent_id}: status={status}, action={action_description}, "
+                        f"sector={sector_id or 'unknown'}. "
+                        f"Brief status update, max 20 words. Format: 'Hey, Agent {self._agent_id}, my status is {status}, I'm {action_description}, {{SECTOR: {sector_id}, STATUS: {status}}}'"
+                    )
+                    
+                    # Use shorter system prompt for faster response
+                    system_prompt = "You are a fire agent. Generate brief status updates. Keep responses under 20 words."
+                    
+                    nl_response = self._llm_client.complete(user_prompt, system_prompt).strip()
+                    # Validate response isn't too long or empty
+                    if not nl_response or len(nl_response) > 200:
+                        nl_response = None  # Fall back to template if empty or too long
+                except Exception as e:
+                    # LLM failures are expected (timeouts, network issues) - use debug level
+                    logger.debug(f"[AGENT-STATUS] LLM generation failed for {self._agent_id}, using template: {type(e).__name__}")
+                    nl_response = None
+            
+            # Fallback to template-based generation (ALWAYS VARIES)
+            if not nl_response:
+                import random
+                
+                # Template variations for each status - ensures messages vary
+                templates = {
+                    "AVAILABLE": [
+                        "Hey, Agent {agent_id}, I'm {agent_id} and I'm ready to respond to fires",
+                        "Agent {agent_id} here, status is AVAILABLE and ready for action",
+                        "This is {agent_id}, I'm available and waiting for orders",
+                        "{agent_id} reporting in, ready to deploy when needed"
+                    ],
+                    "TRAVELLING": [
+                        "Hey, Agent {agent_id}, I'm currently moving to my destination",
+                        "Agent {agent_id} en route, traveling to assigned location",
+                        "This is {agent_id}, I'm on the move to my target",
+                        "{agent_id} here, currently traveling to the scene"
+                    ],
+                    "EXTINGUISHING": [
+                        "Hey, Agent {agent_id}, I'm actively extinguishing a fire",
+                        "Agent {agent_id} engaged in firefighting operations",
+                        "This is {agent_id}, currently fighting fires",
+                        "{agent_id} reporting, fire suppression in progress"
+                    ],
+                    "PATROLLING": [
+                        "Hey, Agent {agent_id}, I'm patrolling my assigned area",
+                        "Agent {agent_id} on patrol duty, monitoring the sector",
+                        "This is {agent_id}, conducting routine patrol",
+                        "{agent_id} here, patrolling and watching for issues"
+                    ]
+                }
+                
+                # Select random template for variation
+                template_list = templates.get(status, templates["AVAILABLE"])
+                base_message = random.choice(template_list).format(agent_id=self._agent_id)
+                
+                # Add sector info if available
+                if sector_id is not None:
+                    sector_variations = [
+                        f" in sector {sector_id}",
+                        f", currently in sector {sector_id}",
+                        f", sector {sector_id}",
+                        f" at sector {sector_id}"
+                    ]
+                    base_message += random.choice(sector_variations)
+                
+                nl_response = f"{base_message}, {{SECTOR: {sector_id}, STATUS: {status}}}"
+            
+            # Ensure the contracts format is included
+            if "{SECTOR:" not in nl_response and sector_id is not None:
+                nl_response += f", {{SECTOR: {sector_id}, STATUS: {status}}}"
+            
+            announcement = {
+                "timestamp": datetime.now().isoformat(),
+                "agent_id": self._agent_id,
+                "natural_language": nl_response,
+                "sector": sector_id,
+                "status": status,
+                "location": {
+                    "latitude": self._location.latitude,
+                    "longitude": self._location.longitude
+                }
+            }
+            
+            self._last_status_announcement_time = current_time
+            return announcement
+            
+        except Exception as e:
+            logger.error(f"[AGENT-STATUS] Failed to generate status announcement for {self._agent_id}: {e}", exc_info=True)
+            return None
+    
     def execute_command(self, command: Dict[str, Any]):
         """
         Add command to task queue - agents handle their own orders.

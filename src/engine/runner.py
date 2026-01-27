@@ -4,6 +4,7 @@ import time
 import logging
 import random
 from typing import Any, Dict, Optional
+import os
 
 from src.settings.communucation_settings import CommunicationSettings, SimulatorCommunicationSettings, get_simulator_settings
 from src.settings.simulation_settings import SimulationSettings, get_simulation_settings
@@ -75,25 +76,40 @@ class EngineRunner:
         if hasattr(self.engine, 'agents_manager') and self.engine.agents_manager:
             self.engine.agents_manager._message_store = self.store
             
-            try:
-                shared_llm_client = LLMClient()
-                logger.debug("[LLM] Initialized shared LLM client for agents")
-            except Exception as e:
-                logger.error(f"[LLM] Failed to init LLM client: {e}")
-                shared_llm_client = None
+            shared_llm_client = None
+            if self.engine.agents_manager._enable_llm_agents:
+                try:
+                    logger.info("[LLM] Initializing shared LLM client for agents...")
+                    logger.info(f"[LLM] ENABLE_LLM_AGENTS={os.getenv('ENABLE_LLM_AGENTS', 'not set')}")
+                    shared_llm_client = LLMClient()
+                    logger.info(f"[LLM] API Key: {'SET' if shared_llm_client.api_key else 'NOT SET'}")
+                except Exception as e:
+                    logger.warning("[LLM] Continuing simulation WITHOUT LLM support - agents will use fallback announcements")
+                    shared_llm_client = None
+                    # Continue without LLM - don't crash simulation
+            else:
+                logger.info("[LLM] LLM agents disabled (ENABLE_LLM_AGENTS=false or not set)")
 
             if self.engine.agents_manager._agent_communication is None and self.engine.agents_manager._enable_llm_agents:
                 try:
+                    logger.info("[LLM] Setting up agent communication...")
                     from src.llm.agent_communication import AgentCommunication
                     comm = AgentCommunication(self.store)
                     self.engine.agents_manager._agent_communication = comm
+                    agents_with_llm = 0
                     for agent in self.engine.agents_manager._agents.values():
                         agent.set_communication(comm)
-                        agent.set_llm_client(shared_llm_client) # Pass LLM to agent
-                        agent._llm_chat_enabled = True
-                    logger.debug("[LLM] Late-bound agent communication and LLM via EngineRunner")
+                        if shared_llm_client:
+                            agent.set_llm_client(shared_llm_client) # Pass LLM to agent
+                            agent._llm_chat_enabled = True
+                            agents_with_llm += 1
+                    logger.info(f"[LLM] ✓ Late-bound agent communication initialized for {len(self.engine.agents_manager._agents)} agents ({agents_with_llm} with LLM client)")
                 except Exception as e:
-                    logger.error(f"[LLM] Failed late-bound communication init: {e}")
+                    logger.error(f"[LLM] ✗ Failed late-bound communication init: {e}", exc_info=True)
+                    logger.warning("[LLM] Continuing simulation WITHOUT agent communication - agents will use fallback announcements")
+                    # Continue without agent communication - don't crash simulation
+            elif not self.engine.agents_manager._enable_llm_agents:
+                logger.info("[LLM] Agent communication skipped (ENABLE_LLM_AGENTS disabled)")
             logger.info("Message store set for agent manager")
         
         await self.engine.start()
@@ -183,6 +199,8 @@ class EngineRunner:
                 "store": self.store,
                 "username": self.settings.rabbitmq_username,
                 "password": self.settings.rabbitmq_password,
+                "host": self.settings.rabbitmq_host,
+                "port": self.settings.rabbitmq_port,
                 "stop_event": self._stop
             },
             daemon=True,
@@ -200,6 +218,8 @@ class EngineRunner:
                 "store": self.store,
                 "username": self.settings.rabbitmq_username,
                 "password": self.settings.rabbitmq_password,
+                "host": self.settings.rabbitmq_host,
+                "port": self.settings.rabbitmq_port,
                 "stop_event": self._stop
             },
             daemon=True,

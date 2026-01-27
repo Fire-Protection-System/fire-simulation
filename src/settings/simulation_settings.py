@@ -4,12 +4,12 @@ from pydantic_settings import BaseSettings
 
 TICK_INTERVAL               = 0.08   # base sim tick (slightly faster for smoother movement)
 FIRE_FIGHTERS_MULTIPLIER    = 5      # used in extinguishing logic (see fire_brigade)
-FIRE_LEVEL_MULTIPLIER       = 1      # reserved for future tuning of fire growth
-FIRE_SPREAD_PROB_MULTIPLIER = 0.005   # 10x slower spreading between sectors (was 0.05)
+FIRE_LEVEL_MULTIPLIER       = 5     # reserved for future tuning of fire growth
+FIRE_SPREAD_PROB_MULTIPLIER = 0.1   # 10x slower spreading between sectors (was 0.05)
 WAIT_FOR_SUPPORT            = False
 SUPPORT_TIMEOUT             = 10.0
-SECTOR_UPDATE_INTERVAL      = 10     # was 5 – sector fire updates 2x rzadziej
-AGENT_UPDATES_PER_SIM_TICK  = 30     
+SECTOR_UPDATE_INTERVAL      = 10     # was 5 – sector fire updates 2x less
+AGENT_UPDATES_PER_SIM_TICK  = 2     
 
 class SimulationSettings(BaseSettings):
     tick_interval: float               = Field(TICK_INTERVAL,               env="TICK_INTERVAL")

@@ -44,14 +44,16 @@ class LLMClient:
                     {"role": "user", "content": prompt}
                 ],
                 "temperature": 0.7,
-                "max_tokens": 500
+                "max_tokens": 100  # Reduced from 500 for faster responses
             }
             
+            # Use a reasonable timeout - connection timeout 3s, read timeout 5s
+            # This allows the request to start quickly but gives time for response
             response = requests.post(
                 f"{self.base_url}/chat/completions",
                 headers={"Authorization": f"Bearer {self.api_key}"},
                 json=payload,
-                timeout=15
+                timeout=(3, 5)  # (connect timeout, read timeout) - 3s to connect, 5s to read response
             )
             
             if response.status_code == 200:
@@ -61,8 +63,13 @@ class LLMClient:
                 logger.error(f"LLM API Error ({response.status_code}): {response.text}")
                 return ""
                 
+        except requests.exceptions.Timeout as e:
+            # Timeout is expected when LLM is slow - use debug level, not error
+            logger.debug(f"LLM request timeout (expected for slow responses): {e}")
+            return ""
         except Exception as e:
-            logger.error(f"LLM Sync request failed: {e}", exc_info=True)
+            # Other errors (network, API errors) - log at debug level to avoid spam
+            logger.debug(f"LLM Sync request failed: {e}")
             return ""
     
     async def chat_completion(self, messages: List[Dict[str, str]], **kwargs: Any) -> Optional[str]:

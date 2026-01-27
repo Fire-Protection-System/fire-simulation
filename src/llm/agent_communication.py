@@ -51,12 +51,15 @@ class AgentCommunication:
         except Exception as e:
             logger.error(f"Failed to send LLM chat announcement: {e}")
 
-    def announce_action(self, 
-                        agent_id: str, 
-                        action: str, 
-                        target_sector_id: Optional[int] = None,
-                        location: Optional[Dict[str, float]] = None,
-                        reasoning: Optional[str] = None):
+    def announce_action(
+        self, 
+        agent_id: str, 
+        action: str, 
+        target_sector_id: Optional[int] = None,
+        location: Optional[Dict[str, float]] = None,
+        reasoning: Optional[str] = None,
+        additional_data: Optional[Dict[str, Any]] = None
+    ):
         """Broadcast current agent intention to all other agents"""
         message = {
             "agent_id": agent_id,
@@ -67,6 +70,9 @@ class AgentCommunication:
             "location": location,
             "reasoning": reasoning
         }
+        
+        if additional_data:
+            message.update(additional_data)
         
         try:
             self._message_store.add_message_to_sent(self._announcement_topic, message)
